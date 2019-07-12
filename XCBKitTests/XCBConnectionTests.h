@@ -8,6 +8,6 @@
 
 #import <SenTestingKit/SenTestingKit.h>
 
-@interface XCBKitTests : SenTestCase
+@interface XCBConnectionTests : SenTestCase
 
 @end

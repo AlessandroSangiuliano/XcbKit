@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <xcb/xcb.h>
 
 @interface XCBKit : NSObject
+
 
 @end

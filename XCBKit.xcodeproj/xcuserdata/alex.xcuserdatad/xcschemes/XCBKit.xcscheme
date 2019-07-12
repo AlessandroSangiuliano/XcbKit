@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "0460"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FA2D9F8622738D1100CEBEE0"
+               BuildableName = "XCBKit.framework"
+               BlueprintName = "XCBKit"
+               ReferencedContainer = "container:XCBKit.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      buildConfiguration = "Debug">
+      <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FA2D9F9E22738D1100CEBEE0"
+               BuildableName = "XCBKitTests.octest"
+               BlueprintName = "XCBKitTests"
+               ReferencedContainer = "container:XCBKit.xcodeproj">
+            </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "XCBConnectionTests/testCreateWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testConnectionWithDisplay">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testConnection">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testRegisterWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testUnregisterWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testWindowForXCBId">
+               </Test>
+               <Test
+                  Identifier = "XCBWindowTests">
+               </Test>
+            </SkippedTests>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "Debug"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
+      <AdditionalOptions>
+      </AdditionalOptions>
+   </LaunchAction>
+   <ProfileAction
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "Release"
+      debugDocumentVersioning = "YES">
+      <PathRunnable
+         FilePath = "/Users/alex/Library/Developer/Xcode/DerivedData/XCBKit-higgipjmtzglkaepujhkyrjjgdhs/Build/Products/Debug/XCBKit.framework/Versions/A/XCBKit">
+      </PathRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
