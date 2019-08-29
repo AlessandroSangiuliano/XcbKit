@@ -50,23 +50,28 @@
 
 - (NSMutableArray*) screens;
 
-- (void)handleMapNotify: (xcb_map_notify_event_t*)anEvent;
-- (void)handleUnMapNotify:(xcb_map_notify_event_t *) anEvent;
-- (void)handleMapRequest: (xcb_map_request_event_t*)anEvent;
-- (void)handleUnmapRequest:(xcb_unmap_window_request_t*)anEvent;
-- (void)handleCreateNotify: (xcb_create_notify_event_t*)anEvent;
-- (void)handleButtonPress: (xcb_button_press_event_t*)anEvent;
-- (void)handleButtonRelease: (xcb_button_release_event_t*)anEvent;
-- (void)handleKeyPress: (xcb_key_press_event_t*)anEvent;
-- (void)handleKeyRelease: (xcb_key_release_event_t*)anEvent;
-- (void)handleMotionNotify: (xcb_motion_notify_event_t*)anEvent;
-- (void)handleEnterNotify: (xcb_enter_notify_event_t*)anEvent;
-- (void)handleLeaveNotify: (xcb_leave_notify_event_t*)anEvent;
-- (void)handleExpose: (xcb_expose_event_t*)anEvent;
-- (void)handleCirculateRequest: (xcb_circulate_request_event_t*)anEvent;
-- (void)handleConfigureWindowRequest: (xcb_configure_request_event_t*)anEvent;
-- (void)handleReparentNotify: (xcb_reparent_notify_event_t*)anEvent;
-- (void)handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
+- (void) handleMapNotify: (xcb_map_notify_event_t*)anEvent;
+- (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent;
+- (void) handleMapRequest: (xcb_map_request_event_t*)anEvent;
+- (void) handleUnmapRequest:(xcb_unmap_window_request_t*)anEvent;
+- (void) handleCreateNotify: (xcb_create_notify_event_t*)anEvent;
+- (void) handleButtonPress: (xcb_button_press_event_t*)anEvent;
+- (void) handleButtonRelease: (xcb_button_release_event_t*)anEvent;
+- (void) handleKeyPress: (xcb_key_press_event_t*)anEvent;
+- (void) handleKeyRelease: (xcb_key_release_event_t*)anEvent;
+- (void) handleMotionNotify: (xcb_motion_notify_event_t*)anEvent;
+- (void) handleEnterNotify: (xcb_enter_notify_event_t*)anEvent;
+- (void) handleLeaveNotify: (xcb_leave_notify_event_t*)anEvent;
+- (void) handleExpose: (xcb_expose_event_t*)anEvent;
+- (void) handleCirculateRequest: (xcb_circulate_request_event_t*)anEvent;
+- (void) handleConfigureWindowRequest: (xcb_configure_request_event_t*)anEvent;
+- (void) handleReparentNotify: (xcb_reparent_notify_event_t*)anEvent;
+- (void) handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
+
+
+- (void) reparentWindow: (XCBWindow*) aWindow;
+- (void) mapWindow: (XCBWindow*)  aWindow;
+
 
 @end
 

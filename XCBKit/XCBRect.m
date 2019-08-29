@@ -63,4 +63,9 @@
 	return [[XCBRect alloc] initWithPoint:point andSize:size];
 }
 
+- (void) dealloc
+{
+    point = nil;
+    size = nil;
+}
 @end

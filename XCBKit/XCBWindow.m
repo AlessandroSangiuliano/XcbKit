@@ -11,6 +11,10 @@
 
 @implementation XCBWindow
 
+@synthesize graphicContextId;
+@synthesize windowRect;
+@synthesize drawableWindow;
+
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
 {
 	return [self initWithXCBWindow:aWindow
@@ -37,6 +41,25 @@
 	isMapped = NO;
 	
 	return self;
+}
+
+- (xcb_void_cookie_t) createGraphicContext
+{
+    uint32_t value[1];
+    graphicContextId = xcb_generate_id([XCBConn connection]);
+    XCBScreen *screen = [[XCBConn screens] objectAtIndex:0];
+    
+    xcb_screen_t scr = [screen screen];
+    value[0] = scr.black_pixel;
+    
+    xcb_void_cookie_t gcCookie = xcb_create_gc([XCBConn connection],
+                                               graphicContextId,
+                                               window,
+                                               XCB_GC_FOREGROUND,
+                                               value);
+    
+    return gcCookie;
+    
 }
 
 - (xcb_window_t) window
@@ -67,7 +90,7 @@
 
 - (void) setParentWindow:(XCBWindow *)aParent
 {
-	parentWindow = aParent;
+	parentWindow = aParent; 
 }
 
 - (void) setAboveWindow:(XCBWindow *)anAbove
@@ -93,6 +116,11 @@
 - (void) setAttributes:(xcb_get_window_attributes_reply_t)someAttributes
 {
 	attributes = someAttributes;
+}
+
+- (void) description
+{
+    NSLog(@"Ciao belli");
 }
 	 
 - (void) dealloc

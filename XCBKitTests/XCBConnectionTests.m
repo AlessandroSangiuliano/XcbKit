@@ -109,17 +109,20 @@
 	XCBConnection *connection = [[XCBConnection alloc] init];
 	XCBScreen *screen = [[connection screens] objectAtIndex:0];
 	XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen].root_visual];
-	[connection createWindowWithDepth: XCB_COPY_FROM_PARENT
+	XCBWindow *window = [connection createWindowWithDepth: XCB_COPY_FROM_PARENT
 					 withParentWindow:[screen rootWindow]
 						withXPosition:0
 						withYPosition:0
 							withWidth:150
-						   withHeight:150
+						   withHeight:22 //altezza finestra di decorazione
 					 withBorrderWidth:10
 						 withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
 						 withVisualId:rootVisual
 						withValueMask:0
 						withValueList:NULL];
+
+    [connection mapWindow:window];
+    [connection flush];
 	
 	pause();
 }

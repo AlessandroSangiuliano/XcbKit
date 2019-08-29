@@ -146,7 +146,7 @@ XCBConnection *XCBConn;
 	return screens;
 }
 
-- (XCBWindow *) createWindowWithDepth: (uint8_t) depth
+- (XCBWindow *) createWindowWithDepth: (uint8_t) depth // clonare questo metodo per la xcb_drawable_t
 			  withParentWindow: (XCBWindow *) aParentWindow
 				 withXPosition: (int16_t) xPosition
 				 withYPosition: (int16_t) yPosition
@@ -160,25 +160,34 @@ XCBConnection *XCBConn;
 {
 	xcb_window_t winId = xcb_generate_id(connection);
 	XCBWindow *winToCreate = [[XCBWindow alloc] initWithXCBWindow:winId withParentWindow:aParentWindow];
-	
+    
+    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
+    XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
+    XCBRect *windowRect = [[XCBRect alloc] initWithPoint:coordinates andSize:windowSize];
+    [winToCreate setWindowRect:windowRect];
+    
 	xcb_create_window(connection,
 					  depth,
 					  winId,
 					  [aParentWindow window],
-					  xPosition,
-					  yPosition,
-					  width,
-					  height,
+					  [[[winToCreate windowRect] point] getX],
+					  [[[winToCreate windowRect] point] getY],
+					  [[[winToCreate windowRect] size] getWidth],
+					  [[[winToCreate windowRect] size] getHeight],
 					  borderWidth,
 					  xcbClass,
 					  [aVisual visualId],
 					  valueMask,
 					  valueList);
 	
-	xcb_map_window(connection, winId);
-	xcb_flush(connection);
+    needFlush = YES;
 	return winToCreate;
 
+}
+
+- (void) mapWindow:(XCBWindow *)aWindow
+{
+    xcb_map_window(connection, [aWindow window]);
 }
 
 - (void)handleMapNotify: (xcb_map_notify_event_t*) anEvent
@@ -279,10 +288,11 @@ XCBConnection *XCBConn;
 
 - (void) dealloc
 {
+    [screens removeAllObjects];
 	screens = nil;
+    [windowsMap removeAllObjects];
 	windowsMap = nil;
 	displayName = nil;
-	
 }
 
 

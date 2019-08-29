@@ -18,20 +18,25 @@
 		FA2D9FA522738D1100CEBEE0 /* XCBKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2D9F8722738D1100CEBEE0 /* XCBKit.framework */; };
 		FA2D9FAB22738D1100CEBEE0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA2D9FA922738D1100CEBEE0 /* InfoPlist.strings */; };
 		FA2D9FAE22738D1100CEBEE0 /* XCBConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */; };
-		FAA0BCEB2276DF6600303CFE /* XCBVisual.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCE92276DF6600303CFE /* XCBVisual.h */; };
-		FAA0BCEC2276DF6600303CFE /* XCBVisual.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCEA2276DF6600303CFE /* XCBVisual.m */; };
+		FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = FA3186CA22F874A5001DE139 /* XCBFrame.h */; };
+		FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = FA3186CB22F874A5001DE139 /* XCBFrame.m */; };
 		FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCED228702FC00303CFE /* XCBPoint.h */; };
 		FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCEE228702FC00303CFE /* XCBPoint.m */; };
 		FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCF12287069E00303CFE /* XCBRect.h */; };
 		FAA0BCF42287069E00303CFE /* XCBRect.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCF22287069E00303CFE /* XCBRect.m */; };
 		FAA0BCF72287072D00303CFE /* XCBSize.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCF52287072D00303CFE /* XCBSize.h */; };
 		FAA0BCF82287072D00303CFE /* XCBSize.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCF62287072D00303CFE /* XCBSize.m */; };
+		FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB6022B22F9987E0037F492 /* XCBTitleBar.h */; };
+		FAB6022E22F9987E0037F492 /* XCBTitleBar.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB6022C22F9987E0037F492 /* XCBTitleBar.m */; };
+		FAB6023122FA9AD70037F492 /* XCBFrameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB6023022FA9AD70037F492 /* XCBFrameTest.m */; };
 		FABB11432274AEC1007A0433 /* XCBScreen.h in Headers */ = {isa = PBXBuildFile; fileRef = FABB11412274AEC1007A0433 /* XCBScreen.h */; };
 		FABB11442274AEC1007A0433 /* XCBScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB11422274AEC1007A0433 /* XCBScreen.m */; };
 		FABB11452274AEC1007A0433 /* XCBScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB11422274AEC1007A0433 /* XCBScreen.m */; };
 		FABB114822756F0E007A0433 /* XCBWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = FABB114622756F0E007A0433 /* XCBWindow.h */; };
 		FABB114922756F0E007A0433 /* XCBWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB114722756F0E007A0433 /* XCBWindow.m */; };
 		FABB114A22756F0E007A0433 /* XCBWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB114722756F0E007A0433 /* XCBWindow.m */; };
+		FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */ = {isa = PBXBuildFile; fileRef = FACACAF32317C88A00C826B3 /* XCBVisual.h */; };
+		FACACAF62317C89800C826B3 /* XCBVisual.m in Sources */ = {isa = PBXBuildFile; fileRef = FACACAF52317C89800C826B3 /* XCBVisual.m */; };
 		FAE4BDFF2275BC99007D0A35 /* XCBWindowTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FAE4BDFE2275BC99007D0A35 /* XCBWindowTests.m */; };
 /* End PBXBuildFile section */
 
@@ -63,18 +68,24 @@
 		FA2D9FAA22738D1100CEBEE0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FA2D9FAC22738D1100CEBEE0 /* XCBConnectionTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XCBConnectionTests.h; sourceTree = "<group>"; };
 		FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XCBConnectionTests.m; sourceTree = "<group>"; };
-		FAA0BCE92276DF6600303CFE /* XCBVisual.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBVisual.h; sourceTree = SOURCE_ROOT; };
-		FAA0BCEA2276DF6600303CFE /* XCBVisual.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBVisual.m; sourceTree = SOURCE_ROOT; };
+		FA3186CA22F874A5001DE139 /* XCBFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBFrame.h; sourceTree = "<group>"; };
+		FA3186CB22F874A5001DE139 /* XCBFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrame.m; sourceTree = "<group>"; };
 		FAA0BCED228702FC00303CFE /* XCBPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBPoint.h; sourceTree = "<group>"; };
 		FAA0BCEE228702FC00303CFE /* XCBPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBPoint.m; sourceTree = "<group>"; };
 		FAA0BCF12287069E00303CFE /* XCBRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBRect.h; sourceTree = "<group>"; };
 		FAA0BCF22287069E00303CFE /* XCBRect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBRect.m; sourceTree = "<group>"; };
 		FAA0BCF52287072D00303CFE /* XCBSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBSize.h; sourceTree = "<group>"; };
 		FAA0BCF62287072D00303CFE /* XCBSize.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBSize.m; sourceTree = "<group>"; };
+		FAB6022B22F9987E0037F492 /* XCBTitleBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBTitleBar.h; sourceTree = "<group>"; };
+		FAB6022C22F9987E0037F492 /* XCBTitleBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBTitleBar.m; sourceTree = "<group>"; };
+		FAB6022F22FA9AD70037F492 /* XCBFrameTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBFrameTest.h; sourceTree = "<group>"; };
+		FAB6023022FA9AD70037F492 /* XCBFrameTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrameTest.m; sourceTree = "<group>"; };
 		FABB11412274AEC1007A0433 /* XCBScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBScreen.h; sourceTree = "<group>"; };
 		FABB11422274AEC1007A0433 /* XCBScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBScreen.m; sourceTree = "<group>"; };
 		FABB114622756F0E007A0433 /* XCBWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindow.h; sourceTree = "<group>"; };
 		FABB114722756F0E007A0433 /* XCBWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBWindow.m; sourceTree = "<group>"; };
+		FACACAF32317C88A00C826B3 /* XCBVisual.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBVisual.h; sourceTree = "<group>"; };
+		FACACAF52317C89800C826B3 /* XCBVisual.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBVisual.m; sourceTree = "<group>"; };
 		FAE4BDFD2275BC99007D0A35 /* XCBWindowTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindowTests.h; sourceTree = "<group>"; };
 		FAE4BDFE2275BC99007D0A35 /* XCBWindowTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBWindowTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -150,14 +161,18 @@
 				FABB11422274AEC1007A0433 /* XCBScreen.m */,
 				FABB114622756F0E007A0433 /* XCBWindow.h */,
 				FABB114722756F0E007A0433 /* XCBWindow.m */,
-				FAA0BCE92276DF6600303CFE /* XCBVisual.h */,
-				FAA0BCEA2276DF6600303CFE /* XCBVisual.m */,
+				FACACAF32317C88A00C826B3 /* XCBVisual.h */,
+				FACACAF52317C89800C826B3 /* XCBVisual.m */,
 				FAA0BCED228702FC00303CFE /* XCBPoint.h */,
 				FAA0BCEE228702FC00303CFE /* XCBPoint.m */,
 				FAA0BCF12287069E00303CFE /* XCBRect.h */,
 				FAA0BCF22287069E00303CFE /* XCBRect.m */,
 				FAA0BCF52287072D00303CFE /* XCBSize.h */,
 				FAA0BCF62287072D00303CFE /* XCBSize.m */,
+				FA3186CA22F874A5001DE139 /* XCBFrame.h */,
+				FA3186CB22F874A5001DE139 /* XCBFrame.m */,
+				FAB6022B22F9987E0037F492 /* XCBTitleBar.h */,
+				FAB6022C22F9987E0037F492 /* XCBTitleBar.m */,
 				FA2D9F9122738D1100CEBEE0 /* Supporting Files */,
 			);
 			path = XCBKit;
@@ -180,6 +195,8 @@
 				FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */,
 				FAE4BDFD2275BC99007D0A35 /* XCBWindowTests.h */,
 				FAE4BDFE2275BC99007D0A35 /* XCBWindowTests.m */,
+				FAB6022F22FA9AD70037F492 /* XCBFrameTest.h */,
+				FAB6023022FA9AD70037F492 /* XCBFrameTest.m */,
 				FA2D9FA722738D1100CEBEE0 /* Supporting Files */,
 			);
 			path = XCBKitTests;
@@ -201,10 +218,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */,
+				FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */,
+				FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */,
 				FA1A725D2274244F00C4E65B /* XCBConnection.h in Headers */,
 				FABB11432274AEC1007A0433 /* XCBScreen.h in Headers */,
 				FABB114822756F0E007A0433 /* XCBWindow.h in Headers */,
-				FAA0BCEB2276DF6600303CFE /* XCBVisual.h in Headers */,
 				FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */,
 				FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */,
 				FAA0BCF72287072D00303CFE /* XCBSize.h in Headers */,
@@ -320,11 +339,13 @@
 			files = (
 				FA2D9F9922738D1100CEBEE0 /* XCBKit.m in Sources */,
 				FA1A725E2274244F00C4E65B /* XCBConnection.m in Sources */,
+				FAB6022E22F9987E0037F492 /* XCBTitleBar.m in Sources */,
 				FABB11442274AEC1007A0433 /* XCBScreen.m in Sources */,
+				FACACAF62317C89800C826B3 /* XCBVisual.m in Sources */,
 				FABB114922756F0E007A0433 /* XCBWindow.m in Sources */,
-				FAA0BCEC2276DF6600303CFE /* XCBVisual.m in Sources */,
 				FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */,
 				FAA0BCF42287069E00303CFE /* XCBRect.m in Sources */,
+				FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */,
 				FAA0BCF82287072D00303CFE /* XCBSize.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,6 +357,7 @@
 				FA2D9FAE22738D1100CEBEE0 /* XCBConnectionTests.m in Sources */,
 				FA1A725F2274244F00C4E65B /* XCBConnection.m in Sources */,
 				FABB11452274AEC1007A0433 /* XCBScreen.m in Sources */,
+				FAB6023122FA9AD70037F492 /* XCBFrameTest.m in Sources */,
 				FABB114A22756F0E007A0433 /* XCBWindow.m in Sources */,
 				FAE4BDFF2275BC99007D0A35 /* XCBWindowTests.m in Sources */,
 			);
@@ -374,7 +396,7 @@
 		FA2D9FAF22738D1100CEBEE0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -398,7 +420,18 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/include,
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/X11/include/xcb,
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					/opt/local/include,
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/X11/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -412,7 +445,7 @@
 		FA2D9FB022738D1100CEBEE0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -430,7 +463,12 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/X11/include,
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = /opt/X11/include/xcb;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
 					"-L/opt/X11/lib",
