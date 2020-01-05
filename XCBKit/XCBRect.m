@@ -11,7 +11,9 @@
 
 @implementation XCBRect
 
-- (id) initWithPoint:(XCBPoint *)aPoint andSize:(XCBSize *)aSize
+@synthesize offset;
+
+- (id) initWithPosition:(XCBPoint *)aPoint andSize:(XCBSize *)aSize
 {
 	self = [super init];
 	
@@ -21,19 +23,21 @@
 		return nil;
 	}
 	
-	point = aPoint;
+	position = aPoint;
 	size = aSize;
+    offset = [[XCBPoint alloc] initWithX:0 andY:0];
+    
 	return self;
 }
 
-- (void) setPoint:(XCBPoint *)aPoint
+- (void) setPosition:(XCBPoint *)aPoint
 {
-	point = aPoint;
+	position = aPoint;
 }
 
-- (XCBPoint*) point
+- (XCBPoint*) position
 {
-	return point;
+	return position;
 }
 
 - (void) setSize:(XCBSize *)aSize
@@ -49,8 +53,8 @@
 - (NSString *) description
 {
 	return [NSString stringWithFormat:@"X and Y coordinates: (%hd, %hd), width and height (%hd, %hd)",
-			[point getX],
-			[point getY],
+			[position getX],
+			[position getY],
 			[size getWidth],
 			[size getHeight]];
 }
@@ -60,12 +64,12 @@
 	XCBPoint *point = [[XCBPoint alloc] initWithX:rect.x andY:rect.y];
 	XCBSize *size = [[XCBSize alloc] initWithWidht:rect.width andHeight:rect.height];
 
-	return [[XCBRect alloc] initWithPoint:point andSize:size];
+	return [[XCBRect alloc] initWithPosition:point andSize:size];
 }
 
 - (void) dealloc
 {
-    point = nil;
+    position = nil;
     size = nil;
 }
 @end

@@ -13,16 +13,18 @@
 
 @interface XCBRect : NSObject
 {
-	XCBPoint *point;
+	XCBPoint *position;
 	XCBSize *size;
 }
 
+@property (strong, nonatomic) XCBPoint *offset;
+
 + (XCBRect*) rectFromXcbRectangle:(xcb_rectangle_t) rect;
 
-- (id) initWithPoint:(XCBPoint *) aPoint andSize:(XCBSize*) aSize;
+- (id) initWithPosition:(XCBPoint *) aPoint andSize:(XCBSize*) aSize;
 - (void) setSize:(XCBSize*) aSize;
 - (XCBSize*) size;
-- (void) setPoint:(XCBPoint*) aPoint;
-- (XCBPoint*) point;
+- (void) setPosition:(XCBPoint*) aPoint;
+- (XCBPoint*) position;
 - (NSString *) description;
 @end

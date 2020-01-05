@@ -29,6 +29,8 @@
 		FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB6022B22F9987E0037F492 /* XCBTitleBar.h */; };
 		FAB6022E22F9987E0037F492 /* XCBTitleBar.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB6022C22F9987E0037F492 /* XCBTitleBar.m */; };
 		FAB6023122FA9AD70037F492 /* XCBFrameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB6023022FA9AD70037F492 /* XCBFrameTest.m */; };
+		FAB7D56E23BE176200801098 /* CairoDrawer.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB7D56C23BE176200801098 /* CairoDrawer.h */; };
+		FAB7D56F23BE176200801098 /* CairoDrawer.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB7D56D23BE176200801098 /* CairoDrawer.m */; };
 		FABB11432274AEC1007A0433 /* XCBScreen.h in Headers */ = {isa = PBXBuildFile; fileRef = FABB11412274AEC1007A0433 /* XCBScreen.h */; };
 		FABB11442274AEC1007A0433 /* XCBScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB11422274AEC1007A0433 /* XCBScreen.m */; };
 		FABB11452274AEC1007A0433 /* XCBScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB11422274AEC1007A0433 /* XCBScreen.m */; };
@@ -80,6 +82,8 @@
 		FAB6022C22F9987E0037F492 /* XCBTitleBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBTitleBar.m; sourceTree = "<group>"; };
 		FAB6022F22FA9AD70037F492 /* XCBFrameTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBFrameTest.h; sourceTree = "<group>"; };
 		FAB6023022FA9AD70037F492 /* XCBFrameTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrameTest.m; sourceTree = "<group>"; };
+		FAB7D56C23BE176200801098 /* CairoDrawer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CairoDrawer.h; sourceTree = "<group>"; };
+		FAB7D56D23BE176200801098 /* CairoDrawer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CairoDrawer.m; sourceTree = "<group>"; };
 		FABB11412274AEC1007A0433 /* XCBScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBScreen.h; sourceTree = "<group>"; };
 		FABB11422274AEC1007A0433 /* XCBScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBScreen.m; sourceTree = "<group>"; };
 		FABB114622756F0E007A0433 /* XCBWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindow.h; sourceTree = "<group>"; };
@@ -153,6 +157,7 @@
 		FA2D9F9022738D1100CEBEE0 /* XCBKit */ = {
 			isa = PBXGroup;
 			children = (
+				FAB7D56B23BE172800801098 /* utils */,
 				FA2D9F9722738D1100CEBEE0 /* XCBKit.h */,
 				FA2D9F9822738D1100CEBEE0 /* XCBKit.m */,
 				FA1A725B2274244F00C4E65B /* XCBConnection.h */,
@@ -211,6 +216,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		FAB7D56B23BE172800801098 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				FAB7D56C23BE176200801098 /* CairoDrawer.h */,
+				FAB7D56D23BE176200801098 /* CairoDrawer.m */,
+			);
+			name = utils;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -222,6 +236,7 @@
 				FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */,
 				FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */,
 				FA1A725D2274244F00C4E65B /* XCBConnection.h in Headers */,
+				FAB7D56E23BE176200801098 /* CairoDrawer.h in Headers */,
 				FABB11432274AEC1007A0433 /* XCBScreen.h in Headers */,
 				FABB114822756F0E007A0433 /* XCBWindow.h in Headers */,
 				FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */,
@@ -345,6 +360,7 @@
 				FABB114922756F0E007A0433 /* XCBWindow.m in Sources */,
 				FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */,
 				FAA0BCF42287069E00303CFE /* XCBRect.m in Sources */,
+				FAB7D56F23BE176200801098 /* CairoDrawer.m in Sources */,
 				FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */,
 				FAA0BCF82287072D00303CFE /* XCBSize.m in Sources */,
 			);
@@ -437,6 +453,7 @@
 				OTHER_LDFLAGS = (
 					"-L/opt/X11/lib",
 					"-lxcb",
+					"-lcairo",
 				);
 				SDKROOT = macosx;
 			};
@@ -473,6 +490,7 @@
 				OTHER_LDFLAGS = (
 					"-L/opt/X11/lib",
 					"-lxcb",
+					"-lcairo",
 				);
 				SDKROOT = macosx;
 			};

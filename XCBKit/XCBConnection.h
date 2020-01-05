@@ -17,10 +17,12 @@
 {
     xcb_connection_t *connection;
     NSString *displayName;
-    NSMapTable *windowsMap;
+    NSMutableDictionary *windowsMap;
 	NSMutableArray *screens;
 	BOOL needFlush;
 }
+
+@property (nonatomic) BOOL dragState;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
@@ -31,7 +33,7 @@
 - (id) initWithDisplay:(NSString *) aDisplay;
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
-- (NSMapTable *) windowsMap;
+- (NSMutableDictionary *) windowsMap;
 - (void) closeConnection;
 - (XCBWindow *) windowForXCBId:(xcb_window_t)anId;
 - (int) flush;
@@ -55,11 +57,11 @@
 - (void) handleMapRequest: (xcb_map_request_event_t*)anEvent;
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t*)anEvent;
 - (void) handleCreateNotify: (xcb_create_notify_event_t*)anEvent;
-- (void) handleButtonPress: (xcb_button_press_event_t*)anEvent;
+- (void) handleButtonPress: (xcb_button_press_event_t*)anEvent forWindow:(XCBWindow*) aWindow;
 - (void) handleButtonRelease: (xcb_button_release_event_t*)anEvent;
 - (void) handleKeyPress: (xcb_key_press_event_t*)anEvent;
 - (void) handleKeyRelease: (xcb_key_release_event_t*)anEvent;
-- (void) handleMotionNotify: (xcb_motion_notify_event_t*)anEvent;
+- (void) handleMotionNotify: (xcb_motion_notify_event_t*)anEvent forWindow:(XCBWindow*) aWindow;
 - (void) handleEnterNotify: (xcb_enter_notify_event_t*)anEvent;
 - (void) handleLeaveNotify: (xcb_leave_notify_event_t*)anEvent;
 - (void) handleExpose: (xcb_expose_event_t*)anEvent;

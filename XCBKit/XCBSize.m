@@ -46,4 +46,10 @@
 	return width;
 }
 
+- (void) dealloc
+{
+    height = 0;
+    width = 0;
+}
+
 @end

@@ -1,4 +1,4 @@
-//
+    //
 //  XCBConnection.m
 //  XCBKit
 //
@@ -9,6 +9,8 @@
 #import "XCBConnection.h"
 
 @implementation XCBConnection
+
+@synthesize dragState;
 
 XCBConnection *XCBConn;
 
@@ -22,6 +24,7 @@ XCBConnection *XCBConn;
     self = [super init];
 	const char *localDisplayName = NULL;
 	needFlush = NO;
+    dragState = NO;
 	
 	if (aDisplay == NULL)
 	{
@@ -33,9 +36,7 @@ XCBConnection *XCBConn;
 		localDisplayName = [aDisplay UTF8String];
 	}
     
-    windowsMap = NSCreateMapTable(NSIntegerMapKeyCallBacks,
-								  NSObjectMapValueCallBacks,
-								  1000);
+    windowsMap = [[NSMutableDictionary alloc] initWithCapacity:1000];
 	
 	screens = [NSMutableArray new];
 
@@ -102,7 +103,7 @@ XCBConnection *XCBConn;
     return connection;
 }
 
-- (NSMapTable *) windowsMap
+- (NSMutableDictionary *) windowsMap
 {
 	return windowsMap;
 }
@@ -110,13 +111,13 @@ XCBConnection *XCBConn;
 - (void) registerWindow:(XCBWindow *)aWindow
 {
 	NSLog(@"[XCBConnection] Adding the window in the windowsMap");
-	NSMapInsert(windowsMap, (void*)(intptr_t)[aWindow window], (__bridge const void *)(aWindow)); //this will work on gnustep too?
+    [windowsMap setObject:aWindow forKey:[[NSNumber alloc] initWithInt:[aWindow window]]];
 }
 
 - (void) unregisterWindow:(XCBWindow *)aWindow
 {
 	NSLog(@"[XCBConnection] Removing the window from the windowsMap");
-	NSMapRemove(windowsMap, (void*)(intptr_t)[aWindow window]);
+    [windowsMap removeObjectForKey:[[NSNumber alloc] initWithInt:[aWindow window]]];
 }
 
 - (void) closeConnection
@@ -126,7 +127,8 @@ XCBConnection *XCBConn;
 
 - (XCBWindow *) windowForXCBId:(xcb_window_t)anId
 {
-	return (__bridge XCBWindow *)(NSMapGet(windowsMap, (void*)(intptr_t)anId)); //this will work on gnustep too?
+    NSNumber *key = [NSNumber numberWithInt:anId];
+	return [windowsMap objectForKey:key];
 }
 
 - (int) flush
@@ -163,15 +165,15 @@ XCBConnection *XCBConn;
     
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
     XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
-    XCBRect *windowRect = [[XCBRect alloc] initWithPoint:coordinates andSize:windowSize];
+    XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
     [winToCreate setWindowRect:windowRect];
     
 	xcb_create_window(connection,
 					  depth,
 					  winId,
 					  [aParentWindow window],
-					  [[[winToCreate windowRect] point] getX],
-					  [[[winToCreate windowRect] point] getY],
+					  [[[winToCreate windowRect] position] getX],
+					  [[[winToCreate windowRect] position] getY],
 					  [[[winToCreate windowRect] size] getWidth],
 					  [[[winToCreate windowRect] size] getHeight],
 					  borderWidth,
@@ -179,6 +181,7 @@ XCBConnection *XCBConn;
 					  [aVisual visualId],
 					  valueMask,
 					  valueList);
+    
 	
     needFlush = YES;
 	return winToCreate;
@@ -281,18 +284,64 @@ XCBConnection *XCBConn;
 	xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
 }
 
+- (void) handleMotionNotify:(xcb_motion_notify_event_t *)anEvent forWindow:(XCBWindow*) aWindow
+{
+    //TODO: è sempre uguale studiare perchè la windows ocn l'event (dopo ho messo il parametro aWindow dovrebbe avere più senso
+    if ([aWindow window] == anEvent->event && dragState)
+    {
+        XCBWindow *frame = [aWindow parentWindow];
+        XCBPoint *pos = [[frame windowRect] position];
+        XCBPoint *offset = [[frame windowRect] offset];
+        
+        int16_t x =  [pos getX];
+        int16_t y = [pos getY];
+        
+        x = x + anEvent->event_x - [offset getX];
+        y = y + anEvent->event_y - [offset getY];
+        
+        [pos setX:x];
+        [pos setY:y];
+        
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, [pos values]);
+        
+        needFlush = YES;
+        pos = nil;
+        offset = nil;
+    }
+    
+}
 
+- (void) handleButtonPress:(xcb_button_press_event_t *)anEvent forWindow:(XCBWindow*) aWindow
+{
+    // è sempre uguale studiare perchè la windows ocn l'event
+    if (anEvent->event == [aWindow window])
+    {
+        XCBWindow *frame = [aWindow parentWindow];
+        XCBPoint *offset = [[frame windowRect] offset];
+        NSLog(@"Ciao");
+        [offset setX:anEvent->event_x];
+        [offset setY:anEvent->event_y];
+        dragState = YES;
+        offset = nil;
+    }
+    
+}
 
-
+- (void) handleButtonRelease:(xcb_button_release_event_t *)anEvent
+{
+   dragState = NO;
+}
 
 
 - (void) dealloc
 {
+    
     [screens removeAllObjects];
 	screens = nil;
     [windowsMap removeAllObjects];
 	windowsMap = nil;
 	displayName = nil;
+    xcb_disconnect(connection);
 }
 
 

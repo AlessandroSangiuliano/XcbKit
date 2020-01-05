@@ -13,7 +13,6 @@
 
 @synthesize graphicContextId;
 @synthesize windowRect;
-@synthesize drawableWindow;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
 {
@@ -43,21 +42,14 @@
 	return self;
 }
 
-- (xcb_void_cookie_t) createGraphicContext
+- (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t)aMask andValues:(uint32_t *)theValues
 {
-    uint32_t value[1];
     graphicContextId = xcb_generate_id([XCBConn connection]);
-    XCBScreen *screen = [[XCBConn screens] objectAtIndex:0];
-    
-    xcb_screen_t scr = [screen screen];
-    value[0] = scr.black_pixel;
-    
     xcb_void_cookie_t gcCookie = xcb_create_gc([XCBConn connection],
                                                graphicContextId,
                                                window,
-                                               XCB_GC_FOREGROUND,
-                                               value);
-    
+                                               aMask,
+                                               theValues);
     return gcCookie;
     
 }
@@ -116,6 +108,16 @@
 - (void) setAttributes:(xcb_get_window_attributes_reply_t)someAttributes
 {
 	attributes = someAttributes;
+}
+
+- (uint32_t) windowMask
+{
+    return windowMask;
+}
+
+- (void) setWindowMask:(uint32_t)aMask
+{
+    windowMask = aMask;
 }
 
 - (void) description

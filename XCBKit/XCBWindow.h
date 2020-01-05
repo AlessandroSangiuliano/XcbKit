@@ -17,12 +17,12 @@
 	XCBWindow *aboveWindow;
 	BOOL isMapped;
 	xcb_get_window_attributes_reply_t attributes;
+    uint32_t windowMask;
     
 }
 
 @property (nonatomic) xcb_gcontext_t graphicContextId;
 @property (strong, nonatomic) XCBRect *windowRect;
-@property (nonatomic) xcb_drawable_t drawableWindow;
 
 
 - (xcb_window_t) window;
@@ -39,7 +39,7 @@
 		withParentWindow:(XCBWindow*) aParent
 		 withAboveWindow:(XCBWindow*) anAbove;
 
-- (xcb_void_cookie_t) createGraphicContext;
+- (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t) aMask andValues:(uint32_t*) values;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;
@@ -49,6 +49,8 @@
 - (BOOL) isMapped;
 - (xcb_get_window_attributes_reply_t) attributes;
 - (void) setAttributes:(xcb_get_window_attributes_reply_t) someAttributes;
+- (void) setWindowMask:(uint32_t) aMask;
+- (uint32_t) windowMask;
 
 -(void) description;
 

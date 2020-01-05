@@ -34,6 +34,6 @@ typedef NS_ENUM(NSInteger, childrenMask)
  ********************************/
 
 - (void) setChildren:(NSMutableDictionary*) aChildrenSet;
--(NSMutableDictionary*) getChildren;
+- (NSMutableDictionary*) getChildren;
 
 @end

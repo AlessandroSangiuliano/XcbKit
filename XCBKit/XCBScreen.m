@@ -10,13 +10,14 @@
 
 @implementation XCBScreen
 
+
 + (XCBScreen*) screenWithXCBScreen:(xcb_screen_t *)aScreen
 {
 	return [[self alloc] initWithXCBScreen:aScreen];
 }
 
 
-- (xcb_screen_t ) screen
+- (xcb_screen_t *) screen
 {
 	return screen;
 }
@@ -29,13 +30,13 @@
 		return;
 	}
 	
-	screen = *aScreen;
+	screen = aScreen;
 }
 
 - (id) initWithXCBScreen:(xcb_screen_t *) aScreen
 {
 	self = [super init];
-	screen = *aScreen;
+	screen = aScreen;
 	rootWindow = [[XCBWindow alloc] initWithXCBWindow:aScreen->root];
 	
 	if (self == nil)
@@ -46,6 +47,7 @@
 	
 	return self;
 }
+
 
 - (void) setRootWindow:(XCBWindow *)aRootWindow
 {
@@ -60,6 +62,7 @@
 - (void) dealloc
 {
 	rootWindow = nil;
+    free(screen);
 }
 
 @end

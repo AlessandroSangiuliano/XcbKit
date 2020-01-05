@@ -22,6 +22,9 @@
 	
 	x = xCoordinate;
 	y = yCoordinate;
+    
+    values[0] = x;
+    values[1] = y;
 	
 	return self;
 }
@@ -29,6 +32,7 @@
 - (void) setX:(int16_t)xCoordinate
 {
 	x = xCoordinate;
+    values[0] = x;
 }
 
 - (int16_t) getX
@@ -39,11 +43,31 @@
 - (void) setY:(int16_t)yCoordinate
 {
 	y = yCoordinate;
+    values[1] = y;
 }
 
 - (int16_t) getY
 {
 	return y;
+}
+
+- (uint32_t*) values
+{
+    return values;
+}
+
+- (void) setValues:(uint32_t *)theValues
+{
+    values[0] = theValues[0];
+    values[1] = theValues[1];
+}
+
+- (void) dealloc
+{
+    x = 0;
+    y = 0;
+    
+    // TODO check memoria su values essendo un array vedere come liberarlo
 }
 
 @end
