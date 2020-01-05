@@ -1,0 +1,49 @@
+XcbKit is a Kit (SDK) for window managers developed in Objective-C.
+
+Version: 0.0.2
+
+----------------------------------------------------------------------------------
+
+
+Actual status:
+
+- It can draw a title bar for a frame
+
+- It can move a window on the screen.
+
+There are a lot of things to add, for example:
+
+- Handle a client window putting it in the Frame. This is easy to do the kit has a model to incorporate a client window in a decorated frame with a title bar.
+
+- Make it to start to accomplish the ICCWM and EWHM.
+
+Thes 2 points are the next step for the 0.0.3
+
+----------------------------------------------------------------------------------
+
+Goal:
+
+Have a complete Object Oriented Window Manger, modern and simple, for Linux/FreeBSD desktop environments.
+
+
+----------------------------------------------------------------------------------
+
+How I'm developing it:
+
+Actually I'm writing the code using Xcode 5.0.2 on OS X 10.9.5, probably the best place to have full compatibility with GNUstep.
+
+----------------------------------------------------------------------------------
+
+What is GNUstep:
+
+GNUstep is a free and open source implementation of the OpenStep APIs, today known as Cocoa.
+
+To be more accurate Cocoa is a propetary implementation of the OpenStep APS, while GNUstep is the free/open source one.
+
+To make an idea with a comparison:
+
+OpenJDK is a reimplementation open source of the JDK APIs.
+
+OracleJDK is the propetary implementation of the JDK APIs.
+
+Easy!
