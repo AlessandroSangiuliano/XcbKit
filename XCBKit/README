@@ -38,6 +38,11 @@ What is GNUstep:
 
 GNUstep is a free and open source implementation of the OpenStep APIs, today known as Cocoa.
 
+Some links:
+
+https://en.wikipedia.org/wiki/OpenStep
+http://www.gnustep.org/
+
 To be more accurate Cocoa is a propetary implementation of the OpenStep APS, while GNUstep is the free/open source one.
 
 To make an idea with a comparison:
@@ -47,3 +52,11 @@ OpenJDK is a reimplementation open source of the JDK APIs.
 OracleJDK is the propetary implementation of the JDK APIs.
 
 Easy!
+
+----------------------------------------------------------------------------------
+
+Some notes on the tests:
+
+Some of the tests, the testHow{something}, are just a place to see how the libraries (cairo and xcb) that I'm using works.
+
+They are a good place to learn the differences and the conveniences!
