@@ -17,7 +17,7 @@ There are a lot of things to add, for example:
 
 - Make it to start to accomplish the ICCWM and EWHM.
 
-Thes 2 points are the next step for the 0.0.3
+These 2 points are the next step for the 0.0.3
 
 ----------------------------------------------------------------------------------
 
@@ -43,13 +43,13 @@ Some links:
 https://en.wikipedia.org/wiki/OpenStep
 http://www.gnustep.org/
 
-To be more accurate Cocoa is a propetary implementation of the OpenStep APS, while GNUstep is the free/open source one.
+To be more accurate Cocoa is a proprietary implementation of the OpenStep APIs, while GNUstep is the free/open source one.
 
 To make an idea with a comparison:
 
 OpenJDK is a reimplementation open source of the JDK APIs.
 
-OracleJDK is the propetary implementation of the JDK APIs.
+OracleJDK is the proprietary implementation of the JDK APIs.
 
 Easy!
 
