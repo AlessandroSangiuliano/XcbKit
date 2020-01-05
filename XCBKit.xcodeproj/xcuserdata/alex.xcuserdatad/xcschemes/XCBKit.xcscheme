@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0500"
+   LastUpgradeVersion = "0460"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -37,6 +37,29 @@
                BlueprintName = "XCBKitTests"
                ReferencedContainer = "container:XCBKit.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "XCBConnectionTests/testCreateWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testConnectionWithDisplay">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testConnection">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testRegisterWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testUnregisterWindow">
+               </Test>
+               <Test
+                  Identifier = "XCBConnectionTests/testWindowForXCBId">
+               </Test>
+               <Test
+                  Identifier = "XCBWindowTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
@@ -58,6 +81,9 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
+      <PathRunnable
+         FilePath = "/Users/alex/Library/Developer/Xcode/DerivedData/XCBKit-higgipjmtzglkaepujhkyrjjgdhs/Build/Products/Debug/XCBKit.framework/Versions/A/XCBKit">
+      </PathRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
