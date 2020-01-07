@@ -20,7 +20,8 @@
 		FA2D9FAE22738D1100CEBEE0 /* XCBConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */; };
 		FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = FA3186CA22F874A5001DE139 /* XCBFrame.h */; };
 		FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = FA3186CB22F874A5001DE139 /* XCBFrame.m */; };
-		FA5ADB9323C236E400C8B403 /* README in Resources */ = {isa = PBXBuildFile; fileRef = FA5ADB9223C236E400C8B403 /* README */; };
+		FA5ADB9623C47DDB00C8B403 /* EWMH.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADB9423C47DDB00C8B403 /* EWMH.h */; };
+		FA5ADB9723C47DDB00C8B403 /* EWMH.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADB9523C47DDB00C8B403 /* EWMH.m */; };
 		FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCED228702FC00303CFE /* XCBPoint.h */; };
 		FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCEE228702FC00303CFE /* XCBPoint.m */; };
 		FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCF12287069E00303CFE /* XCBRect.h */; };
@@ -73,7 +74,8 @@
 		FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XCBConnectionTests.m; sourceTree = "<group>"; };
 		FA3186CA22F874A5001DE139 /* XCBFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBFrame.h; sourceTree = "<group>"; };
 		FA3186CB22F874A5001DE139 /* XCBFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrame.m; sourceTree = "<group>"; };
-		FA5ADB9223C236E400C8B403 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = XCBKit/README; sourceTree = "<group>"; };
+		FA5ADB9423C47DDB00C8B403 /* EWMH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWMH.h; sourceTree = "<group>"; };
+		FA5ADB9523C47DDB00C8B403 /* EWMH.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWMH.m; sourceTree = "<group>"; };
 		FAA0BCED228702FC00303CFE /* XCBPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBPoint.h; sourceTree = "<group>"; };
 		FAA0BCEE228702FC00303CFE /* XCBPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBPoint.m; sourceTree = "<group>"; };
 		FAA0BCF12287069E00303CFE /* XCBRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBRect.h; sourceTree = "<group>"; };
@@ -121,7 +123,6 @@
 		FA2D9F7D22738D1100CEBEE0 = {
 			isa = PBXGroup;
 			children = (
-				FA5ADB9223C236E400C8B403 /* README */,
 				FA2D9F9022738D1100CEBEE0 /* XCBKit */,
 				FA2D9FA622738D1100CEBEE0 /* XCBKitTests */,
 				FA2D9F8922738D1100CEBEE0 /* Frameworks */,
@@ -181,6 +182,8 @@
 				FA3186CB22F874A5001DE139 /* XCBFrame.m */,
 				FAB6022B22F9987E0037F492 /* XCBTitleBar.h */,
 				FAB6022C22F9987E0037F492 /* XCBTitleBar.m */,
+				FA5ADB9423C47DDB00C8B403 /* EWMH.h */,
+				FA5ADB9523C47DDB00C8B403 /* EWMH.m */,
 				FA2D9F9122738D1100CEBEE0 /* Supporting Files */,
 			);
 			path = XCBKit;
@@ -244,6 +247,7 @@
 				FABB114822756F0E007A0433 /* XCBWindow.h in Headers */,
 				FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */,
 				FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */,
+				FA5ADB9623C47DDB00C8B403 /* EWMH.h in Headers */,
 				FAA0BCF72287072D00303CFE /* XCBSize.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,7 +324,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5ADB9323C236E400C8B403 /* README in Resources */,
 				FA2D9F9522738D1100CEBEE0 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -358,6 +361,7 @@
 			files = (
 				FA2D9F9922738D1100CEBEE0 /* XCBKit.m in Sources */,
 				FA1A725E2274244F00C4E65B /* XCBConnection.m in Sources */,
+				FA5ADB9723C47DDB00C8B403 /* EWMH.m in Sources */,
 				FAB6022E22F9987E0037F492 /* XCBTitleBar.m in Sources */,
 				FABB11442274AEC1007A0433 /* XCBScreen.m in Sources */,
 				FACACAF62317C89800C826B3 /* XCBVisual.m in Sources */,
