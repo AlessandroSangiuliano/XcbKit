@@ -11,8 +11,9 @@
 @implementation EWMH
 
 @synthesize atoms;
+@synthesize connection;
 
-- (id) init
+- (id) initWithConnection:(XCBConnection*)aConnection
 {
     self = [super init];
     
@@ -21,6 +22,8 @@
         NSLog(@"Unable to init!");
         return nil;
     }
+    
+    connection = aConnection;
     
     // Root window properties (some are also messages too)
     
@@ -218,6 +221,128 @@
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
     
     return self;
+}
+
++ (id) sharedInstanceWithConnection:(XCBConnection *)aConnection
+{
+    static EWMH *sharedInstance = nil;
+    
+    // this is not thread safe, switch to libdispatch some day.
+    if (sharedInstance == nil)
+    {
+        sharedInstance = [[self alloc] initWithConnection:aConnection];
+    }
+    
+    return sharedInstance;
+}
+
+-(void)dealloc
+{
+    EWMHSupported = nil;
+    EWMHClientList = nil;
+    EWMHClientListStacking = nil;
+    EWMHNumberOfDesktops = nil;
+    EWMHDesktopGeometry = nil;
+    EWMHDesktopViewport = nil;
+    EWMHCurrentDesktop = nil;
+    EWMHDesktopNames = nil;
+    EWMHActiveWindow = nil;
+    EWMHWorkarea = nil;
+    EWMHSupportingWMCheck = nil;
+    EWMHVirtualRoots = nil;
+    EWMHDesktopLayout = nil;
+    EWMHShowingDesktop = nil;
+    
+    // Root Window Messages
+    EWMHCloseWindow = nil;
+    EWMHMoveresizeWindow = nil;
+    EWMHWMMoveresize = nil;
+    EWMHRestackWindow = nil;
+    EWMHRequestFrameExtents = nil;
+    
+    // Application window properties
+    EWMHWMName = nil;
+    EWMHWMVisibleName = nil;
+    EWMHWMIconName = nil;
+    EWMHWMVisibleIconName = nil;
+    EWMHWMDesktop = nil;
+    EWMHWMWindowType = nil;
+    EWMHWMState = nil;
+    EWMHWMAllowedActions = nil;
+    EWMHWMStrut = nil;
+    EWMHWMStrutPartial = nil;
+    EWMHWMIconGeometry = nil;
+    EWMHWMIcon = nil;
+    EWMHWMPid = nil;
+    EWMHWMHandledIcons = nil;
+    EWMHWMUserTime = nil;
+    EWMHWMUserTimeWindow = nil;
+    EWMHWMFrameExtents = nil;
+    
+    // The window types (used with EWMH_WMWindowType)
+    EWMHWMWindowTypeDesktop = nil;
+    EWMHWMWindowTypeDock = nil;
+    EWMHWMWindowTypeToolbar = nil;
+    EWMHWMWindowTypeMenu = nil;
+    EWMHWMWindowTypeUtility = nil;
+    EWMHWMWindowTypeSplash = nil;
+    EWMHWMWindowTypeDialog = nil;
+    EWMHWMWindowTypeDropdownMenu = nil;
+    EWMHWMWindowTypePopupMenu = nil;
+    
+    EWMHWMWindowTypeTooltip = nil;
+    EWMHWMWindowTypeNotification = nil;
+    EWMHWMWindowTypeCombo = nil;
+    EWMHWMWindowTypeDnd = nil;
+    
+    EWMHWMWindowTypeNormal = nil;
+    
+    // The application window states (used with EWMH_WMWindowState)
+    EWMHWMStateModal = nil;
+    EWMHWMStateSticky = nil;
+    EWMHWMStateMaximizedVert = nil;
+    EWMHWMStateMaximizedHorz = nil;
+    EWMHWMStateShaded = nil;
+    EWMHWMStateSkipTaskbar = nil;
+    EWMHWMStateSkipPager = nil;
+    EWMHWMStateHidden = nil;
+    EWMHWMStateFullscreen = nil;
+    EWMHWMStateAbove = nil;
+    EWMHWMStateBelow = nil;
+    EWMHWMStateDemandsAttention = nil;
+    
+    // The application window allowed actions (used with EWMH_WMAllowedActions)
+    EWMHWMActionMove = nil;
+    EWMHWMActionResize = nil;
+    EWMHWMActionMinimize = nil;
+    EWMHWMActionShade = nil;
+    EWMHWMActionStick = nil;
+    EWMHWMActionMaximizeHorz = nil;
+    EWMHWMActionMaximizeVert = nil;
+    EWMHWMActionFullscreen = nil;
+    EWMHWMActionChangeDesktop = nil;
+    EWMHWMActionClose = nil;
+    EWMHWMActionAbove = nil;
+    EWMHWMActionBelow = nil;
+    
+    // Window Manager Protocols
+    EWMHWMPing = nil;
+    EWMHWMSyncRequest = nil;
+    EWMHWMFullscreenMonitors = nil;
+    
+    // Other properties
+    EWMHWMFullPlacement = nil;
+    
+    //GNUStep properties
+    
+    GNUStepMiniaturizeWindow = nil;
+    GNUStepHideApp = nil;
+    GNUStepFrameOffset = nil;
+    GNUStepWmAttr = nil;
+    GNUStepTitleBarState = nil;
+    
+    atoms = nil;
+    connection = nil;
 }
 
 @end

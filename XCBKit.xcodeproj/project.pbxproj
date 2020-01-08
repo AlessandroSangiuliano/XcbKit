@@ -22,6 +22,8 @@
 		FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = FA3186CB22F874A5001DE139 /* XCBFrame.m */; };
 		FA5ADB9623C47DDB00C8B403 /* EWMH.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADB9423C47DDB00C8B403 /* EWMH.h */; };
 		FA5ADB9723C47DDB00C8B403 /* EWMH.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADB9523C47DDB00C8B403 /* EWMH.m */; };
+		FA5ADBD223C4FB5200C8B403 /* XCBAtomService.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADBD023C4FB5200C8B403 /* XCBAtomService.h */; };
+		FA5ADBD323C4FB5200C8B403 /* XCBAtomService.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADBD123C4FB5200C8B403 /* XCBAtomService.m */; };
 		FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCED228702FC00303CFE /* XCBPoint.h */; };
 		FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCEE228702FC00303CFE /* XCBPoint.m */; };
 		FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCF12287069E00303CFE /* XCBRect.h */; };
@@ -76,6 +78,8 @@
 		FA3186CB22F874A5001DE139 /* XCBFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrame.m; sourceTree = "<group>"; };
 		FA5ADB9423C47DDB00C8B403 /* EWMH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWMH.h; sourceTree = "<group>"; };
 		FA5ADB9523C47DDB00C8B403 /* EWMH.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWMH.m; sourceTree = "<group>"; };
+		FA5ADBD023C4FB5200C8B403 /* XCBAtomService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBAtomService.h; sourceTree = "<group>"; };
+		FA5ADBD123C4FB5200C8B403 /* XCBAtomService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBAtomService.m; sourceTree = "<group>"; };
 		FAA0BCED228702FC00303CFE /* XCBPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBPoint.h; sourceTree = "<group>"; };
 		FAA0BCEE228702FC00303CFE /* XCBPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBPoint.m; sourceTree = "<group>"; };
 		FAA0BCF12287069E00303CFE /* XCBRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBRect.h; sourceTree = "<group>"; };
@@ -161,6 +165,7 @@
 		FA2D9F9022738D1100CEBEE0 /* XCBKit */ = {
 			isa = PBXGroup;
 			children = (
+				FA5ADBCF23C4FB3600C8B403 /* services */,
 				FAB7D56B23BE172800801098 /* utils */,
 				FA2D9F9722738D1100CEBEE0 /* XCBKit.h */,
 				FA2D9F9822738D1100CEBEE0 /* XCBKit.m */,
@@ -222,6 +227,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		FA5ADBCF23C4FB3600C8B403 /* services */ = {
+			isa = PBXGroup;
+			children = (
+				FA5ADBD023C4FB5200C8B403 /* XCBAtomService.h */,
+				FA5ADBD123C4FB5200C8B403 /* XCBAtomService.m */,
+			);
+			name = services;
+			sourceTree = "<group>";
+		};
 		FAB7D56B23BE172800801098 /* utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -243,6 +257,7 @@
 				FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */,
 				FA1A725D2274244F00C4E65B /* XCBConnection.h in Headers */,
 				FAB7D56E23BE176200801098 /* CairoDrawer.h in Headers */,
+				FA5ADBD223C4FB5200C8B403 /* XCBAtomService.h in Headers */,
 				FABB11432274AEC1007A0433 /* XCBScreen.h in Headers */,
 				FABB114822756F0E007A0433 /* XCBWindow.h in Headers */,
 				FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */,
@@ -368,6 +383,7 @@
 				FABB114922756F0E007A0433 /* XCBWindow.m in Sources */,
 				FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */,
 				FAA0BCF42287069E00303CFE /* XCBRect.m in Sources */,
+				FA5ADBD323C4FB5200C8B403 /* XCBAtomService.m in Sources */,
 				FAB7D56F23BE176200801098 /* CairoDrawer.m in Sources */,
 				FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */,
 				FAA0BCF82287072D00303CFE /* XCBSize.m in Sources */,
