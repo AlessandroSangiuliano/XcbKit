@@ -20,13 +20,13 @@
 		FA2D9FAE22738D1100CEBEE0 /* XCBConnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */; };
 		FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = FA3186CA22F874A5001DE139 /* XCBFrame.h */; };
 		FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = FA3186CB22F874A5001DE139 /* XCBFrame.m */; };
-		FA5ADB9623C47DDB00C8B403 /* EWMH.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADB9423C47DDB00C8B403 /* EWMH.h */; };
-		FA5ADB9723C47DDB00C8B403 /* EWMH.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADB9523C47DDB00C8B403 /* EWMH.m */; };
 		FA5ADBD923C62F1200C8B403 /* XCBAtomSeriveTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADBD823C62F1200C8B403 /* XCBAtomSeriveTest.m */; };
 		FA5ADBE423C63D5600C8B403 /* XCBAtomService.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADBE223C63D5600C8B403 /* XCBAtomService.h */; };
 		FA5ADBE523C63D5600C8B403 /* XCBAtomService.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADBE323C63D5600C8B403 /* XCBAtomService.m */; };
 		FA5ADBE923C63D6B00C8B403 /* CairoDrawer.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADBE723C63D6B00C8B403 /* CairoDrawer.h */; };
 		FA5ADBEA23C63D6B00C8B403 /* CairoDrawer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADBE823C63D6B00C8B403 /* CairoDrawer.m */; };
+		FA5ADBFB23C6444A00C8B403 /* EWMH.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5ADBFA23C6444A00C8B403 /* EWMH.h */; };
+		FA5ADBFD23C6445200C8B403 /* EWMH.m in Sources */ = {isa = PBXBuildFile; fileRef = FA5ADBFC23C6445200C8B403 /* EWMH.m */; };
 		FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCED228702FC00303CFE /* XCBPoint.h */; };
 		FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0BCEE228702FC00303CFE /* XCBPoint.m */; };
 		FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA0BCF12287069E00303CFE /* XCBRect.h */; };
@@ -77,13 +77,13 @@
 		FA2D9FAD22738D1100CEBEE0 /* XCBConnectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XCBConnectionTests.m; sourceTree = "<group>"; };
 		FA3186CA22F874A5001DE139 /* XCBFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBFrame.h; sourceTree = "<group>"; };
 		FA3186CB22F874A5001DE139 /* XCBFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBFrame.m; sourceTree = "<group>"; };
-		FA5ADB9423C47DDB00C8B403 /* EWMH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWMH.h; sourceTree = "<group>"; };
-		FA5ADB9523C47DDB00C8B403 /* EWMH.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWMH.m; sourceTree = "<group>"; };
 		FA5ADBD823C62F1200C8B403 /* XCBAtomSeriveTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBAtomSeriveTest.m; sourceTree = "<group>"; };
 		FA5ADBE223C63D5600C8B403 /* XCBAtomService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBAtomService.h; sourceTree = "<group>"; };
 		FA5ADBE323C63D5600C8B403 /* XCBAtomService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBAtomService.m; sourceTree = "<group>"; };
 		FA5ADBE723C63D6B00C8B403 /* CairoDrawer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CairoDrawer.h; sourceTree = "<group>"; };
 		FA5ADBE823C63D6B00C8B403 /* CairoDrawer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CairoDrawer.m; sourceTree = "<group>"; };
+		FA5ADBFA23C6444A00C8B403 /* EWMH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWMH.h; sourceTree = "<group>"; };
+		FA5ADBFC23C6445200C8B403 /* EWMH.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWMH.m; sourceTree = "<group>"; };
 		FAA0BCED228702FC00303CFE /* XCBPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBPoint.h; sourceTree = "<group>"; };
 		FAA0BCEE228702FC00303CFE /* XCBPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBPoint.m; sourceTree = "<group>"; };
 		FAA0BCF12287069E00303CFE /* XCBRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBRect.h; sourceTree = "<group>"; };
@@ -189,8 +189,6 @@
 				FA3186CB22F874A5001DE139 /* XCBFrame.m */,
 				FAB6022B22F9987E0037F492 /* XCBTitleBar.h */,
 				FAB6022C22F9987E0037F492 /* XCBTitleBar.m */,
-				FA5ADB9423C47DDB00C8B403 /* EWMH.h */,
-				FA5ADB9523C47DDB00C8B403 /* EWMH.m */,
 				FA2D9F9122738D1100CEBEE0 /* Supporting Files */,
 			);
 			path = XCBKit;
@@ -233,6 +231,8 @@
 		FA5ADBE123C63D5600C8B403 /* services */ = {
 			isa = PBXGroup;
 			children = (
+				FA5ADBFC23C6445200C8B403 /* EWMH.m */,
+				FA5ADBFA23C6444A00C8B403 /* EWMH.h */,
 				FA5ADBE223C63D5600C8B403 /* XCBAtomService.h */,
 				FA5ADBE323C63D5600C8B403 /* XCBAtomService.m */,
 			);
@@ -256,6 +256,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */,
+				FA5ADBFB23C6444A00C8B403 /* EWMH.h in Headers */,
 				FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */,
 				FA5ADBE423C63D5600C8B403 /* XCBAtomService.h in Headers */,
 				FA5ADBE923C63D6B00C8B403 /* CairoDrawer.h in Headers */,
@@ -265,7 +266,6 @@
 				FABB114822756F0E007A0433 /* XCBWindow.h in Headers */,
 				FAA0BCEF228702FC00303CFE /* XCBPoint.h in Headers */,
 				FAA0BCF32287069E00303CFE /* XCBRect.h in Headers */,
-				FA5ADB9623C47DDB00C8B403 /* EWMH.h in Headers */,
 				FAA0BCF72287072D00303CFE /* XCBSize.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -377,9 +377,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA5ADBFD23C6445200C8B403 /* EWMH.m in Sources */,
 				FA2D9F9922738D1100CEBEE0 /* XCBKit.m in Sources */,
 				FA1A725E2274244F00C4E65B /* XCBConnection.m in Sources */,
-				FA5ADB9723C47DDB00C8B403 /* EWMH.m in Sources */,
 				FAB6022E22F9987E0037F492 /* XCBTitleBar.m in Sources */,
 				FABB11442274AEC1007A0433 /* XCBScreen.m in Sources */,
 				FA5ADBEA23C63D6B00C8B403 /* CairoDrawer.m in Sources */,
