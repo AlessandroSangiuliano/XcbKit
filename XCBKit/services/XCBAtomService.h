@@ -13,10 +13,17 @@
 // Singleton
 
 @interface XCBAtomService : NSObject
+{
+}
 
 @property (strong, nonatomic) XCBConnection *connection;
+@property (nonatomic) NSMutableDictionary *cachedAtoms;
+
 
 + (id) sharedInstanceWithConnection:(XCBConnection*) aConnection;
+
+- (void) cacheAtom:(NSString*) atomName;
+- (void) cacheAtoms:(NSArray*) atoms;
 
 - (void) dealloc;
 
