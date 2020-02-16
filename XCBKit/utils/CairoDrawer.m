@@ -174,6 +174,30 @@
 
 }
 
+- (void) drawText:(NSString *)aText withColor:(NSColor *)aColor
+{
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+    
+    cairo_set_source_rgb(cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
+    
+    cairo_select_font_face(cr, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    
+    cairo_set_font_size (cr, 11);
+    
+    cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
+    
+    CGFloat textPositionX = (CGFloat) [[[window windowRect] size] getWidth] / 2;
+    CGFloat textPositionY = (CGFloat) [[[window windowRect] size] getHeight] / 2 + 2;
+    
+    cairo_move_to(cr, textPositionX, textPositionY);
+    
+    cairo_show_text(cr, [aText cStringUsingEncoding: NSUTF8StringEncoding]);
+    
+    cairo_surface_flush(cairoSurface);
+    cairo_destroy(cr);
+}
+
 - (void) dealloc
 {
     cairoSurface = NULL;

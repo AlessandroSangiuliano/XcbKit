@@ -28,5 +28,6 @@
 - (void) drawTitleBarButtonWithColor:(NSColor*) buttonColor withStopColor:(NSColor*) stopColor;
 - (void) drawTitleBarWithColor:(NSColor*) titleColor andStopColor:(NSColor*) stopColor;
 - (void) drawWindowWithColor:(NSColor*)aColor andStopColor:(NSColor*)stopColor;
+- (void) drawText:(NSString*) aText withColor:(NSColor*) aColor;
 
 @end

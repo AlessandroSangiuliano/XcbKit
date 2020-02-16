@@ -13,6 +13,10 @@
 
 @synthesize graphicContextId;
 @synthesize windowRect;
+@synthesize decorated;
+@synthesize draggable;
+
+__strong XCBConnection *connection;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
 {
@@ -38,6 +42,8 @@
 	parentWindow = aParent;
 	aboveWindow = anAbove;
 	isMapped = NO;
+    decorated = NO;
+    draggable = YES;
 	
 	return self;
 }
@@ -118,6 +124,14 @@
 - (void) setWindowMask:(uint32_t)aMask
 {
     windowMask = aMask;
+}
+
+- (void) setWindowBorderWidth:(uint32_t)border
+{
+    uint16_t tempMask = XCB_CONFIG_WINDOW_BORDER_WIDTH;
+    uint32_t valueForBorder[1] = {border};
+    
+    xcb_configure_window([XCBConn connection], window, tempMask, valueForBorder);
 }
 
 - (void) description

@@ -12,6 +12,7 @@
 #import "XCBConnection.h"
 #import <cairo/cairo.h>
 #import <cairo/cairo-xcb.h>
+#import "Transformers.h"
 
 @implementation XCBFrameTest
 
@@ -47,18 +48,21 @@
                         withValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
                         withValueList:values];
     
-    XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:clientWindow
+    /*XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:clientWindow
                                               withConnection:connection
-                                               withXcbWindow:[frameWindow window]];
+                                               withXcbWindow:[frameWindow window]];*/
     
-    XCBRect *frameRect = [[XCBRect alloc] initWithPosition:coordinates andSize: frameSize];
-    [frame setWindowRect:frameRect];
+    /*XCBRect *frameRect = [[XCBRect alloc] initWithPosition:coordinates andSize: frameSize];
+    [frame setWindowRect:frameRect];*/
+    
+    XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow);
 
+    //TODO: FUNZIONE CHE MAPPA UNA XCBWINDOW TO UN XCBFRAME
 
-    [frame setParentWindow:[frameWindow parentWindow]];
+    /*[frame setParentWindow:[frameWindow parentWindow]];
     [frame setAboveWindow:[frameWindow aboveWindow]];
     [frame setIsMapped:[frameWindow isMapped]];
-    [frame setAttributes:[frameWindow attributes]];
+    [frame setAttributes:[frameWindow attributes]];*/
     
     frameWindow = nil;
     
@@ -67,8 +71,21 @@
     XCBTitleBar *titleBar = [[XCBTitleBar alloc] initWithFrame:frame withConnection:connection];
     [frame addChildWindow:titleBar withKey:TitleBar];
     
-    [connection flush];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
+    const char *windowName = "Scemo";
+    
+    xcb_atom_t UTF8_STRING = [[[[ewmhService atomService] cachedAtoms] objectForKey:[ewmhService UTF8_STRING]] unsignedIntValue];
+    
+    [ewmhService changePropertiesForWindow:clientWindow
+                                  withMode:XCB_PROP_MODE_REPLACE
+                              withProperty:[ewmhService EWMHWMName]
+                                  withType: UTF8_STRING
+                                withFormat:8
+                            withDataLength:4
+                                  withData:windowName];
+    
+    [connection flush];
     xcb_generic_event_t *e;
     
     while ((e = xcb_wait_for_event([connection connection])))
@@ -78,18 +95,19 @@
             case XCB_EXPOSE:
                 [titleBar drawTitleBar];
                 [titleBar drawArcs];
+                [titleBar setWindowTitle:@"Pova"];
                 [connection flush];
                 break;
                 
             case XCB_MOTION_NOTIFY:
                 NSLog(@"MOTION NOTIFY");
-                [connection handleMotionNotify:(xcb_motion_notify_event_t *)e forWindow:titleBar];
+                [connection handleMotionNotify:(xcb_motion_notify_event_t *)e];
                 [connection flush];
                 break;
                 
             case XCB_BUTTON_PRESS:
                 NSLog(@"MBUTTON PRESS");
-                [connection handleButtonPress:(xcb_button_press_event_t*)e forWindow:titleBar];
+                [connection handleButtonPress:(xcb_button_press_event_t*)e];
                 break;
                 
             case XCB_MAP_NOTIFY:
@@ -328,4 +346,5 @@
 
     return window;
 }
+
 @end

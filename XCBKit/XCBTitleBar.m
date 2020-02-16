@@ -25,6 +25,7 @@
 @synthesize maximizeButtonColor;
 @synthesize titlebarColor;
 @synthesize windowRect;
+@synthesize ewmhService;
 
 
 - (id) initWithFrame:(XCBFrame *)aFrame withConnection:(XCBConnection *)aConnection
@@ -68,7 +69,7 @@
     titlebarColor = [NSColor colorWithCalibratedRed:0.720 green:0.720 blue:0.720 alpha:1];
     
     values[0] = [screen screen]->white_pixel;
-    values[1] = XCB_EVENT_MASK_EXPOSURE;
+    values[1] = XCB_EVENT_MASK_EXPOSURE |  XCB_EVENT_MASK_BUTTON_PRESS ;
     
     uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     
@@ -85,6 +86,7 @@
                      withValueList:values];
     
     [hideWindowButton setWindowMask:mask];
+    [hideWindowButton setDraggable:NO];
     
     hideButtonColor = [NSColor colorWithCalibratedRed: 0.411 green: 0.176 blue: 0.673 alpha: 1]; //original: 0.7 0.427 1 1
     
@@ -110,6 +112,7 @@
     
     [minimizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
     [minimizeWindowButton setWindowMask:mask];
+    [minimizeWindowButton setDraggable:NO];
     
     minimizeButtonColor = [NSColor colorWithCalibratedRed: 0.9 green: 0.7 blue: 0.3 alpha: 1];
     
@@ -127,6 +130,7 @@
     
     [maximizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
     [maximizeWindowButton setWindowMask:mask];
+    [maximizeWindowButton setDraggable:NO];
     
     maximizeButtonColor = [NSColor colorWithCalibratedRed:0 green:0.74 blue:1 alpha:1];
     
@@ -134,6 +138,7 @@
     [connection mapWindow:hideWindowButton];
     [connection mapWindow:minimizeWindowButton];
     [connection mapWindow:maximizeWindowButton];
+    ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
     return self;
 }
@@ -203,8 +208,27 @@
 
     drawer = [[CairoDrawer alloc] initWithConnection:connection window:maximizeWindowButton visual:visual];
     [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    
     drawer = nil;
 
+}
+
+- (void) setWindowTitle:(NSString *) title
+{
+    windowTitle = title;
+    if ([title length] == 0)
+    {
+        NSLog(@"No title to set to the window.");
+        return;
+    }
+    
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
+    [drawer drawText:windowTitle withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
+    drawer = nil;
 }
 
 - (xcb_arc_t*) arcs
@@ -222,6 +246,7 @@
     minimizeButtonColor = nil;
     maximizeButtonColor = nil;
     titlebarColor = nil;
+    ewmhService = nil;
 }
 
 

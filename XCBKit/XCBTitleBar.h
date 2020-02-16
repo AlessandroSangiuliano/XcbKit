@@ -10,6 +10,7 @@
 #import "XCBWindow.h"
 #import "XCBFrame.h"
 #import "XCBSize.h"
+#import "EWMHService.h"
 
 #ifndef TITLE_MASK
 
@@ -23,21 +24,24 @@ XCB_EVENT_MASK_KEY_PRESS
 @interface XCBTitleBar : XCBWindow
 {
     xcb_arc_t arcs[1];
+    NSString *windowTitle;
 }
 
 @property (strong, nonatomic) NSColor *hideButtonColor;
 @property (strong, nonatomic) NSColor *minimizeButtonColor;
 @property (strong, nonatomic) NSColor *maximizeButtonColor;
-@property(strong, nonatomic) XCBWindow *hideWindowButton;
-@property(strong, nonatomic) XCBWindow *minimizeWindowButton;
-@property(strong, nonatomic) XCBWindow *maximizeWindowButton;
-@property(nonatomic) xcb_arc_t arc;
-@property(strong, nonatomic) XCBConnection *connection;
+@property (strong, nonatomic) XCBWindow *hideWindowButton;
+@property (strong, nonatomic) XCBWindow *minimizeWindowButton;
+@property (strong, nonatomic) XCBWindow *maximizeWindowButton;
+@property (nonatomic) xcb_arc_t arc;
+@property (strong, nonatomic) XCBConnection *connection;
 @property (strong, nonatomic) NSColor *titlebarColor;
+@property (strong, nonatomic) EWMHService *ewmhService;
 
 - (id) initWithFrame:(XCBFrame*) aFrame withConnection:(XCBConnection*) aConnection;
 - (void) drawArcs;
 - (void) drawTitleBar;
+- (void) setWindowTitle:(NSString*) title;
 
 /****************
  *    ACCESORS  *

@@ -57,6 +57,8 @@
     xcb_atom_t atom = reply->atom;
     NSNumber *atomValue = [NSNumber numberWithUnsignedInt:atom];
     [cachedAtoms setObject:atomValue forKey:atomName];
+    
+    //free(reply)?
 }
 
 - (void) cacheAtoms:(NSArray *)atoms
@@ -69,6 +71,11 @@
         [self cacheAtom:atomName];
     }
     
+}
+
+- (xcb_atom_t) atomFromCachedAtomsWithKey:(NSString *)atomName
+{
+    return [[cachedAtoms objectForKey:atomName] unsignedIntValue];
 }
 
 - (void) dealloc

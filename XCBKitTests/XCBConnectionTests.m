@@ -8,6 +8,8 @@
 
 #import "XCBConnectionTests.h"
 #import "XCBConnection.h"
+#import "EWMHService.h"
+#import "CairoDrawer.h"
 
 @implementation XCBConnectionTests
 
@@ -105,6 +107,21 @@
 
 }
 
+- (void) testRootWindowSubStructureRedirect
+{
+    XCBConnection *connection = [XCBConnection sharedConnection];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    [connection flush];
+    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root];
+    
+    xcb_get_window_attributes_reply_t* reply = [connection getAttributesForWindow:rootWindow];
+    NSLog(@"Cacca: %u", reply->all_event_masks);
+    NSLog(@"Pipì: %u", XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
+    NSLog(@"Pene: %u", XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
+    pause();
+    
+}
+
 - (void) testCreateWindow
 {
 	XCBConnection *connection = [[XCBConnection alloc] init];
@@ -198,12 +215,12 @@
                 break;
                 
             case XCB_MOTION_NOTIFY:
-                [connection handleMotionNotify:(xcb_motion_notify_event_t *)e forWindow:window];
+                [connection handleMotionNotify:(xcb_motion_notify_event_t *)e];
                 [connection flush];
                 break;
                 
             case XCB_BUTTON_PRESS:
-                [connection handleButtonPress:(xcb_button_press_event_t*)e forWindow:window];
+                [connection handleButtonPress:(xcb_button_press_event_t*)e];
                 break;
                 
             case XCB_MAP_NOTIFY:
@@ -252,6 +269,134 @@
     [connection flush];
     
     pause();
+}
+
+- (void) testHandleEvents
+{
+    XCBConnection *connection = [XCBConnection sharedConnection];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+        
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    
+    uint32_t values[2];
+    values[0] = [screen screen]->white_pixel;
+    values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
+    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   | XCB_EVENT_MASK_KEY_PRESS;
+    
+    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
+    XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
+
+    
+    XCBWindow *clientWindow = [connection createWindowWithDepth:[screen screen]->root_depth
+                                                                   withParentWindow:[screen rootWindow]
+                                                                      withXPosition:[coordinates getX]
+                                                                      withYPosition:[coordinates getY]
+                                                                          withWidth:[sizes getWidth]
+                                                                         withHeight:[sizes getHeight]
+                                                                   withBorrderWidth:1
+                                                                       withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                                       withVisualId:visual
+                                                                      withValueMask:mask
+                                                                      withValueList:values];
+    
+    XCBWindow* selectionManagerWindow = [connection createWindowWithDepth:[screen screen]->root_depth
+                                                         withParentWindow:[screen rootWindow]
+                                                            withXPosition:-1
+                                                            withYPosition:-1
+                                                                withWidth:1
+                                                               withHeight:1
+                                                         withBorrderWidth:0
+                                                             withXCBClass:XCB_COPY_FROM_PARENT
+                                                             withVisualId:visual
+                                                            withValueMask:0
+                                                            withValueList:NULL];
+    
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    [connection registerAsWindowManager:YES screenId:1 selectionWindow:selectionManagerWindow];
+    
+    xcb_atom_t type = [[[[ewmhService atomService] cachedAtoms] objectForKey:[ewmhService UTF8_STRING]] unsignedIntValue];
+    
+    [ewmhService changePropertiesForWindow:clientWindow
+                                  withMode:XCB_PROP_MODE_REPLACE
+                              withProperty:[ewmhService EWMHWMName]
+                                  withType:type
+                                withFormat:8
+                            withDataLength:4
+                                  withData:"Pova"];
+    
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:clientWindow visual:visual];
+    
+    //[connection mapWindow:clientWindow];
+    //[connection flush];
+    
+    [self eventLoopwithConnection:connection andDrawer:drawer andClientWindow:clientWindow];
+    
+    //pause();
+
+
+}
+
+- (void) eventLoopwithConnection:(XCBConnection*)connection
+         andDrawer:(CairoDrawer*) drawer
+    andClientWindow:(XCBWindow*)clientWindow
+{
+    xcb_generic_event_t *e;
+    
+    while ((e = xcb_wait_for_event([connection connection])))
+    {
+        switch (e->response_type & ~0x80)
+        {
+            case XCB_EXPOSE:
+                NSLog(@"");
+                xcb_expose_event_t * exposeEvent = (xcb_expose_event_t *)e;
+                NSLog(@"Expose for window %u", exposeEvent->window);
+                //[connection handleExpose:exposeEvent];
+                [connection flush];
+                break;
+                
+            case XCB_MOTION_NOTIFY:
+                NSLog(@"");
+                xcb_motion_notify_event_t *motionEvent = (xcb_motion_notify_event_t *)e;
+                NSLog(@"Motion Notify for window %u: ", motionEvent->event);
+                [connection handleMotionNotify:motionEvent];
+                [connection flush];
+                break;
+                
+            case XCB_BUTTON_PRESS:
+                NSLog(@"");
+                xcb_button_press_event_t* pressEvent = (xcb_button_press_event_t*)e;
+                NSLog(@"Button Press Event for window %u: ", pressEvent->event);
+                [connection handleButtonPress:pressEvent];
+                break;
+                
+            case XCB_MAP_NOTIFY:
+                NSLog(@"");
+                xcb_map_notify_event_t *notifyEvent = (xcb_map_notify_event_t*)e;
+                NSLog(@"MAP NOTIFY for window %u", notifyEvent->window);
+                //[connection handleMapRequest:notifyEvent];
+                break;
+                
+            case XCB_MAP_REQUEST:
+                NSLog(@"");
+                xcb_map_request_event_t* mapRequestEvent = (xcb_map_request_event_t*)e;
+                NSLog(@"Map Request for window %u", mapRequestEvent->window);
+                [connection handleMapRequest:mapRequestEvent];
+                break;
+                
+            case XCB_DESTROY_NOTIFY:
+                NSLog(@"");
+                xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t*)e;
+                NSLog(@"Destroy Notify for window: %u", destroyNotify->window);
+                break;
+            default:
+                break;
+        }
+        free(e);
+    }
+
 }
 
 

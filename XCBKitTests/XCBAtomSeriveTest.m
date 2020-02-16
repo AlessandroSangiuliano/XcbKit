@@ -9,6 +9,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import "XCBAtomService.h"
 #import "XCBConnection.h"
+#import "EWMHService.h"
+#import "XCBScreen.h"
 
 @interface XCBAtomSeriveTest : SenTestCase
 
@@ -72,5 +74,72 @@
     STAssertEquals([[cachedAtoms objectForKey:atoms[1]] unsignedIntValue], 294u, @"Expected 294");
 }
 
+- (void) testAtomFromCachedAtomsWithKey
+{
+    NSString *netSupported = @"_NET_SUPPORTED";
+    
+    XCBConnection *connection = [XCBConnection sharedConnection];
+    
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    
+    [atomService cacheAtom:netSupported];
+    
+    NSDictionary *cachedAtoms = [atomService cachedAtoms];
+    
+    xcb_atom_t atomSupported = [atomService atomFromCachedAtomsWithKey:netSupported];
+    
+    STAssertEquals([[cachedAtoms objectForKey:netSupported] unsignedIntValue], atomSupported, @"MUST be equal");
+    
+}
+
+- (void) testCacheRootandWmWindowProperties
+{
+    XCBConnection *connection = [XCBConnection sharedConnection];
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    
+    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    
+    XCBWindow *wmWindow = [connection createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                           withParentWindow:rootWindow
+                                              withXPosition:-1
+                                              withYPosition:-1
+                                                  withWidth:1
+                                                 withHeight:1
+                                           withBorrderWidth:0
+                                               withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                               withVisualId:visual
+                                              withValueMask:0
+                                              withValueList:NULL];
+    
+    [ewmhService putPropertiesForRootWindow:rootWindow andWmWindow:wmWindow];
+    
+    xcb_generic_event_t *e;
+    
+    [connection mapWindow:wmWindow];
+    [connection flush];
+    
+    while ((e = xcb_wait_for_event ([connection connection]))) {
+        switch (e->response_type & ~0x80) {
+            case XCB_EXPOSE:
+            {
+                [connection flush];
+                break;
+            }
+            default: {
+                
+                break;
+            }
+        }
+        
+        free (e);
+    }
+
+    
+    pause();
+}
 
 @end

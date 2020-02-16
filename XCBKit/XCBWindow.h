@@ -18,11 +18,12 @@
 	BOOL isMapped;
 	xcb_get_window_attributes_reply_t attributes;
     uint32_t windowMask;
-    
 }
 
 @property (nonatomic) xcb_gcontext_t graphicContextId;
 @property (strong, nonatomic) XCBRect *windowRect;
+@property (nonatomic) BOOL decorated;
+@property (nonatomic) BOOL draggable;
 
 
 - (xcb_window_t) window;
@@ -51,6 +52,7 @@
 - (void) setAttributes:(xcb_get_window_attributes_reply_t) someAttributes;
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
+- (void) setWindowBorderWidth:(uint32_t)border;
 
 -(void) description;
 

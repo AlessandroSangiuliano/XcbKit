@@ -21,9 +21,13 @@ typedef NS_ENUM(NSInteger, childrenMask)
     NSMutableDictionary *children;
 }
 
+@property (strong, nonatomic) XCBConnection *connection;
+
+- (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection withXcbWindow:(xcb_window_t) xcbWindow;
 
 - (void) addChildWindow:(XCBWindow*) aChild withKey:(childrenMask) keyMask;
+- (XCBWindow*) childWindowForKey:(childrenMask) key;
 - (void) removeChild:(childrenMask) frameChild;
 
 
@@ -35,5 +39,6 @@ typedef NS_ENUM(NSInteger, childrenMask)
 
 - (void) setChildren:(NSMutableDictionary*) aChildrenSet;
 - (NSMutableDictionary*) getChildren;
+- (void) decorateClientWindow;
 
 @end
