@@ -22,6 +22,7 @@
 @property (strong, nonatomic) XCBVisual *visual;
 @property (nonatomic) CGFloat height;
 @property (nonatomic) CGFloat width;
+@property (nonatomic) BOOL alreadyScaled; //potrebbe servire solo per i test
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow visual:(XCBVisual*) aVisual;
@@ -29,5 +30,9 @@
 - (void) drawTitleBarWithColor:(NSColor*) titleColor andStopColor:(NSColor*) stopColor;
 - (void) drawWindowWithColor:(NSColor*)aColor andStopColor:(NSColor*)stopColor;
 - (void) drawText:(NSString*) aText withColor:(NSColor*) aColor;
+- (void) makePreviewImage;
+- (void) saveContext;
+- (void) restoreContext;
+- (void) setPreviewImage;
 
 @end

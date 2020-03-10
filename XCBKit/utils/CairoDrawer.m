@@ -18,6 +18,7 @@
 @synthesize visual;
 @synthesize height;
 @synthesize width;
+@synthesize alreadyScaled;
 
 - (id) initWithConnection:(XCBConnection *)aConnection
 {
@@ -43,9 +44,11 @@
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     
-    [visual setVisualTypeForScreen:screen];
+    if (visual != nil)
+        [visual setVisualTypeForScreen:screen];
     
     screen = nil;
+    alreadyScaled = NO;
     
     return self;
 }
@@ -112,7 +115,7 @@
     CGFloat startXPosition = 0;
     CGFloat endXPosition = 0;
     CGFloat startYPosition = height;
-    CGFloat endYPosition = [[[window windowRect] position] getY];;
+    CGFloat endYPosition = [[[window windowRect] position] getY];
     
     CGFloat stopGradientOffset = 0.99;
     CGFloat colorGradientOffset = 0.2;
@@ -196,6 +199,84 @@
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
+}
+
+- (void) makePreviewImage
+{
+    XCBSize* size = [[window windowRect] size];
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], [size getWidth], [size getHeight]);
+    cr = cairo_create(cairoSurface);
+    
+    cairo_surface_write_to_png(cairoSurface, "/tmp/Preview.png");
+    
+    cairo_surface_destroy(cairoSurface);
+    cairo_destroy(cr);
+}
+
+- (void)setPreviewImage
+{
+    XCBSize* size = [[window windowRect] size];
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], [size getWidth], [size getHeight]);
+    cr = cairo_create(cairoSurface);
+    
+    /* CHECK IF THE COMPOSITORE IS ACTIVE, IF TRUE I CAN SET THE TRANSPARENCY
+    cairo_set_source_rgba(cr, 1, 1, 1, 0.0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);*/
+    
+    
+    NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
+    NSLog(@"Immagine: %f, %f", [image size].width, [image size].height);
+    
+    double scalingFactorW = 50 / [image size].width;
+    double scalingFactorH = 50 / [image size].height;
+    
+    double scaledWidth = [image size].width * scalingFactorW;
+    double scaledHeight = [image size].width * scalingFactorH;
+    
+    NSSize targetSize = NSMakeSize(50, 50);
+    NSPoint origin = NSMakePoint(0, 0);
+    NSRect rect;
+    rect.origin = origin;
+    rect.size.width = scaledWidth;
+    rect.size.height = scaledHeight;
+    
+    NSImage *scaledImage = [[NSImage alloc] initWithSize:targetSize];
+    [scaledImage lockFocus];
+    [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [scaledImage unlockFocus];
+    
+    NSLog(@"Immagine scalata %f, %f", [scaledImage size].height, [scaledImage size].width);
+    
+
+    NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];
+    NSData* data = [imgRep representationUsingType:NSPNGFileType properties:nil];
+    [data writeToFile:@"/tmp/Scaled.png" atomically:NO];
+    
+    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Scaled.png");
+    cairo_set_source_surface(cr, imageSurface, 0, 0);
+    
+    cairo_paint(cr);
+    
+    cairo_surface_destroy(cairoSurface);
+    cairo_surface_destroy(imageSurface);
+    cairo_destroy(cr);
+    
+    image = nil;
+    scaledImage = nil;
+    data = nil;
+    imgRep = nil;
+    size = nil;
+}
+
+- (void) saveContext
+{
+    cairo_save(cr);
+}
+
+- (void) restoreContext
+{
+    cairo_restore(cr);
 }
 
 - (void) dealloc

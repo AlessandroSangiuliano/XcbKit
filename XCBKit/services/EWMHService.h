@@ -201,7 +201,7 @@
 @property (strong, nonatomic)NSString* EWMHWMStateShaded;
 @property (strong, nonatomic)NSString* EWMHWMStateSkipTaskbar;
 @property (strong, nonatomic)NSString* EWMHWMStateSkipPager;
-@property (strong, nonatomic)NSString* EWMHWMStateHidden ;
+@property (strong, nonatomic)NSString* EWMHWMStateHidden;
 @property (strong, nonatomic)NSString* EWMHWMStateFullscreen;
 @property (strong, nonatomic)NSString* EWMHWMStateAbove;
 @property (strong, nonatomic)NSString* EWMHWMStateBelow;

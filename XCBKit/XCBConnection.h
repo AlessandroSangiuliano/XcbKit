@@ -8,9 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "XCBScreen.h"
-#import "XCBWindow.h"
 #import "XCBVisual.h"
+#import "XCBCreateWindowTypeRequest.h"
+#import "XCBWindowTypeResponse.h"
 #include <xcb/xcb.h>
+
+@class XCBWindow;
+@class EWMHService;
 
 @interface XCBConnection : NSObject
 {
@@ -19,11 +23,11 @@
     NSMutableDictionary *windowsMap;
 	NSMutableArray *screens;
 	BOOL needFlush;
-    //EWMHService* ewmhService;
     xcb_timestamp_t currentTime;
 }
 
 @property (nonatomic) BOOL dragState;
+@property (strong, nonatomic) EWMHService* ewmhService;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
@@ -36,7 +40,7 @@
 - (void) unregisterWindow:(XCBWindow *) aWindow;
 - (NSMutableDictionary *) windowsMap;
 - (void) closeConnection;
-- (XCBWindow *) windowForXCBId:(xcb_window_t)anId;
+- (XCBWindow*) windowForXCBId:(xcb_window_t)anId;
 - (int) flush;
 - (void) setNeedFlush:(BOOL) aNeedFlushChoice;
 - (XCBWindow *) createWindowWithDepth: (uint8_t) depth
@@ -51,8 +55,11 @@
 				 withValueMask: (uint32_t) valueMask
 				 withValueList: (const uint32_t *) valueList;
 
+- (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
 
 - (NSMutableArray*) screens;
+
+/*** HANDLE EVENTS ***/
 
 - (void) handleMapNotify: (xcb_map_notify_event_t*)anEvent;
 - (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent;
@@ -71,10 +78,14 @@
 - (void) handleConfigureWindowRequest: (xcb_configure_request_event_t*)anEvent;
 - (void) handleReparentNotify: (xcb_reparent_notify_event_t*)anEvent;
 - (void) handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
+- (void) handleClientMessage: (xcb_client_message_event_t*)anEvent;
+- (void) handleDestroyNotify: (xcb_destroy_notify_event_t*)anEvent;
 
+/*** DEAL WITH WINDOW STUFFS ***/
 
 - (void) reparentWindow: (XCBWindow*) aWindow toWindow:(XCBWindow*)parentWindow position:(XCBPoint*)position;
-- (void) mapWindow: (XCBWindow*)  aWindow;
+- (void) mapWindow: (XCBWindow*) aWindow;
+- (void) unmapWindow:(XCBWindow*)aWindow;
 - (XCBWindow*) parentWindowForWindow:(XCBWindow*)aWindow;
 - (XCBRect*) geometryForWindow:(XCBWindow*)aWindow;
 - (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow checked:(BOOL)check;
@@ -83,7 +94,6 @@
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
-- (void) destroyWindow:(XCBWindow*) aWindow;
 - (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 
 @end

@@ -27,7 +27,7 @@ xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *a
     return transformed;
 }
 
-XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow)
+XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection)
 {
     XCBFrame *frame = [[XCBFrame alloc] init];
     
@@ -38,8 +38,28 @@ XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow)
     [frame setWindowRect:[aWindow windowRect]];
     [frame setWindowMask:[aWindow windowMask]];
     [frame setIsMapped:[aWindow isMapped]];
+    [frame setConnection:connection];
+    
     
     return frame;
+}
+
+XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* connection)
+{
+    XCBTitleBar *titleBar = [[XCBTitleBar alloc] init];
+    
+    [titleBar setAboveWindow:[aWindow aboveWindow]];
+    [titleBar setWindow:[aWindow window]];
+    [titleBar setParentWindow:[aWindow parentWindow]];
+    [titleBar setAttributes:[aWindow attributes]];
+    [titleBar setWindowRect:[aWindow windowRect]];
+    [titleBar setWindowMask:[aWindow windowMask]];
+    [titleBar setIsMapped:[aWindow isMapped]];
+    [titleBar setConnection:connection];
+    [titleBar setTitlebarColor:[NSColor colorWithCalibratedRed:0.720 green:0.720 blue:0.720 alpha:1]];
+    
+    return titleBar;
+
 }
 
 void CsMapXCBWindoToXCBFrame(XCBWindow* sourceWindow, XCBFrame *destFrame)
@@ -53,9 +73,21 @@ void CsMapXCBWindoToXCBFrame(XCBWindow* sourceWindow, XCBFrame *destFrame)
     [destFrame setIsMapped:[sourceWindow isMapped]];
 }
 
-XCBWindow * FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent)
+void CsMapXCBWindowToXCBTitleBar(XCBWindow* sourceWindow, XCBTitleBar* titleBar)
 {
-    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window];
+    [titleBar setAboveWindow:[sourceWindow aboveWindow]];
+    [titleBar setWindow:[sourceWindow window]];
+    [titleBar setParentWindow:[sourceWindow parentWindow]];
+    [titleBar setAttributes:[sourceWindow attributes]];
+    [titleBar setWindowRect:[sourceWindow windowRect]];
+    [titleBar setWindowMask:[sourceWindow windowMask]];
+    [titleBar setIsMapped:[sourceWindow isMapped]];
+    [titleBar setTitlebarColor:[NSColor colorWithCalibratedRed:0.720 green:0.720 blue:0.720 alpha:1]];
+}
+
+XCBWindow * FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnection* connection)
+{
+    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:connection];
     
     XCBSize *size = [[XCBSize alloc] initWithWidht:anEvent->window andHeight:anEvent->height];
     XCBPoint *point = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];

@@ -50,6 +50,10 @@
 		FAD5B31423DE148A00F1CB38 /* XCBSelection.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD5B31223DE148A00F1CB38 /* XCBSelection.h */; };
 		FAD5B31523DE148A00F1CB38 /* XCBSelection.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD5B31323DE148A00F1CB38 /* XCBSelection.m */; };
 		FAE4BDFF2275BC99007D0A35 /* XCBWindowTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FAE4BDFE2275BC99007D0A35 /* XCBWindowTests.m */; };
+		FAF8685B23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = FAF8685923FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.h */; };
+		FAF8685C23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF8685A23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.m */; };
+		FAF8685F23FC450F008A2FA2 /* XCBWindowTypeResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = FAF8685D23FC450F008A2FA2 /* XCBWindowTypeResponse.h */; };
+		FAF8686023FC450F008A2FA2 /* XCBWindowTypeResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF8685E23FC450F008A2FA2 /* XCBWindowTypeResponse.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -112,6 +116,10 @@
 		FAD5B31323DE148A00F1CB38 /* XCBSelection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBSelection.m; sourceTree = "<group>"; };
 		FAE4BDFD2275BC99007D0A35 /* XCBWindowTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindowTests.h; sourceTree = "<group>"; };
 		FAE4BDFE2275BC99007D0A35 /* XCBWindowTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBWindowTests.m; sourceTree = "<group>"; };
+		FAF8685923FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBCreateWindowTypeRequest.h; sourceTree = "<group>"; };
+		FAF8685A23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBCreateWindowTypeRequest.m; sourceTree = "<group>"; };
+		FAF8685D23FC450F008A2FA2 /* XCBWindowTypeResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindowTypeResponse.h; sourceTree = "<group>"; };
+		FAF8685E23FC450F008A2FA2 /* XCBWindowTypeResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBWindowTypeResponse.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -258,6 +266,10 @@
 			children = (
 				FA5ADBE723C63D6B00C8B403 /* CairoDrawer.h */,
 				FA5ADBE823C63D6B00C8B403 /* CairoDrawer.m */,
+				FAF8685923FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.h */,
+				FAF8685A23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.m */,
+				FAF8685D23FC450F008A2FA2 /* XCBWindowTypeResponse.h */,
+				FAF8685E23FC450F008A2FA2 /* XCBWindowTypeResponse.m */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -281,7 +293,9 @@
 				FA5ADC0C23CA1ABE00C8B403 /* Transformers.h in Headers */,
 				FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */,
 				FA5ADBFB23C6444A00C8B403 /* EWMHService.h in Headers */,
+				FAF8685F23FC450F008A2FA2 /* XCBWindowTypeResponse.h in Headers */,
 				FA3186CC22F874A5001DE139 /* XCBFrame.h in Headers */,
+				FAF8685B23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.h in Headers */,
 				FA5ADBE423C63D5600C8B403 /* XCBAtomService.h in Headers */,
 				FA5ADBE923C63D6B00C8B403 /* CairoDrawer.h in Headers */,
 				FAB6022D22F9987E0037F492 /* XCBTitleBar.h in Headers */,
@@ -413,6 +427,8 @@
 				FACACAF62317C89800C826B3 /* XCBVisual.m in Sources */,
 				FA5ADBE523C63D5600C8B403 /* XCBAtomService.m in Sources */,
 				FABB114922756F0E007A0433 /* XCBWindow.m in Sources */,
+				FAF8686023FC450F008A2FA2 /* XCBWindowTypeResponse.m in Sources */,
+				FAF8685C23FC44FD008A2FA2 /* XCBCreateWindowTypeRequest.m in Sources */,
 				FAA0BCF0228702FC00303CFE /* XCBPoint.m in Sources */,
 				FAA0BCF42287069E00303CFE /* XCBRect.m in Sources */,
 				FA3186CD22F874A5001DE139 /* XCBFrame.m in Sources */,

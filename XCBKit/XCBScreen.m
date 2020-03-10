@@ -10,10 +10,12 @@
 
 @implementation XCBScreen
 
+@synthesize height;
+@synthesize width;
 
-+ (XCBScreen*) screenWithXCBScreen:(xcb_screen_t *)aScreen
++ (XCBScreen*) screenWithXCBScreen:(xcb_screen_t *)aScreen andRootWindow:(XCBWindow*)theRootWindow
 {
-	return [[self alloc] initWithXCBScreen:aScreen];
+	return [[self alloc] initWithXCBScreen:aScreen andRootWindow:theRootWindow];
 }
 
 
@@ -33,11 +35,13 @@
 	screen = aScreen;
 }
 
-- (id) initWithXCBScreen:(xcb_screen_t *) aScreen
+- (id) initWithXCBScreen:(xcb_screen_t *) aScreen andRootWindow:(XCBWindow *)theRootWindow
 {
 	self = [super init];
 	screen = aScreen;
-	rootWindow = [[XCBWindow alloc] initWithXCBWindow:aScreen->root];
+	rootWindow = theRootWindow;
+    width = aScreen->width_in_pixels;
+    height = aScreen->height_in_pixels;
 	
 	if (self == nil)
 	{

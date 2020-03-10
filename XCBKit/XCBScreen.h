@@ -16,10 +16,13 @@
 	XCBWindow *rootWindow;
 }
 
+@property (nonatomic) uint16_t height;
+@property (nonatomic) uint16_t width;
+
 - (xcb_screen_t *) screen;
 - (void) setScreen: (xcb_screen_t *) aScreen;
-- (id) initWithXCBScreen:(xcb_screen_t *) aScreen;
-+ (XCBScreen *) screenWithXCBScreen: (xcb_screen_t *) aScreen;
+- (id) initWithXCBScreen:(xcb_screen_t *) aScreen andRootWindow:(XCBWindow*) theRootWindow;
++ (XCBScreen *) screenWithXCBScreen: (xcb_screen_t *) aScreen andRootWindow:(XCBWindow*)theRootWindow;
 - (void) setRootWindow:(XCBWindow *) aRootWindow;
 - (XCBWindow *) rootWindow;
 

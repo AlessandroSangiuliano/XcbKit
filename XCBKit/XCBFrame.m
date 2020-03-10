@@ -11,6 +11,9 @@
 #import "Transformers.h"
 #import "XCBTitleBar.h"
 #import "EWMHService.h"
+#import "XCBCreateWindowTypeRequest.h"
+#import "XCBWindowTypeResponse.h"
+
 
 @implementation XCBFrame
 
@@ -28,45 +31,52 @@
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
 {
-    self = [super initWithXCBWindow: xcbWindow];
-    children = [[NSMutableDictionary alloc] init];
-    [children setObject:aClientWindow forKey: [NSNumber numberWithInteger:ClientWindow]];
-    connection = aConnection;
+    self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
     
     uint16_t width =  [[[aClientWindow windowRect] size] getWidth] + 1;
     uint16_t height =  [[[aClientWindow windowRect] size] getHeight] + 22;
     
+    connection = aConnection;
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     
     uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-        | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_BUTTON_MOTION};
+        | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY};
     
     
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
-    XCBWindow *frameWindow;
+    XCBWindowTypeResponse* response;
     
     if (xcbWindow == 0)
     {
-        frameWindow = [connection createWindowWithDepth:[screen screen]->root_depth
-                                                  withParentWindow:[screen rootWindow]
-                                                     withXPosition:[[[aClientWindow windowRect] position] getX]
-                                                     withYPosition:[[[aClientWindow windowRect] position] getY]
-                                                         withWidth:width
-                                                        withHeight:height
-                                                  withBorrderWidth:1
-                                                      withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                      withVisualId:visual
-                                                     withValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-                                                     withValueList:values];
+        XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
+        [request setDepth:[screen screen]->root_depth];
+        [request setParentWindow:[screen rootWindow]];
+        [request setXPosition:[[[aClientWindow windowRect] position] getX]];
+        [request setXPosition:[[[aClientWindow windowRect] position] getY]];
+        [request setWidth:width];
+        [request setHeight:height];
+        [request setBorderWidth:1];
+        [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+        [request setVisual:visual];
+        [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
+        [request setValueList:values];
         
-        CsMapXCBWindoToXCBFrame(frameWindow, self);
+        response = [connection createWindowForRequest:request registerWindow:NO];
+        
+        CsMapXCBWindoToXCBFrame([response frame], self);
+        
+        children = [[NSMutableDictionary alloc] init];
+        [children setObject:aClientWindow forKey: [NSNumber numberWithInteger:ClientWindow]];
+        [connection registerWindow:self];
+        
+        response = nil;
+        request = nil;
     }
     
     [connection mapWindow:self];
-    frameWindow = nil;
     return self;
 }
 
@@ -89,38 +99,6 @@
 {
     XCBWindow *clientWindow = [children objectForKey:[NSNumber numberWithInteger:ClientWindow]];
     
-    /*uint16_t width =  [[[clientWindow windowRect] size] getWidth] + 1;
-    uint16_t height =  [[[clientWindow windowRect] size] getHeight] + 22;
-    
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
-    
-    uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-        | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_BUTTON_MOTION};
-    
-    
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-    
-    
-    XCBWindow *frameWindow = [connection createWindowWithDepth:[screen screen]->root_depth
-                                              withParentWindow:[screen rootWindow]
-                                                 withXPosition:[[[clientWindow windowRect] position] getX]
-                                                 withYPosition:[[[clientWindow windowRect] position] getY]
-                                                     withWidth:width
-                                                    withHeight:height
-                                              withBorrderWidth:1
-                                                  withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                  withVisualId:visual
-                                                 withValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-                                                 withValueList:values];
-    
-    //Map the frameWindow to this frame.
-    
-    CsMapXCBWindoToXCBFrame(frameWindow, self);*/
-    //[connection mapWindow:self];
-    
-    //frameWindow = nil;
-    
     XCBTitleBar *titleBar = [[XCBTitleBar alloc] initWithFrame:self withConnection:connection];
     [self addChildWindow:titleBar withKey:TitleBar];
     
@@ -141,12 +119,6 @@
     [connection mapWindow:titleBar];
     [titleBar setIsMapped:YES];
     [clientWindow setDecorated:YES];
-    
-    /*uint16_t mask = XCB_CONFIG_WINDOW_BORDER_WIDTH;
-    uint32_t valueForBorder[1] = {0};
-    
-    xcb_configure_window([connection connection], [clientWindow window], mask, valueForBorder);*/
-    
     [clientWindow setWindowBorderWidth:0];
     
     XCBPoint *position = [[XCBPoint alloc] initWithX:0 andY:21];

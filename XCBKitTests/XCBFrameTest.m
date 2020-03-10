@@ -19,7 +19,7 @@
 - (void) testFrame
 {
     XCBConnection *connection = [XCBConnection sharedConnection];
-    XCBWindow *clientWindow = [[XCBWindow alloc] initWithXCBWindow:xcb_generate_id([connection connection])];
+    XCBWindow *clientWindow = [[XCBWindow alloc] initWithXCBWindow:xcb_generate_id([connection connection]) andConnection:connection];
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
     XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
     XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:sizes];
@@ -55,7 +55,7 @@
     /*XCBRect *frameRect = [[XCBRect alloc] initWithPosition:coordinates andSize: frameSize];
     [frame setWindowRect:frameRect];*/
     
-    XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow);
+    XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow, connection);
 
     //TODO: FUNZIONE CHE MAPPA UNA XCBWINDOW TO UN XCBFRAME
 

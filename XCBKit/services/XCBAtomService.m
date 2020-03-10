@@ -43,22 +43,25 @@
     return sharedInstance;
 }
 
-- (void) cacheAtom:(NSString*) atomName
+- (xcb_atom_t) cacheAtom:(NSString*) atomName
 {
-    if ([cachedAtoms objectForKey:atomName] != nil)
+    NSNumber *atomValue = [cachedAtoms objectForKey:atomName];
+    
+    if (atomValue != nil)
     {
         NSLog(@"Atom previously cached!");
-        return;
+        return [atomValue unsignedIntValue];
     }
     
     const char *str = [atomName UTF8String];
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom([connection connection], NO, strlen(str), str);
     xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply([connection connection], cookie, NULL);
     xcb_atom_t atom = reply->atom;
-    NSNumber *atomValue = [NSNumber numberWithUnsignedInt:atom];
+    atomValue = [NSNumber numberWithUnsignedInt:atom];
     [cachedAtoms setObject:atomValue forKey:atomName];
     
-    //free(reply)?
+    atomValue = nil;
+    return reply->atom;
 }
 
 - (void) cacheAtoms:(NSArray *)atoms

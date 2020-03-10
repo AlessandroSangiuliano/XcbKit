@@ -100,7 +100,7 @@
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     
-    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root];
+    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root andConnection:connection];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     
     XCBWindow *wmWindow = [connection createWindowWithDepth:XCB_COPY_FROM_PARENT

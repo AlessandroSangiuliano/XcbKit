@@ -10,6 +10,9 @@
 #import "XCBConnection.h"
 #import "EWMHService.h"
 #import "CairoDrawer.h"
+#import "XCBFrame.h"
+#import "XCBCreateWindowTypeRequest.h"
+#import "XCBTitleBar.h"
 
 @implementation XCBConnectionTests
 
@@ -112,12 +115,12 @@
     XCBConnection *connection = [XCBConnection sharedConnection];
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     [connection flush];
-    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root];
+    XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root andConnection:connection];
     
     xcb_get_window_attributes_reply_t* reply = [connection getAttributesForWindow:rootWindow];
-    NSLog(@"Cacca: %u", reply->all_event_masks);
-    NSLog(@"Pipì: %u", XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
-    NSLog(@"Pene: %u", XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
+    NSLog(@"All events: %u", reply->all_event_masks);
+    NSLog(@"Redirect: %u", XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
+    NSLog(@"Notify: %u", XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
     pause();
     
 }
@@ -332,16 +335,16 @@
     //[connection mapWindow:clientWindow];
     //[connection flush];
     
-    [self eventLoopwithConnection:connection andDrawer:drawer andClientWindow:clientWindow];
+    [self eventLoopWithConnection:connection andDrawer:drawer andClientWindow:clientWindow];
     
     //pause();
 
 
 }
 
-- (void) eventLoopwithConnection:(XCBConnection*)connection
-         andDrawer:(CairoDrawer*) drawer
-    andClientWindow:(XCBWindow*)clientWindow
+- (void) eventLoopWithConnection:(XCBConnection*)connection
+                       andDrawer:(CairoDrawer*) drawer
+                 andClientWindow:(XCBWindow*)clientWindow
 {
     xcb_generic_event_t *e;
     
@@ -370,6 +373,7 @@
                 xcb_button_press_event_t* pressEvent = (xcb_button_press_event_t*)e;
                 NSLog(@"Button Press Event for window %u: ", pressEvent->event);
                 [connection handleButtonPress:pressEvent];
+                [connection flush];
                 break;
                 
             case XCB_MAP_NOTIFY:
@@ -384,18 +388,147 @@
                 xcb_map_request_event_t* mapRequestEvent = (xcb_map_request_event_t*)e;
                 NSLog(@"Map Request for window %u", mapRequestEvent->window);
                 [connection handleMapRequest:mapRequestEvent];
+                [connection flush]; // serve?
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_DESTROY_NOTIFY:
                 NSLog(@"");
                 xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t*)e;
                 NSLog(@"Destroy Notify for window: %u", destroyNotify->window);
+                [connection handleDestroyNotify:destroyNotify];
+                [connection flush];
+                [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_CLIENT_MESSAGE:
+                NSLog(@"");
+                xcb_client_message_event_t *clientMessageEvent = (xcb_client_message_event_t *)e;
+                NSLog(@"Cient message event: %u", clientMessageEvent->window);
+                [connection handleClientMessage:clientMessageEvent];
+                [connection flush];
+                [connection setNeedFlush:NO];
                 break;
             default:
                 break;
         }
         free(e);
     }
+
+}
+
+- (void) testKindOfClass
+{
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:1000];
+    
+    XCBWindow* window = [[XCBWindow alloc] initWithXCBWindow:1 andConnection:nil];
+    XCBFrame* frame = [[XCBFrame alloc] initWithXCBWindow:2 andConnection:nil];
+    
+    [dictionary setObject:window forKey:[NSNumber numberWithInt:1]];
+    [dictionary setObject:frame forKey:[NSNumber numberWithInt:2]];
+    
+    XCBWindow *windowFromDict;
+    XCBFrame *frameFromDict;
+    
+    if ([[dictionary objectForKey:[NSNumber numberWithInt:2]] isKindOfClass:[XCBWindow class]])
+    {
+        windowFromDict = [dictionary objectForKey:[NSNumber numberWithInt:1]];
+        NSLog(@"The object is a XCBWindow: %u", [windowFromDict window]);
+    }
+    else
+        NSLog(@"The window is not a XCBWindow");
+    
+    if ([[dictionary objectForKey:[NSNumber numberWithInt:1]] isKindOfClass:[XCBFrame class]])
+    {
+        frameFromDict = [dictionary objectForKey:[NSNumber numberWithInt:2]];
+        NSLog(@"The object is a XCBWindow: %u", [frameFromDict window]);
+    }
+    else
+        NSLog(@"The window is not a XCBFrame");
+    
+    windowFromDict = [dictionary objectForKey:[NSNumber numberWithInt:2]];
+    
+    if ([windowFromDict respondsToSelector:@selector(childWindowForKey:)])
+    {
+        NSLog(@"funzica");
+    }
+    
+}
+
+- (void) testXCBCreateWindowRequest
+{
+    XCBConnection *connection = [XCBConnection sharedConnection];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+    
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    
+    uint32_t values[2];
+    values[0] = [screen screen]->white_pixel;
+    values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
+    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   |
+    XCB_EVENT_MASK_KEY_PRESS;
+
+
+    XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
+    
+    [request setDepth:[screen screen]->root_depth];
+    [request setParentWindow:[screen rootWindow]];
+    [request setBorderWidth:10];
+    [request setHeight:300];
+    [request setWidth:150];
+    [request setXPosition:0];
+    [request setYPosition:0];
+    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+    [request setValueList:values];
+    [request setValueMask:mask];
+    [request setVisual:visual];
+    
+    XCBWindowTypeResponse* response = [connection createWindowForRequest:request registerWindow:YES];
+    request = nil;
+    
+    STAssertTrue([[response window] isKindOfClass:[XCBWindow class]], @"Expected XCBWindow");
+    
+    request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
+    
+    [request setDepth:[screen screen]->root_depth];
+    [request setParentWindow:[screen rootWindow]];
+    [request setBorderWidth:10];
+    [request setHeight:300];
+    [request setWidth:150];
+    [request setXPosition:0];
+    [request setYPosition:0];
+    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+    [request setValueList:values];
+    [request setValueMask:mask];
+    [request setVisual:visual];
+    
+    response = [connection createWindowForRequest:request registerWindow:YES];
+    request = nil;
+    
+    STAssertTrue([[response frame] isKindOfClass:[XCBFrame class]], @"Expected XCBFrame");
+    
+    request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBTitleBarRequest];
+    
+    [request setDepth:[screen screen]->root_depth];
+    [request setParentWindow:[screen rootWindow]];
+    [request setBorderWidth:10];
+    [request setHeight:300];
+    [request setWidth:150];
+    [request setXPosition:0];
+    [request setYPosition:0];
+    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+    [request setValueList:values];
+    [request setValueMask:mask];
+    [request setVisual:visual];
+
+    response = [connection createWindowForRequest:request registerWindow:YES];
+    request = nil;
+
+    STAssertTrue([[response titleBar] isKindOfClass:[XCBTitleBar class]], @"Expected XCBTitleBar");
+    
+    response = nil;
 
 }
 

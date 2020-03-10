@@ -43,7 +43,7 @@
         return nil;
 	}
     
-    XCBWindow *owner = reply->owner != XCB_NONE ? [[XCBWindow alloc] initWithXCBWindow:reply->owner] : nil;
+    XCBWindow *owner = reply->owner != XCB_NONE ? [[XCBWindow alloc] initWithXCBWindow:reply->owner andConnection:connection] : nil;
     [connection registerWindow:owner];
     
     free(reply);
