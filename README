@@ -11,13 +11,33 @@ Actual status:
 
 - It can move a window on the screen.
 
+- It can maximize a window
+
+- It can iconify/minimize a window
+
+- It can restore maximized and iconified windows to the previous status
+
+- It creates a preview of the iconified window
+
+- It decorates a client window
+
+- It handles destroy notify
+
+- It started to handle some client message event (actually iconify)
+
+- It started to be ICCCM and EWMH compliant
+
+
+
 There are a lot of things to add, for example:
 
-- Handle a client window putting it in the Frame. This is easy to do the kit has a model to incorporate a client window in a decorated frame with a title bar.
+- Extended the ICCCM and EWHM support. 
 
-- Make it to start to accomplish the ICCWM and EWHM.
+- Improve image scaling for better performance and modern way to do it.
 
-These 2 points are the next step for the 0.0.3
+- Handle “WM_DELETE_WINDOW” client message to quit an App.
+
+These above points are the next step for the 0.0.4
 
 ----------------------------------------------------------------------------------
 
