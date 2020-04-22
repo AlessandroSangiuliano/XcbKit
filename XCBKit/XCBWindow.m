@@ -488,6 +488,12 @@ extern XCBConnection *XCBConn;
     [connection setNeedFlush:YES];
 }
 
+- (void) hide
+{
+    [connection unmapWindow:self];
+    [connection setNeedFlush:YES];
+}
+
 - (void) description
 {
     NSLog(@"Ciao belli");

@@ -396,7 +396,7 @@
                 NSLog(@"");
                 xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t*)e;
                 NSLog(@"Destroy Notify for window: %u", destroyNotify->window);
-                [connection handleDestroyNotify:destroyNotify];
+                //[connection handleDestroyNotify:destroyNotify];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;

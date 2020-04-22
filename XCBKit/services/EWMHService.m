@@ -525,7 +525,6 @@
                                                              &error);
     
     return xcb_get_property_value(reply);
-    
 }
 
 

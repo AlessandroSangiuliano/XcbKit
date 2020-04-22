@@ -10,6 +10,7 @@
 #import "XCBConnection.h"
 #import <xcb.h>
 
+@class XCBConnection;
 // Singleton
 
 @interface XCBAtomService : NSObject

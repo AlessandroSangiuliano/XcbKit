@@ -13,6 +13,7 @@
 #import "XCBTitleBar.h"
 #import "Transformers.h"
 #import "CairoDrawer.h"
+#import "ICCCMService.h"
 
 
 @implementation XCBConnection
@@ -21,6 +22,7 @@
 @synthesize ewmhService;
 
 XCBConnection *XCBConn;
+ICCCMService* icccmService;
 
 - (id) init
 {
@@ -94,6 +96,7 @@ XCBConnection *XCBConn;
     
     ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
+    icccmService = [ICCCMService sharedInstanceWithConnection:self];
 	
     XCBConn = self;
     [self flush];
@@ -412,6 +415,21 @@ XCBConnection *XCBConn;
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
+        
+        //FIXME: se massimizzo e poi riduco a icona, quando ripristino a finestra normale lo fa male.
+        
+        /*if (![[window parentWindow] isMapped]) // non so se è corretto.
+        {
+            NSLog(@"PENE VAGINA");
+            XCBFrame* frame = (XCBFrame*) [window parentWindow];
+            XCBTitleBar* titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+            [self mapWindow:frame];
+            [titleBar drawTitleBar];
+            [titleBar drawArcs];
+            [self mapWindow:titleBar];
+            [self mapWindow:window];
+        }*/
+        
         return;
     }
 
@@ -424,7 +442,18 @@ XCBConnection *XCBConn;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
+    
+    const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
+    [icccmService changePropertiesForWindow:frame
+                                   withMode:XCB_PROP_MODE_REPLACE
+                               withProperty:[icccmService WMProtocols]
+                                   withType:XCB_ATOM_ATOM
+                                 withFormat:32
+                             withDataLength:1
+                                   withData:atomProtocols];
     [frame decorateClientWindow];
+    
+    NSLog(@"Client window decorated with id %u", [window window]);
     
 	[self setNeedFlush:YES];
 }
@@ -527,8 +556,22 @@ XCBConnection *XCBConn;
     
     if ([window isCloseButton])
     {
-        XCBWindow* frameWindow = [[window parentWindow] parentWindow];
-        [self unmapWindow:frameWindow];
+        XCBFrame* frameWindow = (XCBFrame*) [[window parentWindow] parentWindow];
+        NSLog(@"Operations for frame window %u", [frameWindow window]);
+        
+        BOOL check = [frameWindow window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
+        
+        [self sendClientMessageTo:[frameWindow childWindowForKey:ClientWindow] message:WM_DELETE_WINDOW];
+        
+        if (frameWindow != nil && check)
+        {
+            [[frameWindow childWindowForKey:ClientWindow] destroy];
+            [frameWindow destroy];
+            //[window destroy];
+            frameWindow = nil;
+            //window = nil;
+        }
+        
         return;
     }
     
@@ -648,6 +691,16 @@ XCBConnection *XCBConn;
         
     }
     
+    /*changeStateAtom = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+    
+    if (changeStateAtom == anEvent->type &&
+        anEvent->data.data32[0] == [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]])
+    {
+        NSLog(@"TRASA");
+        [[frame childWindowForKey:ClientWindow] destroy];
+        [frame destroy];
+    }*/
+    
     window = nil;
     titleBar = nil;
     frame = nil;
@@ -705,19 +758,19 @@ XCBConnection *XCBConn;
     
     if (frame)
     {
-        NSLog(@"Destroying frame");
+        NSLog(@"Destroying frame %u", [frame window]);
         [frame destroy];
     }
     
     if (titleBar)
     {
-        NSLog(@"Destroying title bar");
+        NSLog(@"Destroying title bar %u", [titleBar window]);
         [self unregisterWindow:titleBar];
     }
     
     if (clientWindow)
     {
-        NSLog(@"Destroying client window");
+        NSLog(@"Destroying client window %u", [clientWindow window]);
         [self unregisterWindow:clientWindow];
         //[clientWindow destroy];
     }
@@ -732,6 +785,53 @@ XCBConnection *XCBConn;
     titleBar = nil;
     clientWindow = nil;
     rootWindow = nil;
+}
+
+- (void) sendClientMessageTo:(XCBWindow *)destination message:(Message)message
+{
+    xcb_client_message_event_t event;
+    XCBAtomService* atomService = [XCBAtomService sharedInstanceWithConnection:self];
+    
+    switch (message)
+    {
+        case WM_DELETE_WINDOW:
+            
+            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
+            {
+                NSLog(@"Delete for window %u", [destination window]);
+                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+                event.format = 32;
+                event.response_type = XCB_CLIENT_MESSAGE;
+                event.window = [destination window];
+                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+                event.data.data32[1] = currentTime;
+                event.data.data32[2] = 0;
+                event.data.data32[3] = 0;
+            
+                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char*)&event);
+            }
+            /*else
+                xcb_kill_client(connection, [destination window]);*/
+            
+            /*event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+            event.format = 32;
+            event.response_type = XCB_CLIENT_MESSAGE;
+            event.window = [destination window];
+            event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+            event.data.data32[1] = currentTime;
+            
+            xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char*)&event);*/
+            
+            /*if (destination != Nil)
+            {
+                [[destination parentWindow] destroy];
+            }*/
+            
+            break;
+            
+        default:
+            break;
+    }
 }
 
 //TODO: tenere traccia del tempo per ogni evento.

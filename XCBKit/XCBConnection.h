@@ -11,10 +11,12 @@
 #import "XCBVisual.h"
 #import "XCBCreateWindowTypeRequest.h"
 #import "XCBWindowTypeResponse.h"
+#import "EMessage.h"
 #include <xcb/xcb.h>
 
 @class XCBWindow;
 @class EWMHService;
+@class XCBAtomService;
 
 @interface XCBConnection : NSObject
 {
@@ -80,6 +82,10 @@
 - (void) handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
 - (void) handleClientMessage: (xcb_client_message_event_t*)anEvent;
 - (void) handleDestroyNotify: (xcb_destroy_notify_event_t*)anEvent;
+
+/*** SENDS EVENTS ***/
+
+- (void) sendClientMessageTo:(XCBWindow*) destination message:(Message) message;
 
 /*** DEAL WITH WINDOW STUFFS ***/
 
