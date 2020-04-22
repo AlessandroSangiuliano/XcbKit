@@ -420,7 +420,7 @@ ICCCMService* icccmService;
         
         /*if (![[window parentWindow] isMapped]) // non so se è corretto.
         {
-            NSLog(@"PENE VAGINA");
+            NSLog(@"ENTER");
             XCBFrame* frame = (XCBFrame*) [window parentWindow];
             XCBTitleBar* titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
             [self mapWindow:frame];
@@ -690,16 +690,6 @@ ICCCMService* icccmService;
         }
         
     }
-    
-    /*changeStateAtom = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
-    
-    if (changeStateAtom == anEvent->type &&
-        anEvent->data.data32[0] == [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]])
-    {
-        NSLog(@"TRASA");
-        [[frame childWindowForKey:ClientWindow] destroy];
-        [frame destroy];
-    }*/
     
     window = nil;
     titleBar = nil;

@@ -75,7 +75,7 @@
     
     xcb_atom_t* expected = (xcb_atom_t*)[icccmService getProperty:[icccmService WMProtocols] forWindow:window delete:NO];
     
-    NSLog(@"pene %u", expected[0]);
+    NSLog(@"Atom id %u", expected[0]);
     
     STAssertEquals(atom[0], expected[0], @"Must be equal");
     
