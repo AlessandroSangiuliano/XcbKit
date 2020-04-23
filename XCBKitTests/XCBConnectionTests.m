@@ -125,6 +125,47 @@
     
 }
 
+- (void) testChangeAttributes
+{
+    XCBConnection *connection = [[XCBConnection alloc] init];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    
+    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
+    XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
+    
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    
+    uint32_t values[2];
+    values[0] = [screen screen]->white_pixel;
+    values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
+    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   |
+    XCB_EVENT_MASK_KEY_PRESS;
+    
+    
+    XCBWindow *window = [connection createWindowWithDepth:[screen screen]->root_depth
+                                         withParentWindow:[screen rootWindow]
+                                            withXPosition:[coordinates getX]
+                                            withYPosition:[coordinates getY]
+                                                withWidth:[sizes getWidth]
+                                               withHeight:[sizes getHeight]
+                                         withBorrderWidth:1
+                                             withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                             withVisualId:visual
+                                            withValueMask:mask
+                                            withValueList:values];
+    
+    mask = XCB_CW_OVERRIDE_REDIRECT;
+    uint32_t overraideValue[1] = {YES};
+    
+    [connection changeAttributes:overraideValue forWindow:window withMask:mask checked:NO];
+    
+    xcb_get_window_attributes_reply_t *reply = [connection getAttributesForWindow:window];
+    
+    STAssertTrue(reply->override_redirect == YES, @"");
+    
+}
+
 - (void) testCreateWindow
 {
 	XCBConnection *connection = [[XCBConnection alloc] init];

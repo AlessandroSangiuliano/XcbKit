@@ -338,9 +338,8 @@ ICCCMService* icccmService;
     return rect;
 }
 
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow checked:(BOOL)check
+- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow withMask:(uint32_t)aMask checked:(BOOL)check
 {
-    uint32_t mask = XCB_CW_EVENT_MASK;
     xcb_void_cookie_t cookie;
     
     BOOL attributesChanged = NO;
@@ -349,11 +348,11 @@ ICCCMService* icccmService;
     
     if (check)
     {
-        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], mask, values);
+        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], aMask, values);
     }
     else
     {
-        cookie = xcb_change_window_attributes(connection, [aWindow window], mask, values);
+        cookie = xcb_change_window_attributes(connection, [aWindow window], aMask, values);
     }
         
     xcb_generic_error_t *error = xcb_request_check(connection, cookie);
@@ -399,11 +398,12 @@ ICCCMService* icccmService;
 
 - (void)handleMapRequest: (xcb_map_request_event_t*)anEvent
 {
+    
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
-	NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
-	/*xcb_map_window(connection, [window window]);
-	[window setIsMapped:YES];*/
+	
+    NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
+
     
     if (window != nil)
     {
@@ -436,6 +436,17 @@ ICCCMService* icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+        
+        /* check the ovveride redirect flag, if yes the WM must not handle the window */
+        
+        xcb_get_window_attributes_reply_t* reply = [self getAttributesForWindow:window];
+        
+        if (reply->override_redirect == YES)
+        {
+            NSLog(@"Override redirect detected"); //da eliminare
+            return;
+        }
+        
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
         [self registerWindow:window];
@@ -560,6 +571,7 @@ ICCCMService* icccmService;
         NSLog(@"Operations for frame window %u", [frameWindow window]);
         
         BOOL check = [frameWindow window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
+        currentTime = anEvent->time;
         
         [self sendClientMessageTo:[frameWindow childWindowForKey:ClientWindow] message:WM_DELETE_WINDOW];
         
@@ -788,7 +800,6 @@ ICCCMService* icccmService;
             
             if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
             {
-                NSLog(@"Delete for window %u", [destination window]);
                 event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
                 event.format = 32;
                 event.response_type = XCB_CLIENT_MESSAGE;
@@ -846,7 +857,7 @@ ICCCMService* icccmService;
     
     if (replace) //gli attributi vanno cambiati sempre poi chekko se il replace è attivo e getto la selection.
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow checked:YES];
+        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
     
         if (!attributesChanged)
         {
@@ -881,7 +892,7 @@ ICCCMService* icccmService;
     
     if (aquired)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow checked:YES];
+        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
         
         if (!attributesChanged)
         {

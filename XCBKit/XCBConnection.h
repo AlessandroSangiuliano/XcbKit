@@ -94,7 +94,7 @@
 - (void) unmapWindow:(XCBWindow*)aWindow;
 - (XCBWindow*) parentWindowForWindow:(XCBWindow*)aWindow;
 - (XCBRect*) geometryForWindow:(XCBWindow*)aWindow;
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow checked:(BOOL)check;
+- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (xcb_get_window_attributes_reply_t*) getAttributesForWindow:(XCBWindow*)aWindow;
 
 
