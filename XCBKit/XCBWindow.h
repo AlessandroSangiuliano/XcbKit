@@ -22,6 +22,7 @@
     uint32_t windowMask;
 }
 
+
 typedef NS_ENUM(NSInteger, WindowState)
 {
     ICCCM_WM_STATE_WITHDRAWN = 0,
@@ -40,6 +41,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL isMaximized;
 @property (nonatomic) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
+@property (nonatomic) BOOL needDestroy;
+
 
 
 - (xcb_window_t) window;

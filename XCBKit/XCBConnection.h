@@ -101,6 +101,7 @@
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
 - (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
+- (XCBWindow*) rootWindowForScreenNumber:(int)number;
 
 @end
 
