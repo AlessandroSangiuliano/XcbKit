@@ -433,6 +433,13 @@
                 [connection setNeedFlush:NO];
                 break;
                 
+            case XCB_UNMAP_NOTIFY:
+                NSLog(@"");
+                xcb_unmap_notify_event_t* unmapNotifyEvent = (xcb_unmap_notify_event_t*)e;
+                NSLog(@"Unmap Notify for window %u", unmapNotifyEvent->window);
+                [connection handleUnMapNotify:unmapNotifyEvent];
+                break;
+                
             case XCB_DESTROY_NOTIFY:
                 NSLog(@"");
                 xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t*)e;

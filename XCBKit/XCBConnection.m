@@ -387,13 +387,24 @@ ICCCMService* icccmService;
 	[window setIsMapped:YES];
 }
 
-- (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent
+- (void) handleUnMapNotify:(xcb_unmap_notify_event_t *) anEvent
 {
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
 	xcb_get_window_attributes_reply_t attributes;
 	attributes.map_state = XCB_MAP_STATE_UNMAPPED;
 	[window setIsMapped:NO];
 	NSLog(@"[%@] The window %u is unmapped!", NSStringFromClass([self class]), [window window]);
+    
+    XCBFrame* frameWindow = (XCBFrame*) [window parentWindow];
+    
+    if ([frameWindow needDestroy])
+    {
+        NSLog(@"Destroying window %u", [frameWindow window]);
+        XCBRect* rect = [window windowRect];
+        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:[rect position]];
+        [window setDecorated:NO];
+        [frameWindow destroy];
+    }
 }
 
 - (void)handleMapRequest: (xcb_map_request_event_t*)anEvent
@@ -588,7 +599,7 @@ ICCCMService* icccmService;
              an expose event is generated for the frame and close button, so i was calling [frame destroy]
              in handleExpose method (XCBConnection). I think that is toally wrong and bad */
             
-            [frameWindow setNeedDestroy:NO];
+            [frameWindow setNeedDestroy:YES];
             //[frameWindow destroy];
             //[window destroy];
         }
@@ -682,7 +693,7 @@ ICCCMService* icccmService;
         if ([window decorated])
         {
             frame = (XCBFrame*) [window parentWindow];
-            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar]; //FIXME: quando chiudo l'about window e la riapro il parent window è la root window e non il frame che deve essere ancora creato e riparentare la lient window, quindi esplode. in teoria non è più decorata, ma qui entra lo stesso come se lo fosse.
             clientWindow = [frame childWindowForKey:ClientWindow];
         }
     }

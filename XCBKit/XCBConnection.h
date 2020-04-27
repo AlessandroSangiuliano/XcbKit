@@ -64,7 +64,7 @@
 /*** HANDLE EVENTS ***/
 
 - (void) handleMapNotify: (xcb_map_notify_event_t*)anEvent;
-- (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent;
+- (void) handleUnMapNotify:(xcb_unmap_notify_event_t *) anEvent;
 - (void) handleMapRequest: (xcb_map_request_event_t*)anEvent;
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t*)anEvent;
 - (void) handleCreateNotify: (xcb_create_notify_event_t*)anEvent;
