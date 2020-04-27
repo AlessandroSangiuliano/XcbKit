@@ -399,6 +399,7 @@
                 NSLog(@"Expose for window %u", exposeEvent->window);
                 //[connection handleExpose:exposeEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_MOTION_NOTIFY:
@@ -407,6 +408,7 @@
                 NSLog(@"Motion Notify for window %u: ", motionEvent->event);
                 [connection handleMotionNotify:motionEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_BUTTON_PRESS:
@@ -415,13 +417,14 @@
                 NSLog(@"Button Press Event for window %u: ", pressEvent->event);
                 [connection handleButtonPress:pressEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_MAP_NOTIFY:
                 NSLog(@"");
                 xcb_map_notify_event_t *notifyEvent = (xcb_map_notify_event_t*)e;
                 NSLog(@"MAP NOTIFY for window %u", notifyEvent->window);
-                //[connection handleMapRequest:notifyEvent];
+                //[connection handleMapNotify:notifyEvent];
                 break;
                 
             case XCB_MAP_REQUEST:
@@ -444,7 +447,7 @@
                 NSLog(@"");
                 xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t*)e;
                 NSLog(@"Destroy Notify for window: %u", destroyNotify->window);
-                //[connection handleDestroyNotify:destroyNotify];
+                [connection handleDestroyNotify:destroyNotify];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;

@@ -89,52 +89,6 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "XCBKit/XCBConnection.m"
-            timestampString = "609629650.6295969"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "756"
-            endingLineNumber = "756"
-            landmarkName = "-handleReparentNotify:"
-            landmarkType = "5">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "-[XCBConnection handleReparentNotify:]"
-                  moduleName = "XCBKitTests"
-                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.117532"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "757"
-                  endingLineNumber = "757"
-                  offsetFromSymbolStart = "16">
-               </Location>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "-[XCBConnection handleReparentNotify:]"
-                  moduleName = "XCBKit"
-                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.120823"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "757"
-                  endingLineNumber = "757"
-                  offsetFromSymbolStart = "16">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "XCBKitTests/XCBConnectionTests.m"
             timestampString = "603823085.641776"
             startingColumnNumber = "9223372036854775807"
@@ -168,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "XCBKit/XCBConnection.m"
-            timestampString = "609629650.6295969"
+            timestampString = "609702042.526884"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "893"
-            endingLineNumber = "893"
+            startingLineNumber = "882"
+            endingLineNumber = "882"
             landmarkName = "-registerAsWindowManager:screenId:selectionWindow:"
             landmarkType = "5">
             <Locations>
@@ -583,7 +537,7 @@
                   symbolName = "-[XCBWindow minimize]"
                   moduleName = "XCBKitTests"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBWindow.m"
-                  timestampString = "609629225.118533"
+                  timestampString = "609701690.680181"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "357"
@@ -597,7 +551,7 @@
                   symbolName = "-[XCBWindow minimize]"
                   moduleName = "XCBKit"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBWindow.m"
-                  timestampString = "609629225.1215481"
+                  timestampString = "609701690.695177"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "357"
@@ -661,11 +615,11 @@
                   symbolName = "-[XCBConnection handleButtonPress:]"
                   moduleName = "XCBKitTests"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.119485"
+                  timestampString = "609701690.681214"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "576"
-                  endingLineNumber = "576"
+                  startingLineNumber = "577"
+                  endingLineNumber = "577"
                   offsetFromSymbolStart = "23">
                </Location>
                <Location
@@ -675,57 +629,11 @@
                   symbolName = "-[XCBConnection handleButtonPress:]"
                   moduleName = "XCBKit"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.121866"
+                  timestampString = "609701690.695504"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "576"
-                  endingLineNumber = "576"
-                  offsetFromSymbolStart = "23">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "XCBKit/XCBConnection.m"
-            timestampString = "609629650.6295969"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "762"
-            endingLineNumber = "762"
-            landmarkName = "-handleDestroyNotify:"
-            landmarkType = "5">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "-[XCBConnection handleDestroyNotify:]"
-                  moduleName = "XCBKitTests"
-                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.1198"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "761"
-                  endingLineNumber = "761"
-                  offsetFromSymbolStart = "23">
-               </Location>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "-[XCBConnection handleDestroyNotify:]"
-                  moduleName = "XCBKit"
-                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.122178"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "761"
-                  endingLineNumber = "761"
+                  startingLineNumber = "577"
+                  endingLineNumber = "577"
                   offsetFromSymbolStart = "23">
                </Location>
             </Locations>
@@ -753,7 +661,7 @@
                   symbolName = "-[XCBConnection handleUnMapNotify:]"
                   moduleName = "XCBKitTests"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.120169"
+                  timestampString = "609701690.681572"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "396"
@@ -767,7 +675,7 @@
                   symbolName = "-[XCBConnection handleUnMapNotify:]"
                   moduleName = "XCBKit"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.12249"
+                  timestampString = "609701690.695814"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "396"
@@ -780,7 +688,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "XCBKit/XCBConnection.m"
@@ -793,32 +701,78 @@
             landmarkType = "5">
             <Locations>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "-[XCBConnection handleClientMessage:]"
                   moduleName = "XCBKitTests"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.120488"
+                  timestampString = "609701553.799611"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "676"
-                  endingLineNumber = "676"
+                  startingLineNumber = "677"
+                  endingLineNumber = "677"
                   offsetFromSymbolStart = "450">
                </Location>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "-[XCBConnection handleClientMessage:]"
                   moduleName = "XCBKit"
                   urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
-                  timestampString = "609629225.122807"
+                  timestampString = "609701553.802194"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "676"
-                  endingLineNumber = "676"
+                  startingLineNumber = "677"
+                  endingLineNumber = "677"
                   offsetFromSymbolStart = "450">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "XCBKit/XCBConnection.m"
+            timestampString = "609701564.333961"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "769"
+            endingLineNumber = "769"
+            landmarkName = "-handleDestroyNotify:"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[XCBConnection handleDestroyNotify:]"
+                  moduleName = "XCBKitTests"
+                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
+                  timestampString = "609701690.681905"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "769"
+                  endingLineNumber = "769"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[XCBConnection handleDestroyNotify:]"
+                  moduleName = "XCBKit"
+                  urlString = "file:///Users/alex/Documents/XCBKit/XCBKit/XCBConnection.m"
+                  timestampString = "609701690.696123"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "769"
+                  endingLineNumber = "769"
+                  offsetFromSymbolStart = "23">
                </Location>
             </Locations>
          </BreakpointContent>

@@ -391,7 +391,7 @@ ICCCMService* icccmService;
 {
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
 	xcb_get_window_attributes_reply_t attributes;
-	attributes.map_state = XCB_MAP_STATE_UNMAPPED;
+	attributes.map_state = XCB_MAP_STATE_UNMAPPED; // check and eventually fix this.
 	[window setIsMapped:NO];
 	NSLog(@"[%@] The window %u is unmapped!", NSStringFromClass([self class]), [window window]);
     
@@ -404,7 +404,11 @@ ICCCMService* icccmService;
         [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:[rect position]];
         [window setDecorated:NO];
         [frameWindow destroy];
+        rect = nil;
     }
+    
+    window = nil;
+    frameWindow = nil;
 }
 
 - (void)handleMapRequest: (xcb_map_request_event_t*)anEvent
@@ -427,7 +431,7 @@ ICCCMService* icccmService;
     {
         NSLog(@"Window with id %u already decorated", [window window]);
         
-        //FIXME: se massimizzo e poi riduco a icona, quando ripristino a finestra normale lo fa male.
+        //FIXME: If I maximize then i iconify, the restore to normal window is working bad
         
         /*if (![[window parentWindow] isMapped]) // non so se è corretto.
         {
@@ -461,6 +465,7 @@ ICCCMService* icccmService;
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
         [self registerWindow:window];
+        rect = nil;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
@@ -478,6 +483,9 @@ ICCCMService* icccmService;
     NSLog(@"Client window decorated with id %u", [window window]);
     
 	[self setNeedFlush:YES];
+    
+    window = nil;
+    frame = nil;
 }
 
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -759,66 +767,55 @@ ICCCMService* icccmService;
 
 - (void) handleDestroyNotify:(xcb_destroy_notify_event_t *) anEvent
 {
-    XCBWindow* window = [self windowForXCBId:anEvent->window];
-    XCBWindow* clientWindow;
-    XCBFrame* frame;
-    XCBTitleBar* titleBar;
-    XCBWindow* rootWindow = [self rootWindowForScreenNumber:0];
+    /* case to handle:
+     * the window is a client window: get the frame
+     * the window is a title bar child button window: get the frame from the title bar
+     * after getting the frame:
+     * unregister title bar, title bar children and client window.
+     */
     
-    if ([window window] == [rootWindow window] || window == nil)
-    {
-        return;
-    }
+    XCBWindow* window = [self windowForXCBId:anEvent->window];
+    XCBFrame* frameWindow = nil;
+    XCBTitleBar* titleBarWindow = nil;
     
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        frame = (XCBFrame*)window;
-        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-        clientWindow = [frame childWindowForKey:ClientWindow];
-        //[self unmapWindow:frame];
-    }
-    
-    if ([window isKindOfClass:[XCBTitleBar class]])
-    {
-        frame = (XCBFrame*)[titleBar parentWindow];
-        clientWindow = [frame childWindowForKey:ClientWindow];
+        frameWindow = (XCBFrame*)window;
     }
     
     if ([window isKindOfClass:[XCBWindow class]])
     {
-        frame = (XCBFrame*)[window parentWindow];
-        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        if ([[window parentWindow] isKindOfClass:[XCBFrame class]]) /* then is the client window */
+        {
+            frameWindow = (XCBFrame*) [window parentWindow];
+            [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
+        }
+        
+        if ([[window parentWindow] isKindOfClass:[XCBTitleBar class]]) /* then is the client window */
+        {
+            frameWindow = (XCBFrame*) [[window parentWindow] parentWindow];
+            [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
+        }
+        
     }
     
-    if (frame)
+    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluet if the check on destroy window is necessary or not */
     {
-        NSLog(@"Destroying frame %u", [frame window]);
-        [frame destroy];
+        titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
+        [self unregisterWindow:[titleBarWindow hideWindowButton]];
+        [self unregisterWindow:[titleBarWindow minimizeWindowButton]];
+        [self unregisterWindow:[titleBarWindow maximizeWindowButton]];
+        [self unregisterWindow:titleBarWindow];
+        [frameWindow destroy];
     }
     
-    if (titleBar)
-    {
-        NSLog(@"Destroying title bar %u", [titleBar window]);
-        [self unregisterWindow:titleBar];
-    }
+    [self unregisterWindow:window];
     
-    if (clientWindow)
-    {
-        NSLog(@"Destroying client window %u", [clientWindow window]);
-        [self unregisterWindow:clientWindow];
-        //[clientWindow destroy];
-    }
-    
-    if (window)
-    {
-        [self unregisterWindow:window];
-    }
-    
+    frameWindow = nil;
+    titleBarWindow = nil;
     window = nil;
-    frame = nil;
-    titleBar = nil;
-    clientWindow = nil;
-    rootWindow = nil;
+    
+    return;
 }
 
 - (void) sendClientMessageTo:(XCBWindow *)destination message:(Message)message

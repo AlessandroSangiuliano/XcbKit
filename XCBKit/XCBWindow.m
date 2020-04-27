@@ -485,7 +485,6 @@ extern XCBConnection *XCBConn;
 
 - (void) destroy
 {
-    [connection unregisterWindow:self];
     xcb_destroy_window([connection connection], window);
     [connection setNeedFlush:YES];
 }
