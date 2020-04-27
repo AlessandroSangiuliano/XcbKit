@@ -27,6 +27,7 @@
 @synthesize isMaximized;
 @synthesize isMinimized;
 @synthesize connection;
+@synthesize needDestroy;
 
 extern XCBConnection *XCBConn;
 
@@ -65,6 +66,7 @@ extern XCBConnection *XCBConn;
     isMinimizeButton = NO;
     isMaximizeButton = NO;
     connection = aConnection;
+    needDestroy = NO;
 	
 	return self;
 }
@@ -483,8 +485,13 @@ extern XCBConnection *XCBConn;
 
 - (void) destroy
 {
-    [connection unregisterWindow:self];
     xcb_destroy_window([connection connection], window);
+    [connection setNeedFlush:YES];
+}
+
+- (void) hide
+{
+    [connection unmapWindow:self];
     [connection setNeedFlush:YES];
 }
 

@@ -13,6 +13,7 @@
 #import "XCBTitleBar.h"
 #import "Transformers.h"
 #import "CairoDrawer.h"
+#import "ICCCMService.h"
 
 
 @implementation XCBConnection
@@ -21,6 +22,7 @@
 @synthesize ewmhService;
 
 XCBConnection *XCBConn;
+ICCCMService* icccmService;
 
 - (id) init
 {
@@ -94,6 +96,7 @@ XCBConnection *XCBConn;
     
     ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
+    icccmService = [ICCCMService sharedInstanceWithConnection:self];
 	
     XCBConn = self;
     [self flush];
@@ -335,9 +338,8 @@ XCBConnection *XCBConn;
     return rect;
 }
 
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow checked:(BOOL)check
+- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow withMask:(uint32_t)aMask checked:(BOOL)check
 {
-    uint32_t mask = XCB_CW_EVENT_MASK;
     xcb_void_cookie_t cookie;
     
     BOOL attributesChanged = NO;
@@ -346,11 +348,11 @@ XCBConnection *XCBConn;
     
     if (check)
     {
-        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], mask, values);
+        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], aMask, values);
     }
     else
     {
-        cookie = xcb_change_window_attributes(connection, [aWindow window], mask, values);
+        cookie = xcb_change_window_attributes(connection, [aWindow window], aMask, values);
     }
         
     xcb_generic_error_t *error = xcb_request_check(connection, cookie);
@@ -385,22 +387,38 @@ XCBConnection *XCBConn;
 	[window setIsMapped:YES];
 }
 
-- (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent
+- (void) handleUnMapNotify:(xcb_unmap_notify_event_t *) anEvent
 {
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
 	xcb_get_window_attributes_reply_t attributes;
-	attributes.map_state = XCB_MAP_STATE_UNMAPPED;
+	attributes.map_state = XCB_MAP_STATE_UNMAPPED; // check and eventually fix this.
 	[window setIsMapped:NO];
 	NSLog(@"[%@] The window %u is unmapped!", NSStringFromClass([self class]), [window window]);
+    
+    XCBFrame* frameWindow = (XCBFrame*) [window parentWindow];
+    
+    if ([frameWindow needDestroy])
+    {
+        NSLog(@"Destroying window %u", [frameWindow window]);
+        XCBRect* rect = [window windowRect];
+        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:[rect position]];
+        [window setDecorated:NO];
+        [frameWindow destroy];
+        rect = nil;
+    }
+    
+    window = nil;
+    frameWindow = nil;
 }
 
 - (void)handleMapRequest: (xcb_map_request_event_t*)anEvent
 {
+    
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
-	NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
-	/*xcb_map_window(connection, [window window]);
-	[window setIsMapped:YES];*/
+	
+    NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
+
     
     if (window != nil)
     {
@@ -412,21 +430,62 @@ XCBConnection *XCBConn;
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
+        
+        //FIXME: If I maximize then i iconify, the restore to normal window is working bad
+        
+        /*if (![[window parentWindow] isMapped]) // non so se è corretto.
+        {
+            NSLog(@"ENTER");
+            XCBFrame* frame = (XCBFrame*) [window parentWindow];
+            XCBTitleBar* titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+            [self mapWindow:frame];
+            [titleBar drawTitleBar];
+            [titleBar drawArcs];
+            [self mapWindow:titleBar];
+            [self mapWindow:window];
+        }*/
+        
         return;
     }
 
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+        
+        /* check the ovveride redirect flag, if yes the WM must not handle the window */
+        
+        xcb_get_window_attributes_reply_t* reply = [self getAttributesForWindow:window];
+        
+        if (reply->override_redirect == YES)
+        {
+            NSLog(@"Override redirect detected"); //da eliminare
+            return;
+        }
+        
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
         [self registerWindow:window];
+        rect = nil;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
+    
+    const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
+    [icccmService changePropertiesForWindow:frame
+                                   withMode:XCB_PROP_MODE_REPLACE
+                               withProperty:[icccmService WMProtocols]
+                                   withType:XCB_ATOM_ATOM
+                                 withFormat:32
+                             withDataLength:1
+                                   withData:atomProtocols];
     [frame decorateClientWindow];
     
+    NSLog(@"Client window decorated with id %u", [window window]);
+    
 	[self setNeedFlush:YES];
+    
+    window = nil;
+    frame = nil;
 }
 
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -527,8 +586,36 @@ XCBConnection *XCBConn;
     
     if ([window isCloseButton])
     {
-        XCBWindow* frameWindow = [[window parentWindow] parentWindow];
-        [self unmapWindow:frameWindow];
+        XCBFrame* frameWindow = (XCBFrame*) [[window parentWindow] parentWindow];
+        NSLog(@"Operations for frame window %u", [frameWindow window]);
+        
+        BOOL check = [frameWindow window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
+        currentTime = anEvent->time;
+        
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
+        
+        //XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
+        
+        if (frameWindow != nil && check) //probably unnecessary check hwn fixed
+        {
+            /*[self unregisterWindow:clientWindow];
+            [self unregisterWindow:[frameWindow childWindowForKey:TitleBar]];*/
+            
+            /* i was using an artifact with [frameWindow setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
+             an expose event is generated for the frame and close button, so i was calling [frame destroy]
+             in handleExpose method (XCBConnection). I think that is toally wrong and bad */
+            
+            [frameWindow setNeedDestroy:YES];
+            //[frameWindow destroy];
+            //[window destroy];
+        }
+        
+        frameWindow = nil;
+        window = nil;
+        clientWindow = nil;
+        //point = nil;
         return;
     }
     
@@ -614,7 +701,7 @@ XCBConnection *XCBConn;
         if ([window decorated])
         {
             frame = (XCBFrame*) [window parentWindow];
-            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar]; //FIXME: quando chiudo l'about window e la riapro il parent window è la root window e non il frame che deve essere ancora creato e riparentare la lient window, quindi esplode. in teoria non è più decorata, ma qui entra lo stesso come se lo fosse.
             clientWindow = [frame childWindowForKey:ClientWindow];
         }
     }
@@ -662,7 +749,15 @@ XCBConnection *XCBConn;
 
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
-   //handle the expose event
+    XCBWindow* window = [self windowForXCBId:anEvent->window];
+    
+    if ([window needDestroy])
+    {
+        NSLog(@"Destroying window %u", [window window]);
+        XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
+        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:point];
+        [window destroy];
+    }
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
@@ -672,66 +767,102 @@ XCBConnection *XCBConn;
 
 - (void) handleDestroyNotify:(xcb_destroy_notify_event_t *) anEvent
 {
-    XCBWindow* window = [self windowForXCBId:anEvent->window];
-    XCBWindow* clientWindow;
-    XCBFrame* frame;
-    XCBTitleBar* titleBar;
-    XCBWindow* rootWindow = [[[self screens] objectAtIndex:0] rootWindow];
+    /* case to handle:
+     * the window is a client window: get the frame
+     * the window is a title bar child button window: get the frame from the title bar
+     * after getting the frame:
+     * unregister title bar, title bar children and client window.
+     */
     
-    if ([window window] == [rootWindow window] || window == nil)
-    {
-        return;
-    }
+    XCBWindow* window = [self windowForXCBId:anEvent->window];
+    XCBFrame* frameWindow = nil;
+    XCBTitleBar* titleBarWindow = nil;
     
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        frame = (XCBFrame*)window;
-        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-        clientWindow = [frame childWindowForKey:ClientWindow];
-        [self unmapWindow:frame];
-    }
-    
-    if ([window isKindOfClass:[XCBTitleBar class]])
-    {
-        frame = (XCBFrame*)[titleBar parentWindow];
-        clientWindow = [frame childWindowForKey:ClientWindow];
+        frameWindow = (XCBFrame*)window;
     }
     
     if ([window isKindOfClass:[XCBWindow class]])
     {
-        frame = (XCBFrame*)[window parentWindow];
-        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        if ([[window parentWindow] isKindOfClass:[XCBFrame class]]) /* then is the client window */
+        {
+            frameWindow = (XCBFrame*) [window parentWindow];
+            [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
+        }
+        
+        if ([[window parentWindow] isKindOfClass:[XCBTitleBar class]]) /* then is the client window */
+        {
+            frameWindow = (XCBFrame*) [[window parentWindow] parentWindow];
+            [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
+        }
+        
     }
     
-    if (frame)
+    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluet if the check on destroy window is necessary or not */
     {
-        NSLog(@"Destroying frame");
-        [frame destroy];
+        titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
+        [self unregisterWindow:[titleBarWindow hideWindowButton]];
+        [self unregisterWindow:[titleBarWindow minimizeWindowButton]];
+        [self unregisterWindow:[titleBarWindow maximizeWindowButton]];
+        [self unregisterWindow:titleBarWindow];
+        [frameWindow destroy];
     }
     
-    if (titleBar)
-    {
-        NSLog(@"Destroying title bar");
-        [self unregisterWindow:titleBar];
-    }
+    [self unregisterWindow:window];
     
-    if (clientWindow)
-    {
-        NSLog(@"Destroying client window");
-        [self unregisterWindow:clientWindow];
-        //[clientWindow destroy];
-    }
-    
-    if (window)
-    {
-        [self unregisterWindow:window];
-    }
-    
+    frameWindow = nil;
+    titleBarWindow = nil;
     window = nil;
-    frame = nil;
-    titleBar = nil;
-    clientWindow = nil;
-    rootWindow = nil;
+    
+    return;
+}
+
+- (void) sendClientMessageTo:(XCBWindow *)destination message:(Message)message
+{
+    xcb_client_message_event_t event;
+    XCBAtomService* atomService = [XCBAtomService sharedInstanceWithConnection:self];
+    
+    switch (message)
+    {
+        case WM_DELETE_WINDOW:
+            
+            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
+            {
+                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+                event.format = 32;
+                event.response_type = XCB_CLIENT_MESSAGE;
+                event.window = [destination window];
+                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+                event.data.data32[1] = currentTime;
+                event.data.data32[2] = 0;
+                event.data.data32[3] = 0;
+                event.sequence = 0;
+            
+                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char*)&event);
+            }
+            /*else
+                xcb_kill_client(connection, [destination window]);*/
+            
+            /*event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+            event.format = 32;
+            event.response_type = XCB_CLIENT_MESSAGE;
+            event.window = [destination window];
+            event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+            event.data.data32[1] = currentTime;
+            
+            xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char*)&event);*/
+            
+            /*if (destination != Nil)
+            {
+                [[destination parentWindow] destroy];
+            }*/
+            
+            break;
+            
+        default:
+            break;
+    }
 }
 
 //TODO: tenere traccia del tempo per ogni evento.
@@ -756,7 +887,7 @@ XCBConnection *XCBConn;
     
     if (replace) //gli attributi vanno cambiati sempre poi chekko se il replace è attivo e getto la selection.
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow checked:YES];
+        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
     
         if (!attributesChanged)
         {
@@ -791,7 +922,7 @@ XCBConnection *XCBConn;
     
     if (aquired)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow checked:YES];
+        BOOL attributesChanged = [self changeAttributes:values forWindow: rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
         
         if (!attributesChanged)
         {
@@ -806,6 +937,11 @@ XCBConnection *XCBConn;
     rootWindow = nil;
     selector = nil;
     atomName = nil;
+}
+
+- (XCBWindow*) rootWindowForScreenNumber:(int)number
+{
+    return [[screens objectAtIndex:number] rootWindow];
 }
 
 - (void) dealloc

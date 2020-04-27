@@ -11,10 +11,12 @@
 #import "XCBVisual.h"
 #import "XCBCreateWindowTypeRequest.h"
 #import "XCBWindowTypeResponse.h"
+#import "EMessage.h"
 #include <xcb/xcb.h>
 
 @class XCBWindow;
 @class EWMHService;
+@class XCBAtomService;
 
 @interface XCBConnection : NSObject
 {
@@ -62,7 +64,7 @@
 /*** HANDLE EVENTS ***/
 
 - (void) handleMapNotify: (xcb_map_notify_event_t*)anEvent;
-- (void) handleUnMapNotify:(xcb_map_notify_event_t *) anEvent;
+- (void) handleUnMapNotify:(xcb_unmap_notify_event_t *) anEvent;
 - (void) handleMapRequest: (xcb_map_request_event_t*)anEvent;
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t*)anEvent;
 - (void) handleCreateNotify: (xcb_create_notify_event_t*)anEvent;
@@ -81,6 +83,10 @@
 - (void) handleClientMessage: (xcb_client_message_event_t*)anEvent;
 - (void) handleDestroyNotify: (xcb_destroy_notify_event_t*)anEvent;
 
+/*** SENDS EVENTS ***/
+
+- (void) sendClientMessageTo:(XCBWindow*) destination message:(Message) message;
+
 /*** DEAL WITH WINDOW STUFFS ***/
 
 - (void) reparentWindow: (XCBWindow*) aWindow toWindow:(XCBWindow*)parentWindow position:(XCBPoint*)position;
@@ -88,13 +94,14 @@
 - (void) unmapWindow:(XCBWindow*)aWindow;
 - (XCBWindow*) parentWindowForWindow:(XCBWindow*)aWindow;
 - (XCBRect*) geometryForWindow:(XCBWindow*)aWindow;
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow checked:(BOOL)check;
+- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (xcb_get_window_attributes_reply_t*) getAttributesForWindow:(XCBWindow*)aWindow;
 
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
 - (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
+- (XCBWindow*) rootWindowForScreenNumber:(int)number;
 
 @end
 
