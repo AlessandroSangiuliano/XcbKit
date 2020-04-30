@@ -17,6 +17,7 @@
 @class XCBWindow;
 @class EWMHService;
 @class XCBAtomService;
+@class XCBRegion;
 
 @interface XCBConnection : NSObject
 {
@@ -30,6 +31,7 @@
 
 @property (nonatomic) BOOL dragState;
 @property (strong, nonatomic) EWMHService* ewmhService;
+@property (strong, nonatomic) XCBRegion* damagedRegions;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
@@ -96,6 +98,7 @@
 - (XCBRect*) geometryForWindow:(XCBWindow*)aWindow;
 - (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (xcb_get_window_attributes_reply_t*) getAttributesForWindow:(XCBWindow*)aWindow;
+- (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 
 
 - (xcb_timestamp_t) currentTime;

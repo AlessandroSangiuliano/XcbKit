@@ -67,6 +67,17 @@
 	return [[XCBRect alloc] initWithPosition:point andSize:size];
 }
 
+- (xcb_rectangle_t) xcbRectangle
+{
+    xcb_rectangle_t rect;
+    rect.height = [size getHeight];
+    rect.width = [size getWidth];
+    rect.x = [position getX];
+    rect.y= [position getY];
+    
+    return rect;
+}
+
 - (void) dealloc
 {
     position = nil;

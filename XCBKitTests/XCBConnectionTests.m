@@ -397,7 +397,7 @@
                 NSLog(@"");
                 xcb_expose_event_t * exposeEvent = (xcb_expose_event_t *)e;
                 NSLog(@"Expose for window %u", exposeEvent->window);
-                //[connection handleExpose:exposeEvent];
+                [connection handleExpose:exposeEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;

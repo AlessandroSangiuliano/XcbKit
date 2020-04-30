@@ -14,12 +14,14 @@
 #import "Transformers.h"
 #import "CairoDrawer.h"
 #import "ICCCMService.h"
+#import "XCBRegion.h"
 
 
 @implementation XCBConnection
 
 @synthesize dragState;
 @synthesize ewmhService;
+@synthesize damagedRegions;
 
 XCBConnection *XCBConn;
 ICCCMService* icccmService;
@@ -758,6 +760,14 @@ ICCCMService* icccmService;
         [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:point];
         [window destroy];
     }
+    XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
+    XCBSize* size = [[XCBSize alloc] initWithWidht:anEvent->width andHeight:anEvent->height];
+    XCBRect* exposeRectangle = [[XCBRect alloc] initWithPosition:position andSize:size];
+    xcb_rectangle_t rectangles = [exposeRectangle xcbRectangle];
+    XCBRegion* region = [[XCBRegion alloc] initWithConnection:self rectagles:&rectangles count:1];
+    
+    [self addDamagedRegion:region];
+    
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
@@ -942,6 +952,15 @@ ICCCMService* icccmService;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number
 {
     return [[screens objectAtIndex:number] rootWindow];
+}
+
+- (void) addDamagedRegion:(XCBRegion *)damagedRegion
+{
+    if (damagedRegions == nil)
+        damagedRegions = [[XCBRegion alloc] initWithConnection:self rectagles:NULL count:0];
+    
+    [damagedRegions unionWithRegion:damagedRegions destination:damagedRegions];
+    [self setNeedFlush:YES];
 }
 
 - (void) dealloc

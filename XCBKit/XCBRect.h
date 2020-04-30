@@ -27,4 +27,5 @@
 - (void) setPosition:(XCBPoint*) aPoint;
 - (XCBPoint*) position;
 - (NSString *) description;
+- (xcb_rectangle_t) xcbRectangle;
 @end
