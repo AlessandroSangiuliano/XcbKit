@@ -490,8 +490,6 @@ extern XCBConnection *XCBConn;
         frame = nil;
     }
     
-        
-    [connection mapWindow:self];
     isMinimized = NO;
     
     [ewmhService changePropertiesForWindow:frame
