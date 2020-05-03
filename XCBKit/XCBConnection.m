@@ -772,24 +772,21 @@ ICCCMService* icccmService;
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow* window = [self windowForXCBId:anEvent->window];
-    xcb_rectangle_t exposeRect;
-    exposeRect.x = anEvent->x;
-    exposeRect.y = anEvent->y;
-    exposeRect.height = anEvent->height;
-    exposeRect.width = anEvent->width;
-    
-    [window description];
-    NSLog(@"Event rectangle with cardinalities: %d %d %d %d", exposeRect.x, exposeRect.y, exposeRect.height, exposeRect.width);
-    
     XCBRect* exposeRectangle = [[XCBRect alloc] initWithExposeEvent:anEvent];
     xcb_rectangle_t expose_rectangle = [exposeRectangle xcbRectangle];
     
-    if ([window graphicContextId] != XCB_NONE)
-    {
-        NSLog(@"GC id: %u", [window graphicContextId]);
-    }
+    [window description];
+    NSLog(@"Event rectangle with cardinalities: %d %d %d %d",
+          expose_rectangle.x,
+          expose_rectangle.y,
+          expose_rectangle.height,
+          expose_rectangle.width);
     
-    //xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
+    NSLog(@"GC id: %u", [window graphicContextId]);
+    
+    /*** I get all the client window black here, and now maybe I know the reason. ***/
+    
+    xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
     
     /*XCBFrame* frame;
     
@@ -818,6 +815,9 @@ ICCCMService* icccmService;
     }
     
     [self addDamagedRegion:damagedRegion];*/
+    
+    
+    /*** this was another try ***/
     
     /*XCBScreen *screen = [[self screens] objectAtIndex:0];
     XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
