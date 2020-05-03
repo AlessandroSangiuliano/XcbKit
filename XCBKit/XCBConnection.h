@@ -32,6 +32,7 @@
 @property (nonatomic) BOOL dragState;
 @property (strong, nonatomic) EWMHService* ewmhService;
 @property (strong, nonatomic) XCBRegion* damagedRegions;
+@property (nonatomic) BOOL xfixesInitialized;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;

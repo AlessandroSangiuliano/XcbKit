@@ -22,6 +22,7 @@
 @synthesize dragState;
 @synthesize ewmhService;
 @synthesize damagedRegions;
+@synthesize xfixesInitialized;
 
 XCBConnection *XCBConn;
 ICCCMService* icccmService;
@@ -374,6 +375,13 @@ ICCCMService* icccmService;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
     xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, NULL);
     
+    NSLog(@"MASK %u", reply->your_event_mask);
+    
+    if (XCB_EVENT_MASK_EXPOSURE == reply->your_event_mask)
+    {
+        NSLog(@"Il pene e la vagina %u", reply->all_event_masks);
+    }
+    
     return reply;
 }
 
@@ -399,7 +407,7 @@ ICCCMService* icccmService;
     
     XCBFrame* frameWindow = (XCBFrame*) [window parentWindow];
     
-    if ([frameWindow needDestroy])
+    if (frameWindow && ![frameWindow isMinimized])
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
         XCBRect* rect = [window windowRect];
@@ -418,6 +426,9 @@ ICCCMService* icccmService;
     
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
+    XCBScreen* screen = [screens objectAtIndex:0];
+    uint32_t gcValues[1] = {0};
+    uint32_t mask =  XCB_GC_GRAPHICS_EXPOSURES;
 	
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
@@ -453,6 +464,8 @@ ICCCMService* icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+        [window createGraphicContextWithMask:mask andValues:gcValues];
+        [window createPixmap];
         
         /* check the ovveride redirect flag, if yes the WM must not handle the window */
         
@@ -463,6 +476,8 @@ ICCCMService* icccmService;
             NSLog(@"Override redirect detected"); //da eliminare
             return;
         }
+        uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE};
+        [self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
         
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
@@ -471,6 +486,8 @@ ICCCMService* icccmService;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
+    //[frame createGraphicContextWithMask:mask andValues:gcValues];
+    //[frame createPixmap];
     
     const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
     [icccmService changePropertiesForWindow:frame
@@ -488,6 +505,7 @@ ICCCMService* icccmService;
     
     window = nil;
     frame = nil;
+    screen = nil;
 }
 
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -703,7 +721,7 @@ ICCCMService* icccmService;
         if ([window decorated])
         {
             frame = (XCBFrame*) [window parentWindow];
-            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar]; //FIXME: quando chiudo l'about window e la riapro il parent window è la root window e non il frame che deve essere ancora creato e riparentare la lient window, quindi esplode. in teoria non è più decorata, ma qui entra lo stesso come se lo fosse.
+            titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
             clientWindow = [frame childWindowForKey:ClientWindow];
         }
     }
@@ -725,11 +743,13 @@ ICCCMService* icccmService;
             [drawer makePreviewImage];
             XCBPoint* position = [[XCBPoint alloc] initWithX:100 andY:100];
             [frame createMiniWindowAtPosition:position];
+            [frame setIsMinimized:YES];
             position = nil;
         }
         
         if (clientWindow)
         {
+            [clientWindow setIsMinimized:YES];
             [self unmapWindow:clientWindow];
             [drawer setWindow:frame];
             [drawer setPreviewImage];
@@ -752,27 +772,77 @@ ICCCMService* icccmService;
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow* window = [self windowForXCBId:anEvent->window];
+    xcb_rectangle_t exposeRect;
+    exposeRect.x = anEvent->x;
+    exposeRect.y = anEvent->y;
+    exposeRect.height = anEvent->height;
+    exposeRect.width = anEvent->width;
     
-    if ([window needDestroy])
+    [window description];
+    NSLog(@"Event rectangle with cardinalities: %d %d %d %d", exposeRect.x, exposeRect.y, exposeRect.height, exposeRect.width);
+    
+    XCBRect* exposeRectangle = [[XCBRect alloc] initWithExposeEvent:anEvent];
+    xcb_rectangle_t expose_rectangle = [exposeRectangle xcbRectangle];
+    
+    if ([window graphicContextId] != XCB_NONE)
     {
-        NSLog(@"Destroying window %u", [window window]);
-        XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
-        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:point];
-        [window destroy];
+        NSLog(@"GC id: %u", [window graphicContextId]);
     }
-    XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
+    
+    //xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
+    
+    /*XCBFrame* frame;
+    
+    if ([window isKindOfClass:[XCBTitleBar class]] ||
+        [window isMinimizeButton] ||
+        [window isMaximizeButton] ||
+        [window isCloseButton])
+    {
+        return;
+    }
+    
+    if ([window isKindOfClass:[XCBFrame class]])
+        frame = (XCBFrame*) window;*/
+    
+        
+    
+    /*XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
     XCBSize* size = [[XCBSize alloc] initWithWidht:anEvent->width andHeight:anEvent->height];
     XCBRect* exposeRectangle = [[XCBRect alloc] initWithPosition:position andSize:size];
     xcb_rectangle_t rectangles = [exposeRectangle xcbRectangle];
-    XCBRegion* region = [[XCBRegion alloc] initWithConnection:self rectagles:&rectangles count:1];
+    XCBRegion* damagedRegion = [[XCBRegion alloc] initWithConnection:self rectagles:&rectangles count:1];
     
-    [self addDamagedRegion:region];
+    if (!xfixesInitialized)
+    {
+        xfixesInitialized = [damagedRegion initXFixesProtocol]; // che cosa brutta
+    }
     
+    [self addDamagedRegion:damagedRegion];*/
+    
+    /*XCBScreen *screen = [[self screens] objectAtIndex:0];
+    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+    
+    CairoDrawer* drawer = [[CairoDrawer alloc] initWithConnection:self window:window visual:visual];
+    [drawer drawContent];
+    xcb_copy_area(connection,
+                  [window pixmap],
+                  [window window],
+                  [window graphicContextId],
+                  anEvent->x,
+                  anEvent->y,
+                  anEvent->x,
+                  anEvent->y,
+                  anEvent->width,
+                  anEvent->height);
+    
+    screen = nil;
+    visual = nil;*/
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
 {
-    // devo gestire questa notifica altirenti come riparento?
+    NSLog(@"Yet Not Implemented");
 }
 
 - (void) handleDestroyNotify:(xcb_destroy_notify_event_t *) anEvent
@@ -957,9 +1027,9 @@ ICCCMService* icccmService;
 - (void) addDamagedRegion:(XCBRegion *)damagedRegion
 {
     if (damagedRegions == nil)
-        damagedRegions = [[XCBRegion alloc] initWithConnection:self rectagles:NULL count:0];
+        damagedRegions = [[XCBRegion alloc] initWithConnection:self rectagles:0 count:0];
     
-    [damagedRegions unionWithRegion:damagedRegions destination:damagedRegions];
+    [damagedRegions unionWithRegion:damagedRegion destination:damagedRegions];
     [self setNeedFlush:YES];
 }
 

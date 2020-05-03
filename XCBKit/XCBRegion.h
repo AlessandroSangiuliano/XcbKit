@@ -27,6 +27,7 @@
 - (id) initWithConnection:(XCBConnection *)aConnection regionId:(xcb_xfixes_region_t)aRegionId;
 - (id) initWithConnection:(XCBConnection *)aConnection rectagles:(xcb_rectangle_t*)rects count:(int) rectsNumber;
 - (void) unionWithRegion:(XCBRegion*)secondSource destination:(XCBRegion*)destination;
+- (BOOL) initXFixesProtocol;
 
 
 @end

@@ -177,6 +177,15 @@
 
 }
 
+- (void) drawContent
+{
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+    
+    cairo_surface_flush(cairoSurface);
+    cairo_destroy(cr);
+}
+
 - (void) drawText:(NSString *)aText withColor:(NSColor *)aColor
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
@@ -192,6 +201,8 @@
     
     CGFloat textPositionX = (CGFloat) [[[window windowRect] size] getWidth] / 2;
     CGFloat textPositionY = (CGFloat) [[[window windowRect] size] getHeight] / 2 + 2;
+    
+    //[aText sizeWithAttributes:<#(NSDictionary *)#>]; to get the size of the stirng for placing it in the middle of the title bar.
     
     cairo_move_to(cr, textPositionX, textPositionY);
     

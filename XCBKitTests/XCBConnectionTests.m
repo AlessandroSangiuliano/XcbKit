@@ -424,7 +424,7 @@
                 NSLog(@"");
                 xcb_map_notify_event_t *notifyEvent = (xcb_map_notify_event_t*)e;
                 NSLog(@"MAP NOTIFY for window %u", notifyEvent->window);
-                //[connection handleMapNotify:notifyEvent];
+                [connection handleMapNotify:notifyEvent];
                 break;
                 
             case XCB_MAP_REQUEST:

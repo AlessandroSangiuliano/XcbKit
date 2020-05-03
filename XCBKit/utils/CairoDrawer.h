@@ -12,6 +12,7 @@
 #import <XCBConnection.h>
 #import "XCBWindow.h"
 #import "XCBVisual.h"
+#import "XCBRect.h"
 
 @interface CairoDrawer : NSObject
 
@@ -34,5 +35,6 @@
 - (void) saveContext;
 - (void) restoreContext;
 - (void) setPreviewImage;
+- (void) drawContent;
 
 @end
