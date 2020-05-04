@@ -30,6 +30,23 @@
 	return self;
 }
 
+- (id) initWithExposeEvent:(xcb_expose_event_t *)anEvent
+{
+    self = [super init];
+    
+    if (self == nil)
+    {
+        NSLog(@"[%@] Error during initialization", NSStringFromClass([self class]));
+		return nil;
+    }
+    
+    position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
+    size = [[XCBSize alloc] initWithWidht:anEvent->width andHeight:anEvent->height];
+    offset = [[XCBPoint alloc] initWithX:0 andY:0];
+    
+    return self;
+}
+
 - (void) setPosition:(XCBPoint *)aPoint
 {
 	position = aPoint;

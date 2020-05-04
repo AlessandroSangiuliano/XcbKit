@@ -46,6 +46,11 @@
 	return width;
 }
 
+- (void) description
+{
+    NSLog(@"Width: %u; Height: %u", width, height);
+}
+
 - (void) dealloc
 {
     height = 0;

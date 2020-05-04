@@ -22,6 +22,7 @@
 + (XCBRect*) rectFromXcbRectangle:(xcb_rectangle_t) rect;
 
 - (id) initWithPosition:(XCBPoint *) aPoint andSize:(XCBSize*) aSize;
+- (id) initWithExposeEvent:(xcb_expose_event_t*)anEvent;
 - (void) setSize:(XCBSize*) aSize;
 - (XCBSize*) size;
 - (void) setPosition:(XCBPoint*) aPoint;

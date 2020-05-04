@@ -28,6 +28,7 @@
 @synthesize isMinimized;
 @synthesize connection;
 @synthesize needDestroy;
+@synthesize pixmap;
 
 extern XCBConnection *XCBConn;
 
@@ -67,20 +68,33 @@ extern XCBConnection *XCBConn;
     isMaximizeButton = NO;
     connection = aConnection;
     needDestroy = NO;
-	
+	   
 	return self;
 }
 
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t)aMask andValues:(uint32_t *)theValues
 {
-    graphicContextId = xcb_generate_id([XCBConn connection]);
-    xcb_void_cookie_t gcCookie = xcb_create_gc([XCBConn connection],
+    graphicContextId = xcb_generate_id([connection connection]);
+    xcb_void_cookie_t gcCookie = xcb_create_gc([connection connection],
                                                graphicContextId,
                                                window,
                                                aMask,
                                                theValues);
     return gcCookie;
     
+}
+
+- (void) createPixmap
+{
+    pixmap = xcb_generate_id([connection connection]);
+    XCBScreen* screen = [[connection screens] objectAtIndex:0];
+    xcb_create_pixmap([connection connection],
+                      [screen screen]->root_depth,
+                      pixmap,
+                      window,
+                      [[windowRect size] getWidth],
+                      [[windowRect size] getHeight]);
+    screen = nil;
 }
 
 - (xcb_window_t) window
@@ -435,6 +449,12 @@ extern XCBConnection *XCBConn;
     windowRect = oldRect;
     XCBFrame* frame;
     
+    EWMHService* ewmhService = [connection ewmhService];
+    XCBAtomService* atomService = [ewmhService atomService];
+    
+    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
+    [atomService cacheAtom:@"WM_STATE"];
+    
     XCBPoint* position = [windowRect position];
     XCBSize* size =  [windowRect size];
     
@@ -455,6 +475,15 @@ extern XCBConnection *XCBConn;
         [titleBar drawTitleBar];
         [titleBar drawArcs];
         [connection mapWindow:clientWindow];
+        [clientWindow setIsMinimized:NO];
+        
+        [ewmhService changePropertiesForWindow:clientWindow
+                                      withMode:XCB_PROP_MODE_REPLACE
+                                  withProperty:@"WM_STATE"
+                                      withType:XCB_ATOM_ATOM
+                                    withFormat:32
+                                withDataLength:1
+                                      withData:state];
         
         titleBar = nil;
         clientWindow = nil;
@@ -462,12 +491,6 @@ extern XCBConnection *XCBConn;
     }
     
     isMinimized = NO;
-    
-    EWMHService* ewmhService = [connection ewmhService];
-    XCBAtomService* atomService = [ewmhService atomService];
-    
-    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
-    [atomService cacheAtom:@"WM_STATE"];
     
     [ewmhService changePropertiesForWindow:frame
                                   withMode:XCB_PROP_MODE_REPLACE
@@ -497,7 +520,10 @@ extern XCBConnection *XCBConn;
 
 - (void) description
 {
-    NSLog(@"Ciao belli");
+    
+    NSLog(@" Window id: %u. Parent window id: %u.\nWindow Size and Position:", window, [parentWindow window]);
+    [[windowRect size] description];
+    [[windowRect position] description];
 }
 	 
 - (void) dealloc

@@ -19,5 +19,6 @@
 - (uint16_t) getWidth;
 - (void) setHeight:(uint16_t) aHeight;
 - (uint16_t) getHeight;
+- (void) description;
 
 @end

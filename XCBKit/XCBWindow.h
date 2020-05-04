@@ -42,6 +42,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic) BOOL needDestroy;
+@property (nonatomic) xcb_pixmap_t pixmap;
 
 
 
@@ -63,6 +64,7 @@ typedef NS_ENUM(NSInteger, WindowState)
           withConnection:(XCBConnection*) aConnection;
 
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t) aMask andValues:(uint32_t*) values;
+- (void) createPixmap;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;
