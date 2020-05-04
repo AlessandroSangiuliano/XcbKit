@@ -375,13 +375,6 @@ ICCCMService* icccmService;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
     xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, NULL);
     
-    NSLog(@"MASK %u", reply->your_event_mask);
-    
-    if (XCB_EVENT_MASK_EXPOSURE == reply->your_event_mask)
-    {
-        NSLog(@"Il pene e la vagina %u", reply->all_event_masks);
-    }
-    
     return reply;
 }
 
@@ -618,7 +611,7 @@ ICCCMService* icccmService;
         
         //XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
         
-        if (frameWindow != nil && check) //probably unnecessary check hwn fixed
+        if (frameWindow != nil && check) //probably unnecessary check when fixed
         {
             /*[self unregisterWindow:clientWindow];
             [self unregisterWindow:[frameWindow childWindowForKey:TitleBar]];*/
@@ -741,7 +734,7 @@ ICCCMService* icccmService;
         {
             drawer = [[CairoDrawer alloc] initWithConnection:self window:clientWindow visual:visual];
             [drawer makePreviewImage];
-            XCBPoint* position = [[XCBPoint alloc] initWithX:100 andY:100];
+            XCBPoint* position = [[XCBPoint alloc] initWithX:100 andY:100]; //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
             [frame setIsMinimized:YES];
             position = nil;
@@ -786,9 +779,9 @@ ICCCMService* icccmService;
     
     /*** I get all the client window black here, and now maybe I know the reason. ***/
     
-    xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
+    //xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
     
-    /*XCBFrame* frame;
+    XCBFrame* frame;
     
     if ([window isKindOfClass:[XCBTitleBar class]] ||
         [window isMinimizeButton] ||
@@ -799,8 +792,10 @@ ICCCMService* icccmService;
     }
     
     if ([window isKindOfClass:[XCBFrame class]])
-        frame = (XCBFrame*) window;*/
+        frame = (XCBFrame*) window;
     
+    
+    xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, &expose_rectangle);
         
     
     /*XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
