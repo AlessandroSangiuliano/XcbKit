@@ -421,7 +421,7 @@ ICCCMService* icccmService;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
     XCBScreen* screen = [screens objectAtIndex:0];
     uint32_t gcValues[1] = {0};
-    uint32_t mask =  XCB_GC_GRAPHICS_EXPOSURES;
+    uint32_t mask = XCB_GC_GRAPHICS_EXPOSURES;
 	
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 

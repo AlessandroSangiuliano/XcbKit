@@ -397,7 +397,7 @@
                 NSLog(@"");
                 xcb_expose_event_t * exposeEvent = (xcb_expose_event_t *)e;
                 NSLog(@"Expose for window %u", exposeEvent->window);
-                [connection handleExpose:exposeEvent];
+                //[connection handleExpose:exposeEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;
@@ -457,6 +457,15 @@
                 xcb_client_message_event_t *clientMessageEvent = (xcb_client_message_event_t *)e;
                 NSLog(@"Cient message event: %u", clientMessageEvent->window);
                 [connection handleClientMessage:clientMessageEvent];
+                [connection flush];
+                [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_CONFIGURE_REQUEST:
+                NSLog(@"");
+                xcb_configure_request_event_t* configRequest = (xcb_configure_request_event_t*)e;
+                NSLog(@"Configure request for window %u", configRequest->window);
+                [connection handleConfigureWindowRequest:configRequest];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;
