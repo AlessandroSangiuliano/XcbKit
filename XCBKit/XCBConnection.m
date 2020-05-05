@@ -258,7 +258,10 @@ ICCCMService* icccmService;
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
     XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
     XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
+    XCBRect* originalRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
+    
     [winToCreate setWindowRect:windowRect];
+    [winToCreate setOriginalRect:originalRect];
     
 	xcb_create_window(connection,
 					  depth,
@@ -474,6 +477,7 @@ ICCCMService* icccmService;
         
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
+        [window setOriginalRect:rect];
         [self registerWindow:window];
         rect = nil;
     }

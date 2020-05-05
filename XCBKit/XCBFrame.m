@@ -33,6 +33,7 @@
 {
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
+    [self setOriginalRect:[aClientWindow originalRect]];
     
     uint16_t width =  [[[aClientWindow windowRect] size] getWidth] + 1;
     uint16_t height =  [[[aClientWindow windowRect] size] getHeight] + 22;

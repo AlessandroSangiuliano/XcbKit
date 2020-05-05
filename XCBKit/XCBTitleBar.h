@@ -34,7 +34,7 @@ XCB_EVENT_MASK_KEY_PRESS
 @property (strong, nonatomic) XCBWindow *minimizeWindowButton;
 @property (strong, nonatomic) XCBWindow *maximizeWindowButton;
 @property (nonatomic) xcb_arc_t arc;
-@property (strong, nonatomic) XCBConnection *connection;
+@property (strong, nonatomic) XCBConnection *connection; //FIXME: is now in the super class; use that!
 @property (strong, nonatomic) NSColor *titlebarColor;
 @property (strong, nonatomic) EWMHService *ewmhService;
 

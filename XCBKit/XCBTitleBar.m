@@ -27,7 +27,6 @@
 @synthesize minimizeButtonColor;
 @synthesize maximizeButtonColor;
 @synthesize titlebarColor;
-@synthesize windowRect;
 @synthesize ewmhService;
 
 
@@ -201,6 +200,8 @@
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
     [drawer drawTitleBarWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     drawer = nil;
+    
+    /*** My GOD what a bad thing, just set the window OMG ***/
     
     drawer = [[CairoDrawer alloc] initWithConnection:connection window:hideWindowButton visual:visual];
     [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
