@@ -18,6 +18,7 @@
 
 @synthesize graphicContextId;
 @synthesize windowRect;
+@synthesize originalRect;
 @synthesize decorated;
 @synthesize draggable;
 @synthesize isCloseButton;
@@ -178,7 +179,7 @@ extern XCBConnection *XCBConn;
     
     if ([parentWindow isKindOfClass:[XCBTitleBar class]])
     {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
+        titleBar = (XCBTitleBar*) parentWindow;
     }
 
     
@@ -186,7 +187,8 @@ extern XCBConnection *XCBConn;
     
     /*** restore to the previous dimension and position of the frame ***/
     
-    [frame setWindowRect:[frame oldRect]];
+    [frame setWindowRect:[frame originalRect]];
+    [frame setOldRect:nil];
     
     uint32_t valueList[4] =
     {
@@ -200,7 +202,8 @@ extern XCBConnection *XCBConn;
     
     /*** restore the title bar pos and dim ***/
     
-    [titleBar setWindowRect:[titleBar oldRect]];
+    [titleBar setWindowRect:[titleBar originalRect]];
+    [titleBar setOldRect:nil];
     valueList[2] = [[[titleBar windowRect] size] getWidth];
     valueList[3] = [[[titleBar windowRect] size] getHeight];
     
@@ -213,7 +216,8 @@ extern XCBConnection *XCBConn;
     
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
-    [clientWindow setWindowRect:[clientWindow oldRect]];
+    [clientWindow setWindowRect:[clientWindow originalRect]];
+    [clientWindow setOldRect:nil];
     valueList[0] = [[[clientWindow windowRect] position] getX];
     valueList[1] = [[[clientWindow windowRect] position] getY];
     valueList[2] = [[[clientWindow windowRect] size] getWidth];
@@ -260,7 +264,7 @@ extern XCBConnection *XCBConn;
     
     if ([parentWindow isKindOfClass:[XCBTitleBar class]])
     {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
+        titleBar = (XCBTitleBar*)parentWindow;
     }
     
     if ([frame isMaximized])
@@ -290,7 +294,7 @@ extern XCBConnection *XCBConn;
     newPoint = nil;
     newRect = nil;
     
-    /*** resize the title bar ***/
+    /*** resize the title bar and save the old rect ***/
     
     [titleBar setOldRect:[titleBar windowRect]];
     
@@ -314,7 +318,7 @@ extern XCBConnection *XCBConn;
     newPoint = nil;
     newRect = nil;
     
-    /*** resize the client window ***/
+    /*** resize the client window and save the old rect ***/
     
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
@@ -394,6 +398,7 @@ extern XCBConnection *XCBConn;
                    (const char*) &event);
     
     /*** set iconic hints? or normal if not iconized hints? ***/
+    
 }
 
 - (void) createMiniWindowAtPosition:(XCBPoint*)position
@@ -404,6 +409,21 @@ extern XCBConnection *XCBConn;
     XCBRect* newRect = [[XCBRect alloc] initWithPosition:position andSize:newSize];
     
     windowRect = newRect;
+    
+    if ([self isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frameWindow = (XCBFrame*) self;
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        XCBTitleBar* titleBar = (XCBTitleBar*) [frameWindow childWindowForKey:TitleBar];
+        
+        [clientWindow setOldRect:[clientWindow windowRect]];
+        [titleBar description];
+        [titleBar setOldRect:[titleBar windowRect]];
+        
+        frameWindow = nil;
+        clientWindow = nil;
+        titleBar = nil;
+    }
     
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
     uint32_t valueList[4] = {[position getX], [position getY], [newSize getWidth], [newSize getHeight]};
@@ -472,6 +492,8 @@ extern XCBConnection *XCBConn;
         XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
         
         [connection mapWindow:titleBar];
+        
+        [titleBar description];
         [titleBar drawTitleBar];
         [titleBar drawArcs];
         [connection mapWindow:clientWindow];

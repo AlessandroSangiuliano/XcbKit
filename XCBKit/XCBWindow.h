@@ -33,6 +33,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) xcb_gcontext_t graphicContextId;
 @property (strong, nonatomic) XCBRect *windowRect;
 @property (strong, nonatomic) XCBRect* oldRect;
+@property (strong, nonatomic) XCBRect* originalRect;
 @property (nonatomic) BOOL decorated;
 @property (nonatomic) BOOL draggable; //TODO: forse no nmi serve
 @property (nonatomic) BOOL isCloseButton;
