@@ -554,6 +554,7 @@ extern XCBConnection *XCBConn;
 	aboveWindow = nil;
     windowRect = nil;
     oldRect = nil;
+    originalRect = nil;
 }
 
 @end
