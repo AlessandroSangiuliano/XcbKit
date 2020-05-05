@@ -550,8 +550,8 @@ extern XCBConnection *XCBConn;
 	 
 - (void) dealloc
 {
-	parentWindow = nil;
-	aboveWindow = nil;
+    parentWindow = nil;
+    aboveWindow = nil;
     windowRect = nil;
     oldRect = nil;
     originalRect = nil;
