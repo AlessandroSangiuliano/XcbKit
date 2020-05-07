@@ -18,6 +18,7 @@
 
 @synthesize graphicContextId;
 @synthesize windowRect;
+@synthesize originalRect;
 @synthesize decorated;
 @synthesize draggable;
 @synthesize isCloseButton;
@@ -178,7 +179,7 @@ extern XCBConnection *XCBConn;
     
     if ([parentWindow isKindOfClass:[XCBTitleBar class]])
     {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
+        titleBar = (XCBTitleBar*)parentWindow;
     }
 
     
@@ -186,7 +187,8 @@ extern XCBConnection *XCBConn;
     
     /*** restore to the previous dimension and position of the frame ***/
     
-    [frame setWindowRect:[frame oldRect]];
+    [frame setWindowRect:[frame originalRect]];
+    [frame setOldRect:nil];
     
     uint32_t valueList[4] =
     {
@@ -201,6 +203,9 @@ extern XCBConnection *XCBConn;
     /*** restore the title bar pos and dim ***/
     
     [titleBar setWindowRect:[titleBar oldRect]];
+    [titleBar setOldRect:nil];
+    valueList[0] = [[[titleBar windowRect] position] getX];
+    valueList[1] = [[[titleBar windowRect] position] getY];
     valueList[2] = [[[titleBar windowRect] size] getWidth];
     valueList[3] = [[[titleBar windowRect] size] getHeight];
     
@@ -214,6 +219,7 @@ extern XCBConnection *XCBConn;
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
     [clientWindow setWindowRect:[clientWindow oldRect]];
+    [clientWindow setOldRect:nil];
     valueList[0] = [[[clientWindow windowRect] position] getX];
     valueList[1] = [[[clientWindow windowRect] position] getY];
     valueList[2] = [[[clientWindow windowRect] size] getWidth];
@@ -255,23 +261,24 @@ extern XCBConnection *XCBConn;
     XCBFrame* frame = (XCBFrame*) [parentWindow parentWindow];
     XCBTitleBar* titleBar;
     
-    uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
-
-    
-    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
-    {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
-    }
-    
     if ([frame isMaximized])
     {
         [self restoreDimensionAndPosition];
         return;
     }
     
+    uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
+
+    
+    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
+    {
+        titleBar = (XCBTitleBar*)parentWindow;
+    }
+    
     /*** save previous dimensions and position of the window **/
     
     [frame setOldRect:[frame windowRect]];
+    
     
     /*** redraw and resize the frame ***/
     
@@ -399,6 +406,7 @@ extern XCBConnection *XCBConn;
 - (void) createMiniWindowAtPosition:(XCBPoint*)position
 {
     oldRect = windowRect;
+    XCBTitleBar* titleBar;
     
     XCBSize* newSize =[[XCBSize alloc] initWithWidht:50 andHeight:50]; //misure di prova
     XCBRect* newRect = [[XCBRect alloc] initWithPosition:position andSize:newSize];
@@ -409,6 +417,13 @@ extern XCBConnection *XCBConn;
     uint32_t valueList[4] = {[position getX], [position getY], [newSize getWidth], [newSize getHeight]};
     
     xcb_configure_window([connection connection], window, mask, &valueList);
+    
+    if ([self isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frame = (XCBFrame*)self;
+        titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+        [titleBar setOldRect:[titleBar windowRect]];
+    }
     
     EWMHService* ewmhService = [connection ewmhService];
     XCBAtomService* atomService = [ewmhService atomService];
@@ -471,9 +486,11 @@ extern XCBConnection *XCBConn;
         XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
         XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
         
+        [titleBar setWindowRect:[titleBar oldRect]];
         [connection mapWindow:titleBar];
         [titleBar drawTitleBar];
         [titleBar drawArcs];
+        
         [connection mapWindow:clientWindow];
         [clientWindow setIsMinimized:NO];
         
@@ -528,10 +545,11 @@ extern XCBConnection *XCBConn;
 	 
 - (void) dealloc
 {
-	parentWindow = nil;
-	aboveWindow = nil;
+    parentWindow = nil;
+    aboveWindow = nil;
     windowRect = nil;
     oldRect = nil;
+    originalRect = nil;
 }
 
 @end

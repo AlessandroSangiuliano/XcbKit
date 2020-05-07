@@ -27,7 +27,6 @@
 @synthesize minimizeButtonColor;
 @synthesize maximizeButtonColor;
 @synthesize titlebarColor;
-@synthesize windowRect;
 @synthesize ewmhService;
 
 
