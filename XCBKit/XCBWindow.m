@@ -218,7 +218,7 @@ extern XCBConnection *XCBConn;
     
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
-    [clientWindow setWindowRect:[clientWindow oldRect]];
+    [clientWindow setWindowRect:[clientWindow originalRect]];
     [clientWindow setOldRect:nil];
     valueList[0] = [[[clientWindow windowRect] position] getX];
     valueList[1] = [[[clientWindow windowRect] position] getY];
@@ -503,6 +503,7 @@ extern XCBConnection *XCBConn;
         XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
         
         [titleBar setWindowRect:[titleBar oldRect]];
+        [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
         
         [titleBar description];
