@@ -497,7 +497,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1053"
             endingLineNumber = "1053"
-            landmarkName = "-dealloc"
+            landmarkName = "-addDamagedRegion:"
             landmarkType = "5">
             <Locations>
                <Location
@@ -881,8 +881,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "271"
             endingLineNumber = "271"
-            landmarkName = "-maximizeToWidth:andHeight:"
-            landmarkType = "5">
+            landmarkName = "@implementation XCBWindow"
+            landmarkType = "3">
             <Locations>
                <Location
                   shouldBeEnabled = "Yes"

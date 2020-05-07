@@ -258,6 +258,8 @@ ICCCMService* icccmService;
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
     XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
     XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
+    XCBRect* originalRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
+    
     [winToCreate setWindowRect:windowRect];
     [winToCreate setOriginalRect:windowRect];
     
