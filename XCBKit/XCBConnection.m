@@ -261,7 +261,7 @@ ICCCMService* icccmService;
     XCBRect* originalRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
     
     [winToCreate setWindowRect:windowRect];
-    [winToCreate setOriginalRect:originalRect];
+    [winToCreate setOriginalRect:windowRect];
     
 	xcb_create_window(connection,
 					  depth,
@@ -391,6 +391,7 @@ ICCCMService* icccmService;
 	
 	NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
 	[window setIsMapped:YES];
+    window = nil;
 }
 
 - (void) handleUnMapNotify:(xcb_unmap_notify_event_t *) anEvent
@@ -512,6 +513,7 @@ ICCCMService* icccmService;
 	xcb_unmap_window(connection, [window window]);
 	[window setIsMapped:NO];
 	[self setNeedFlush:YES];
+    window = nil;
 }
 
 - (void) handleConfigureWindowRequest:(xcb_configure_request_event_t *)anEvent
@@ -564,6 +566,8 @@ ICCCMService* icccmService;
 	}
 	
 	xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
+    
+    window = nil;
 }
 
 - (void) handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
@@ -587,13 +591,18 @@ ICCCMService* icccmService;
         
         [pos setX:x];
         [pos setY:y];
+        [[[frame originalRect] position] setX:x];
+        [[[frame originalRect] position] setY:y];
         
         xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, [pos values]);
         
         needFlush = YES;
         pos = nil;
         offset = nil;
+        frame = nil;
     }
+    
+     window = nil;
     
 }
 
@@ -640,6 +649,7 @@ ICCCMService* icccmService;
     {
         XCBWindow* frameWindow = [[window parentWindow] parentWindow];
         [frameWindow minimize];
+        frameWindow = nil;
         return;
     }
     
@@ -647,12 +657,14 @@ ICCCMService* icccmService;
     {
         XCBScreen* screen = [screens objectAtIndex:0];
         [window maximizeToWidth:[screen width] andHeight:[screen height]];
+        screen = nil;
         return;
     }
     
     if ([window isMinimized])
     {
         [window restoreFromIconified];
+        window = nil;
         return;
     }
     
@@ -667,7 +679,8 @@ ICCCMService* icccmService;
         dragState = NO;
     
     offset = nil;
-    
+    parent = nil;
+    window = nil;
     
 }
 
@@ -792,6 +805,8 @@ ICCCMService* icccmService;
         [window isMaximizeButton] ||
         [window isCloseButton])
     {
+        window = nil;
+        exposeRectangle = nil;
         return;
     }
     
@@ -936,12 +951,13 @@ ICCCMService* icccmService;
             {
                 [[destination parentWindow] destroy];
             }*/
-            
             break;
             
         default:
             break;
     }
+    
+    atomService = nil;
 }
 
 //TODO: tenere traccia del tempo per ogni evento.
@@ -984,6 +1000,8 @@ ICCCMService* icccmService;
         }
         
         NSLog(@"Subtructure redirect was set to the root window");
+        rootWindow = nil;
+        screen = nil;
         return;
     }
 
@@ -1006,6 +1024,8 @@ ICCCMService* icccmService;
         if (!attributesChanged)
         {
             NSLog(@"Can't register as window manager.");
+            rootWindow = nil;
+            screen = nil;
             return;
         }
     }
@@ -1039,6 +1059,8 @@ ICCCMService* icccmService;
     [windowsMap removeAllObjects];
 	windowsMap = nil;
 	displayName = nil;
+    ewmhService = nil;
+    damagedRegions = nil;
     xcb_disconnect(connection);
 }
 
