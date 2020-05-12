@@ -671,9 +671,7 @@ ICCCMService* icccmService;
     XCBPoint *offset = [[parent windowRect] offset];
     [offset setX:anEvent->event_x];
     [offset setY:anEvent->event_y];
-    
-    uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
-    xcb_configure_window(connection, [parent window], XCB_CONFIG_WINDOW_STACK_MODE, &values);
+    [parent stackAbove];
     
     if ([parent window] != anEvent->root)
         dragState = YES;

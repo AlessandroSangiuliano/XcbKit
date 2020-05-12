@@ -86,7 +86,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) createMiniWindowAtPosition:(XCBPoint*)position;
 - (void) restoreFromIconified;
 - (void) destroy;
-
+- (void) stackAbove;
+- (void) stackBelow;
 - (void) description;
 
 
