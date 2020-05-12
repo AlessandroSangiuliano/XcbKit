@@ -148,18 +148,6 @@
 
 - (void) drawArcs
 {
-    /*int height = [[[hideWindowButton windowRect] size] getHeight] - 1;
-    int width = [[[hideWindowButton windowRect] size] getWidth] - 1;
-    arc.angle1 = 0;
-    arc.angle2 = 360 << 6;
-    arc.height = height;
-    arc.width = width;
-    arc.x = 0;
-    arc.y = 0;
-    
-    arcs[0] = arc;
-    int size = sizeof(arcs)/sizeof(arcs[0]);*/
-    
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
@@ -184,11 +172,6 @@
     [drawer drawTitleBarButtonWithColor:maximizeButtonColor withStopColor:stopColor];
     
     drawer = nil;
-    
-    //xcb_poly_arc([connection connection], [hideWindowButton window], [hideWindowButton graphicContextId], size, arcs);
-    //xcb_poly_arc([connection connection], [minizeWindowButton window], [minizeWindowButton graphicContextId], size, arcs);
-    //xcb_poly_arc([connection connection], [maximizeWindowButton window], [hideWindowButton graphicContextId], size, arcs);
-    
 }
 
 - (void) drawTitleBar

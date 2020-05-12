@@ -258,7 +258,6 @@ ICCCMService* icccmService;
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
     XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
     XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
-    XCBRect* originalRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
     
     [winToCreate setWindowRect:windowRect];
     [winToCreate setOriginalRect:windowRect];
@@ -673,6 +672,9 @@ ICCCMService* icccmService;
     [offset setX:anEvent->event_x];
     [offset setY:anEvent->event_y];
     
+    uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
+    xcb_configure_window(connection, [parent window], XCB_CONFIG_WINDOW_STACK_MODE, &values);
+    
     if ([parent window] != anEvent->root)
         dragState = YES;
     else
@@ -742,10 +744,6 @@ ICCCMService* icccmService;
         anEvent->format == 32 &&
         anEvent->data.data32[0] == ICCCM_WM_STATE_ICONIC)
     {
-        if (titleBar != nil)
-        {
-            [self unmapWindow:titleBar];
-        }
         
         if (frame != nil)
         {
@@ -755,6 +753,11 @@ ICCCMService* icccmService;
             [frame createMiniWindowAtPosition:position];
             [frame setIsMinimized:YES];
             position = nil;
+        }
+        
+        if (titleBar != nil)
+        {
+            [self unmapWindow:titleBar];
         }
         
         if (clientWindow)
