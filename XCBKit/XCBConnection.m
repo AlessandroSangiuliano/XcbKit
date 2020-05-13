@@ -472,7 +472,11 @@ ICCCMService* icccmService;
             NSLog(@"Override redirect detected"); //da eliminare
             return;
         }
-        uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE};
+
+        uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   |
+            XCB_EVENT_MASK_KEY_PRESS};
+        
+        //uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE};
         [self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
         
         XCBRect *rect = [self geometryForWindow:window];
@@ -608,6 +612,7 @@ ICCCMService* icccmService;
 - (void) handleButtonPress:(xcb_button_press_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+    //[window stackAbove];
     
     if ([window isCloseButton])
     {
@@ -666,6 +671,8 @@ ICCCMService* icccmService;
         window = nil;
         return;
     }
+    
+    
     
     XCBWindow *parent = [window parentWindow];
     XCBPoint *offset = [[parent windowRect] offset];
