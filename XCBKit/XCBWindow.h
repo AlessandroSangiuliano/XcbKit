@@ -44,6 +44,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic) BOOL needDestroy;
 @property (nonatomic) xcb_pixmap_t pixmap;
+@property (nonatomic) BOOL firstRun; //find a better solution
 
 
 
@@ -88,6 +89,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) destroy;
 - (void) stackAbove;
 - (void) stackBelow;
+- (void) grabButton;
+- (void) ungrabButton;
 - (void) description;
 
 

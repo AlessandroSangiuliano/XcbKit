@@ -14,6 +14,8 @@
 #import "CairoDrawer.h"
 #import "EWMHService.h"
 
+#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
+
 @implementation XCBWindow
 
 @synthesize graphicContextId;
@@ -30,6 +32,7 @@
 @synthesize connection;
 @synthesize needDestroy;
 @synthesize pixmap;
+@synthesize firstRun;
 
 extern XCBConnection *XCBConn;
 
@@ -566,9 +569,35 @@ extern XCBConnection *XCBConn;
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
 }
 
+- (void) grabButton
+{
+    if (firstRun)
+    {
+        firstRun = NO;
+        return;
+    }
+    
+    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+    
+    xcb_grab_button([connection connection],
+                    YES,
+                    window,
+                    BUTTONMASK,
+                    XCB_GRAB_MODE_ASYNC,
+                    XCB_GRAB_MODE_ASYNC,
+                    XCB_NONE,
+                    XCB_NONE,
+                    XCB_BUTTON_INDEX_1, //for now just grab the left button
+                    XCB_MOD_MASK_ANY); // for now any mask.
+}
+
+- (void) ungrabButton
+{
+    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+}
+
 - (void) description
 {
-    
     NSLog(@" Window id: %u. Parent window id: %u.\nWindow Size and Position:", window, [parentWindow window]);
     [[windowRect size] description];
     [[windowRect position] description];

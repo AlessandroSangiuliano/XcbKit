@@ -363,9 +363,7 @@ ICCCMService* icccmService;
     xcb_generic_error_t *error = xcb_request_check(connection, cookie);
     
     if (error != NULL)
-    {
         NSLog(@"Unable to change the attributes for window %u with error code: %d", [aWindow window], error->error_code);
-    }
     else
         attributesChanged = YES;
     
@@ -387,7 +385,6 @@ ICCCMService* icccmService;
 	attributes.map_state = XCB_MAP_STATE_VIEWABLE;
 	attributes.response_type = anEvent->response_type;
 	[window setAttributes:attributes];
-	
 	NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
 	[window setIsMapped:YES];
     window = nil;
@@ -460,8 +457,8 @@ ICCCMService* icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-        [window createGraphicContextWithMask:mask andValues:gcValues];
-        [window createPixmap];
+        //[window createGraphicContextWithMask:mask andValues:gcValues];
+        //[window createPixmap];
         
         /* check the ovveride redirect flag, if yes the WM must not handle the window */
         
@@ -472,17 +469,12 @@ ICCCMService* icccmService;
             NSLog(@"Override redirect detected"); //da eliminare
             return;
         }
-
-        uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   |
-            XCB_EVENT_MASK_KEY_PRESS};
-        
-        //uint32_t values[1] = {XCB_EVENT_MASK_EXPOSURE};
-        [self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
         
         XCBRect *rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
         [window setOriginalRect:rect];
         [self registerWindow:window];
+        [window setFirstRun:YES];
         rect = nil;
     }
 
@@ -612,7 +604,6 @@ ICCCMService* icccmService;
 - (void) handleButtonPress:(xcb_button_press_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
-    //[window stackAbove];
     
     if ([window isCloseButton])
     {
@@ -672,14 +663,42 @@ ICCCMService* icccmService;
         return;
     }
     
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frame = (XCBFrame*)window;
+        XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+        [frame stackAbove];
+        
+        [clientWindow ungrabButton];
+        frame = nil;
+        clientWindow = nil;
+    }
     
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        XCBFrame* frameWindow = (XCBFrame*)[window parentWindow];
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [frameWindow stackAbove];
+        [clientWindow ungrabButton];
+        
+        frameWindow = nil;
+        clientWindow = nil;
+    }
     
-    XCBWindow *parent = [window parentWindow];
+    if ([window isKindOfClass:[XCBWindow class]] &&
+        [[window parentWindow] isKindOfClass:[XCBFrame class]])
+    {
+        [window ungrabButton];
+        [[window parentWindow] stackAbove];
+    }
+
+    
+    XCBFrame *parent = (XCBFrame*)[window parentWindow];
     XCBPoint *offset = [[parent windowRect] offset];
     [offset setX:anEvent->event_x];
     [offset setY:anEvent->event_y];
-    [parent stackAbove];
-    
+
     if ([parent window] != anEvent->root)
         dragState = YES;
     else
@@ -688,12 +707,29 @@ ICCCMService* icccmService;
     offset = nil;
     parent = nil;
     window = nil;
-    
 }
 
 - (void) handleButtonRelease:(xcb_button_release_event_t *)anEvent
 {
    dragState = NO;
+}
+
+- (void) handleFocusOut:(xcb_focus_out_event_t *)anEvent
+{
+    XCBWindow *window = [self windowForXCBId:anEvent->event];
+    
+    NSLog(@"Not yet implemented");
+    
+    window = nil;
+}
+
+- (void) handleFocusIn:(xcb_focus_in_event_t *)anEvent
+{
+    XCBWindow *window = [self windowForXCBId:anEvent->event];
+    
+    NSLog(@"Not yet implemented");
+    
+    window = nil;
 }
 
 - (void) handleClientMessage:(xcb_client_message_event_t *)anEvent
@@ -785,6 +821,78 @@ ICCCMService* icccmService;
     atomService = nil;
     
     return;
+}
+
+- (void) handleEnterNotify:(xcb_enter_notify_event_t *)anEvent
+{
+    XCBWindow* window = [self windowForXCBId:anEvent->event];
+    
+    if ([window isKindOfClass:[XCBWindow class]] &&
+        [[window parentWindow] isKindOfClass:[XCBFrame class]])
+        [window grabButton];
+    
+    
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frameWindow = (XCBFrame*)window;
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [clientWindow grabButton];
+        
+        clientWindow = nil;
+        frameWindow = nil;
+    }
+    
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        XCBTitleBar* titleBar = (XCBTitleBar*)window;
+        XCBFrame* frameWindow = (XCBFrame*)[titleBar parentWindow];
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [clientWindow grabButton];
+        
+        titleBar = nil;
+        frameWindow = nil;
+        clientWindow = nil;
+    }
+    
+    window = nil;
+}
+
+- (void) handleLeaveNotify:(xcb_leave_notify_event_t *)anEvent
+{
+    XCBWindow* window = [self windowForXCBId:anEvent->event];
+    
+    if ([window isKindOfClass:[XCBWindow class]] &&
+        [[window parentWindow] isKindOfClass:[XCBFrame class]])
+        [window ungrabButton];
+    
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frameWindow = (XCBFrame*)window;
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [clientWindow ungrabButton];
+        
+        frameWindow = nil;
+        clientWindow = nil;
+    }
+    
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        XCBTitleBar* titleBar = (XCBTitleBar*)window;
+        XCBFrame* frameWindow = (XCBFrame*)[titleBar parentWindow];
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        
+        [clientWindow ungrabButton];
+        
+        titleBar = nil;
+        frameWindow = nil;
+        clientWindow = nil;
+    }
+
+    window = nil;
+    
 }
 
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
