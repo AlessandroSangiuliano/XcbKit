@@ -327,7 +327,7 @@
     uint32_t values[2];
     values[0] = [screen screen]->white_pixel;
     values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
-    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   | XCB_EVENT_MASK_KEY_PRESS;
+    XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS;
     
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
     XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
@@ -397,7 +397,7 @@
                 NSLog(@"");
                 xcb_expose_event_t * exposeEvent = (xcb_expose_event_t *)e;
                 NSLog(@"Expose for window %u", exposeEvent->window);
-                //[connection handleExpose:exposeEvent];
+                [connection handleExpose:exposeEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
                 break;
@@ -409,6 +409,42 @@
                 [connection handleMotionNotify:motionEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_ENTER_NOTIFY:
+                NSLog(@"");
+                xcb_enter_notify_event_t* enterEvent = (xcb_enter_notify_event_t*)e;
+                NSLog(@"Enter notify for window %u", enterEvent->event);
+                [connection handleEnterNotify:enterEvent];
+                [connection flush];
+                break;
+                
+            case XCB_LEAVE_NOTIFY:
+                NSLog(@"");
+                xcb_leave_notify_event_t* leaveEvent = (xcb_leave_notify_event_t*)e;
+                NSLog(@"Leave notify for window %u", leaveEvent->event);
+                [connection handleLeaveNotify:leaveEvent];
+                [connection flush];
+                break;
+                
+            case XCB_FOCUS_IN:
+                NSLog(@"");
+                xcb_focus_in_event_t* focusInEvent = (xcb_focus_in_event_t*)e;
+                NSLog(@"Focus In Event for window %u", focusInEvent->event);
+                //[connection handleFocusIn:focusInEvent];
+                break;
+                
+            case XCB_FOCUS_OUT:
+                NSLog(@"");
+                xcb_focus_out_event_t* focusOutEvent = (xcb_focus_out_event_t*)e;
+                NSLog(@"Focus Out Event for window %u", focusOutEvent->event);
+                //[connection handleFocusOut:focusOutEvent];
+                break;
+                
+            case XCB_VISIBILITY_NOTIFY:
+                NSLog(@"");
+                xcb_visibility_notify_event_t* visibilityEvent = (xcb_visibility_notify_event_t*)e;
+                NSLog(@"Enter notify for window %u", visibilityEvent->window);
                 break;
                 
             case XCB_BUTTON_PRESS:
@@ -468,6 +504,11 @@
                 [connection handleConfigureWindowRequest:configRequest];
                 [connection flush];
                 [connection setNeedFlush:NO];
+                break;
+            case XCB_PROPERTY_NOTIFY:
+                NSLog(@"");
+                xcb_property_notify_event_t* propEvent = (xcb_property_notify_event_t*)e;
+                NSLog(@"Window %u notify property change", propEvent->window);
                 break;
             default:
                 break;
