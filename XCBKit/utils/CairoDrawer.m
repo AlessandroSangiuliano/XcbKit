@@ -199,17 +199,24 @@
     
     cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
     
+    NSFont* font = [NSFont fontWithName:@"Microsoft Sans Serif" size:11];
+    NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+    
+    NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
+    CGFloat halfLength = size.width / 2;
+    
     CGFloat textPositionX = (CGFloat) [[[window windowRect] size] getWidth] / 2;
     CGFloat textPositionY = (CGFloat) [[[window windowRect] size] getHeight] / 2 + 2;
     
-    //[aText sizeWithAttributes:<#(NSDictionary *)#>]; to get the size of the stirng for placing it in the middle of the title bar.
-    
-    cairo_move_to(cr, textPositionX, textPositionY);
+    cairo_move_to(cr, textPositionX - halfLength, textPositionY);
     
     cairo_show_text(cr, [aText cStringUsingEncoding: NSUTF8StringEncoding]);
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
+    
+    font = nil;
+    attributes = nil;
 }
 
 - (void) makePreviewImage

@@ -505,8 +505,7 @@ ICCCMService* icccmService;
 {
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
 	NSLog(@"[%@] Unmap request for window %u", NSStringFromClass([self class]), [window window]);
-	xcb_unmap_window(connection, [window window]);
-	[window setIsMapped:NO];
+	[self unmapWindow:window];
 	[self setNeedFlush:YES];
     window = nil;
 }
