@@ -244,7 +244,7 @@
     
     
     NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
-    NSLog(@"Immagine: %f, %f", [image size].width, [image size].height);
+    NSLog(@"Image: %f, %f", [image size].width, [image size].height);
     
     double scalingFactorW = 50 / [image size].width;
     double scalingFactorH = 50 / [image size].height;
@@ -264,7 +264,7 @@
     [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [scaledImage unlockFocus];
     
-    NSLog(@"Immagine scalata %f, %f", [scaledImage size].height, [scaledImage size].width);
+    NSLog(@"Image scaled to %f, %f", [scaledImage size].height, [scaledImage size].width);
     
 
     NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];

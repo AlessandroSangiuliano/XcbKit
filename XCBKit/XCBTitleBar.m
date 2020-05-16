@@ -182,22 +182,29 @@
     
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
     [drawer drawTitleBarWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
     
-    /*** My GOD what a bad thing, just set the window OMG ***/
+    /*** This is better than allocation/deallocatin the drawer object for each window to draw, however find
+     * a better solution to avoid all the sets methods/messages ***/
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:hideWindowButton visual:visual];
+    [drawer setWindow:hideWindowButton];
+    [drawer setHeight:[[[hideWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[hideWindowButton windowRect] size] getWidth]];
     [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:minimizeWindowButton visual:visual];
+    [drawer setWindow:minimizeWindowButton];
+    [drawer setHeight:[[[minimizeWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[minimizeWindowButton windowRect] size] getWidth]];
     [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
+    
+    [drawer setWindow:maximizeWindowButton];
+    [drawer setHeight:[[[maximizeWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[maximizeWindowButton windowRect] size] getWidth]];
+    [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
 
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:maximizeWindowButton visual:visual];
-    [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
     drawer = nil;
+    screen = nil;
+    visual = nil;
 
 }
 
