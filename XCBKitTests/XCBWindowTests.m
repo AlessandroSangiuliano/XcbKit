@@ -166,7 +166,7 @@
     
 }
 
-- (void) testTakeScreenshotXCB
+- (void) testHowTakeScreenshotXCBorCairo
 {
     XCBConnection* connection = [XCBConnection sharedConnection];
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
