@@ -229,6 +229,7 @@
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+    size = nil;
 }
 
 - (void)setPreviewImage
