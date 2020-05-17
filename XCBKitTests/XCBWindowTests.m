@@ -166,7 +166,7 @@
     
 }
 
-/*- (void) testTakeScreenshotXCB
+- (void) testTakeScreenshotXCB
 {
     XCBConnection* connection = [XCBConnection sharedConnection];
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
@@ -244,6 +244,7 @@
                 
             case XCB_BUTTON_PRESS:
                 //[self withCairoStride:window];
+                [self cairoScreenForWindow:window andConnection:connection andVisual:visual];
                 break;
                 
             case XCB_MAP_NOTIFY:
@@ -258,6 +259,24 @@
     
     pause();
 
+}
+
+- (void) cairoScreenForWindow:(XCBWindow*)aWindow andConnection:(XCBConnection*)aConnection andVisual:(XCBVisual*)aVisual
+{
+    cairo_surface_t *surface = cairo_xcb_surface_create([aConnection connection],
+                                                        [aWindow window],
+                                                        [aVisual visualType],
+                                                        [[[aWindow windowRect] size] getWidth],
+                                                        [[[aWindow windowRect] size] getHeight]);
+    
+        
+    cairo_t* cr = cairo_create(surface);
+    cairo_scale(cr, 0.5, 0.5);
+    cairo_set_source_surface(cr, surface, 0, 0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    cairo_surface_write_to_png(surface, "/tmp/gigio.png");
+    
 }
 
 /*- (void) makeScreenshotForWindow:(XCBWindow*)aWindow andConnection:(XCBConnection*)aConnection
