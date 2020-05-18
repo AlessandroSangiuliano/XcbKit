@@ -128,6 +128,12 @@
     XCBPoint *position = [[XCBPoint alloc] initWithX:0 andY:21];
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];
+    
+    position = nil;
+    titleBar = nil;
+    clientWindow = nil;
+    ewmhService = nil;
+    windowTitle = nil;
 }
 
 
