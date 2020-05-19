@@ -11,6 +11,8 @@
 #import "XCBFrame.h"
 #import "XCBSize.h"
 #import "EWMHService.h"
+#import "ETitleBarColor.h"
+#import "ETitleBarColor.h"
 
 #ifndef TITLE_MASK
 
@@ -34,14 +36,22 @@ XCB_EVENT_MASK_KEY_PRESS
 @property (strong, nonatomic) XCBWindow *minimizeWindowButton;
 @property (strong, nonatomic) XCBWindow *maximizeWindowButton;
 @property (nonatomic) xcb_arc_t arc;
-@property (strong, nonatomic) XCBConnection *connection;
-@property (strong, nonatomic) NSColor *titlebarColor;
+@property (strong, nonatomic) XCBConnection *connection; //FIXME: is now in the super class; use that!
+@property (strong, nonatomic) NSColor *titleBarUpColor;
+@property (strong, nonatomic) NSColor *titleBarDownColor;
 @property (strong, nonatomic) EWMHService *ewmhService;
 
 - (id) initWithFrame:(XCBFrame*) aFrame withConnection:(XCBConnection*) aConnection;
-- (void) drawArcs;
-- (void) drawTitleBar;
+- (void) drawArcsForColor:(TitleBarColor)aColor;
+
+/*** 
+* Draws the titlebar with the color argument.
+* aColor: The color to draw the title bar; if nil titleBarStandardColor is used.
+***/
+
+- (void) drawTitleBarForColor:(TitleBarColor)aColor; //maybe is better to set the color all the time if the default one is not desidered.
 - (void) setWindowTitle:(NSString*) title;
+- (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor;
 
 /****************
  *    ACCESORS  *

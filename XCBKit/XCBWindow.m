@@ -14,10 +14,13 @@
 #import "CairoDrawer.h"
 #import "EWMHService.h"
 
+#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
+
 @implementation XCBWindow
 
 @synthesize graphicContextId;
 @synthesize windowRect;
+@synthesize originalRect;
 @synthesize decorated;
 @synthesize draggable;
 @synthesize isCloseButton;
@@ -27,6 +30,9 @@
 @synthesize isMaximized;
 @synthesize isMinimized;
 @synthesize connection;
+@synthesize needDestroy;
+@synthesize pixmap;
+@synthesize firstRun;
 
 extern XCBConnection *XCBConn;
 
@@ -65,20 +71,34 @@ extern XCBConnection *XCBConn;
     isMinimizeButton = NO;
     isMaximizeButton = NO;
     connection = aConnection;
-	
+    needDestroy = NO;
+	   
 	return self;
 }
 
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t)aMask andValues:(uint32_t *)theValues
 {
-    graphicContextId = xcb_generate_id([XCBConn connection]);
-    xcb_void_cookie_t gcCookie = xcb_create_gc([XCBConn connection],
+    graphicContextId = xcb_generate_id([connection connection]);
+    xcb_void_cookie_t gcCookie = xcb_create_gc([connection connection],
                                                graphicContextId,
                                                window,
                                                aMask,
                                                theValues);
     return gcCookie;
     
+}
+
+- (void) createPixmap
+{
+    pixmap = xcb_generate_id([connection connection]);
+    XCBScreen* screen = [[connection screens] objectAtIndex:0];
+    xcb_create_pixmap([connection connection],
+                      [screen screen]->root_depth,
+                      pixmap,
+                      window,
+                      [[windowRect size] getWidth],
+                      [[windowRect size] getHeight]);
+    screen = nil;
 }
 
 - (xcb_window_t) window
@@ -162,7 +182,7 @@ extern XCBConnection *XCBConn;
     
     if ([parentWindow isKindOfClass:[XCBTitleBar class]])
     {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
+        titleBar = (XCBTitleBar*)parentWindow;
     }
 
     
@@ -170,7 +190,8 @@ extern XCBConnection *XCBConn;
     
     /*** restore to the previous dimension and position of the frame ***/
     
-    [frame setWindowRect:[frame oldRect]];
+    [frame setWindowRect:[frame originalRect]];
+    [frame setOldRect:nil];
     
     uint32_t valueList[4] =
     {
@@ -185,19 +206,22 @@ extern XCBConnection *XCBConn;
     /*** restore the title bar pos and dim ***/
     
     [titleBar setWindowRect:[titleBar oldRect]];
+    [titleBar setOldRect:nil];
+    valueList[0] = [[[titleBar windowRect] position] getX];
+    valueList[1] = [[[titleBar windowRect] position] getY];
     valueList[2] = [[[titleBar windowRect] size] getWidth];
     valueList[3] = [[[titleBar windowRect] size] getHeight];
     
     xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
     
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
     /*** restore dim and pos of the client window ***/
     
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
-    [clientWindow setWindowRect:[clientWindow oldRect]];
+    [clientWindow setWindowRect:[clientWindow originalRect]];
+    [clientWindow setOldRect:nil];
     valueList[0] = [[[clientWindow windowRect] position] getX];
     valueList[1] = [[[clientWindow windowRect] position] getY];
     valueList[2] = [[[clientWindow windowRect] size] getWidth];
@@ -239,23 +263,24 @@ extern XCBConnection *XCBConn;
     XCBFrame* frame = (XCBFrame*) [parentWindow parentWindow];
     XCBTitleBar* titleBar;
     
-    uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
-
-    
-    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
-    {
-        titleBar = FnFromXCBWindowToXCBTitleBar(parentWindow, XCBConn);
-    }
-    
     if ([frame isMaximized])
     {
         [self restoreDimensionAndPosition];
         return;
     }
     
+    uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
+
+    
+    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
+    {
+        titleBar = (XCBTitleBar*)parentWindow;
+    }
+    
     /*** save previous dimensions and position of the window **/
     
     [frame setOldRect:[frame windowRect]];
+    
     
     /*** redraw and resize the frame ***/
     
@@ -274,7 +299,7 @@ extern XCBConnection *XCBConn;
     newPoint = nil;
     newRect = nil;
     
-    /*** resize the title bar ***/
+    /*** resize the title bar and save the old rect ***/
     
     [titleBar setOldRect:[titleBar windowRect]];
     
@@ -291,14 +316,13 @@ extern XCBConnection *XCBConn;
     /*** set the new title bar rect and redraw it ***/
     
     [titleBar setWindowRect:newRect];
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
     newSize = nil;
     newPoint = nil;
     newRect = nil;
     
-    /*** resize the client window ***/
+    /*** resize the client window and save the old rect ***/
     
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
@@ -378,21 +402,45 @@ extern XCBConnection *XCBConn;
                    (const char*) &event);
     
     /*** set iconic hints? or normal if not iconized hints? ***/
+    
 }
 
 - (void) createMiniWindowAtPosition:(XCBPoint*)position
 {
     oldRect = windowRect;
+    XCBTitleBar* titleBar;
     
     XCBSize* newSize =[[XCBSize alloc] initWithWidht:50 andHeight:50]; //misure di prova
     XCBRect* newRect = [[XCBRect alloc] initWithPosition:position andSize:newSize];
     
     windowRect = newRect;
     
+    if ([self isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frameWindow = (XCBFrame*) self;
+        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        XCBTitleBar* titleBar = (XCBTitleBar*) [frameWindow childWindowForKey:TitleBar];
+        
+        [clientWindow setOldRect:[clientWindow windowRect]];
+        [titleBar description];
+        [titleBar setOldRect:[titleBar windowRect]];
+        
+        frameWindow = nil;
+        clientWindow = nil;
+        titleBar = nil;
+    }
+    
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
     uint32_t valueList[4] = {[position getX], [position getY], [newSize getWidth], [newSize getHeight]};
     
     xcb_configure_window([connection connection], window, mask, &valueList);
+    
+    if ([self isKindOfClass:[XCBFrame class]])
+    {
+        XCBFrame* frame = (XCBFrame*)self;
+        titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
+        [titleBar setOldRect:[titleBar windowRect]];
+    }
     
     EWMHService* ewmhService = [connection ewmhService];
     XCBAtomService* atomService = [ewmhService atomService];
@@ -433,6 +481,12 @@ extern XCBConnection *XCBConn;
     windowRect = oldRect;
     XCBFrame* frame;
     
+    EWMHService* ewmhService = [connection ewmhService];
+    XCBAtomService* atomService = [ewmhService atomService];
+    
+    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
+    [atomService cacheAtom:@"WM_STATE"];
+    
     XCBPoint* position = [windowRect position];
     XCBSize* size =  [windowRect size];
     
@@ -449,10 +503,23 @@ extern XCBConnection *XCBConn;
         XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
         XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
         
+        [titleBar setWindowRect:[titleBar oldRect]];
+        [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
-        [titleBar drawTitleBar];
-        [titleBar drawArcs];
+        
+        [titleBar description];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        
         [connection mapWindow:clientWindow];
+        [clientWindow setIsMinimized:NO];
+        
+        [ewmhService changePropertiesForWindow:clientWindow
+                                      withMode:XCB_PROP_MODE_REPLACE
+                                  withProperty:@"WM_STATE"
+                                      withType:XCB_ATOM_ATOM
+                                    withFormat:32
+                                withDataLength:1
+                                      withData:state];
         
         titleBar = nil;
         clientWindow = nil;
@@ -460,12 +527,6 @@ extern XCBConnection *XCBConn;
     }
     
     isMinimized = NO;
-    
-    EWMHService* ewmhService = [connection ewmhService];
-    XCBAtomService* atomService = [ewmhService atomService];
-    
-    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
-    [atomService cacheAtom:@"WM_STATE"];
     
     [ewmhService changePropertiesForWindow:frame
                                   withMode:XCB_PROP_MODE_REPLACE
@@ -483,22 +544,69 @@ extern XCBConnection *XCBConn;
 
 - (void) destroy
 {
-    [connection unregisterWindow:self];
     xcb_destroy_window([connection connection], window);
     [connection setNeedFlush:YES];
 }
 
+- (void) hide
+{
+    [connection unmapWindow:self];
+    [connection setNeedFlush:YES];
+}
+
+- (void) stackAbove
+{
+    uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
+}
+
+- (void) stackBelow
+{
+    uint32_t values[1] = {XCB_STACK_MODE_BELOW};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
+}
+
+- (void) grabButton
+{
+    if (firstRun)
+    {
+        firstRun = NO;
+        return;
+    }
+    
+    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+    
+    xcb_grab_button([connection connection],
+                    YES,
+                    window,
+                    BUTTONMASK,
+                    XCB_GRAB_MODE_ASYNC,
+                    XCB_GRAB_MODE_ASYNC,
+                    XCB_NONE,
+                    XCB_NONE,
+                    XCB_BUTTON_INDEX_1, //for now just grab the left button
+                    XCB_MOD_MASK_ANY); // for now any mask.
+}
+
+- (void) ungrabButton
+{
+    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+}
+
 - (void) description
 {
-    NSLog(@"Ciao belli");
+    NSLog(@" Window id: %u. Parent window id: %u.\nWindow Size and Position:", window, [parentWindow window]);
+    [[windowRect size] description];
+    [[windowRect position] description];
 }
 	 
 - (void) dealloc
 {
-	parentWindow = nil;
-	aboveWindow = nil;
+    parentWindow = nil;
+    aboveWindow = nil;
     windowRect = nil;
     oldRect = nil;
+    originalRect = nil;
 }
 
 @end

@@ -93,8 +93,7 @@
         switch (e->response_type & ~0x80)
         {
             case XCB_EXPOSE:
-                [titleBar drawTitleBar];
-                [titleBar drawArcs];
+                [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
                 [titleBar setWindowTitle:@"Pova"];
                 [connection flush];
                 break;

@@ -62,6 +62,11 @@
     values[1] = theValues[1];
 }
 
+- (void) description
+{
+    NSLog(@"X: %hd; Y: %hd", x, y);
+}
+
 - (void) dealloc
 {
     x = 0;

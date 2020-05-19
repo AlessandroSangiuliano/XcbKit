@@ -33,15 +33,18 @@
 {
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
+    [self setOriginalRect:[aClientWindow windowRect]];
     
     uint16_t width =  [[[aClientWindow windowRect] size] getWidth] + 1;
     uint16_t height =  [[[aClientWindow windowRect] size] getHeight] + 22;
     
     connection = aConnection;
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
-    
-    uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-        | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY};
+
+    uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS |
+        XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS |
+        XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
+        XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
     
     
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
@@ -75,6 +78,7 @@
         response = nil;
         request = nil;
     }
+    
     
     [connection mapWindow:self];
     return self;
@@ -112,8 +116,7 @@
     if (windowTitle == nil)
         windowTitle = @"";
     
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [titleBar setWindowTitle:windowTitle];
     
     [connection mapWindow:titleBar];
@@ -124,7 +127,14 @@
     XCBPoint *position = [[XCBPoint alloc] initWithX:0 andY:21];
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];
+    
+    position = nil;
+    titleBar = nil;
+    clientWindow = nil;
+    ewmhService = nil;
+    windowTitle = nil;
 }
+
 
 
 /********************************

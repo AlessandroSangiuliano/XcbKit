@@ -125,6 +125,47 @@
     
 }
 
+- (void) testChangeAttributes
+{
+    XCBConnection *connection = [[XCBConnection alloc] init];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    
+    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
+    XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
+    
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    
+    uint32_t values[2];
+    values[0] = [screen screen]->white_pixel;
+    values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
+    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   |
+    XCB_EVENT_MASK_KEY_PRESS;
+    
+    
+    XCBWindow *window = [connection createWindowWithDepth:[screen screen]->root_depth
+                                         withParentWindow:[screen rootWindow]
+                                            withXPosition:[coordinates getX]
+                                            withYPosition:[coordinates getY]
+                                                withWidth:[sizes getWidth]
+                                               withHeight:[sizes getHeight]
+                                         withBorrderWidth:1
+                                             withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                             withVisualId:visual
+                                            withValueMask:mask
+                                            withValueList:values];
+    
+    mask = XCB_CW_OVERRIDE_REDIRECT;
+    uint32_t overraideValue[1] = {YES};
+    
+    [connection changeAttributes:overraideValue forWindow:window withMask:mask checked:NO];
+    
+    xcb_get_window_attributes_reply_t *reply = [connection getAttributesForWindow:window];
+    
+    STAssertTrue(reply->override_redirect == YES, @"");
+    
+}
+
 - (void) testCreateWindow
 {
 	XCBConnection *connection = [[XCBConnection alloc] init];
@@ -286,7 +327,7 @@
     uint32_t values[2];
     values[0] = [screen screen]->white_pixel;
     values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |  XCB_EVENT_MASK_BUTTON_MOTION |
-    XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   | XCB_EVENT_MASK_KEY_PRESS;
+    XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS;
     
     XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
     XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
@@ -356,8 +397,9 @@
                 NSLog(@"");
                 xcb_expose_event_t * exposeEvent = (xcb_expose_event_t *)e;
                 NSLog(@"Expose for window %u", exposeEvent->window);
-                //[connection handleExpose:exposeEvent];
+                [connection handleExpose:exposeEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_MOTION_NOTIFY:
@@ -366,6 +408,43 @@
                 NSLog(@"Motion Notify for window %u: ", motionEvent->event);
                 [connection handleMotionNotify:motionEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_ENTER_NOTIFY:
+                NSLog(@"");
+                xcb_enter_notify_event_t* enterEvent = (xcb_enter_notify_event_t*)e;
+                NSLog(@"Enter notify for window %u", enterEvent->event);
+                [connection handleEnterNotify:enterEvent];
+                [connection flush];
+                break;
+                
+            case XCB_LEAVE_NOTIFY:
+                NSLog(@"");
+                xcb_leave_notify_event_t* leaveEvent = (xcb_leave_notify_event_t*)e;
+                NSLog(@"Leave notify for window %u", leaveEvent->event);
+                [connection handleLeaveNotify:leaveEvent];
+                [connection flush];
+                break;
+                
+            case XCB_FOCUS_IN:
+                NSLog(@"");
+                xcb_focus_in_event_t* focusInEvent = (xcb_focus_in_event_t*)e;
+                NSLog(@"Focus In Event for window %u", focusInEvent->event);
+                //[connection handleFocusIn:focusInEvent];
+                break;
+                
+            case XCB_FOCUS_OUT:
+                NSLog(@"");
+                xcb_focus_out_event_t* focusOutEvent = (xcb_focus_out_event_t*)e;
+                NSLog(@"Focus Out Event for window %u", focusOutEvent->event);
+                //[connection handleFocusOut:focusOutEvent];
+                break;
+                
+            case XCB_VISIBILITY_NOTIFY:
+                NSLog(@"");
+                xcb_visibility_notify_event_t* visibilityEvent = (xcb_visibility_notify_event_t*)e;
+                NSLog(@"Enter notify for window %u", visibilityEvent->window);
                 break;
                 
             case XCB_BUTTON_PRESS:
@@ -374,13 +453,14 @@
                 NSLog(@"Button Press Event for window %u: ", pressEvent->event);
                 [connection handleButtonPress:pressEvent];
                 [connection flush];
+                [connection setNeedFlush:NO];
                 break;
                 
             case XCB_MAP_NOTIFY:
                 NSLog(@"");
                 xcb_map_notify_event_t *notifyEvent = (xcb_map_notify_event_t*)e;
                 NSLog(@"MAP NOTIFY for window %u", notifyEvent->window);
-                //[connection handleMapRequest:notifyEvent];
+                [connection handleMapNotify:notifyEvent];
                 break;
                 
             case XCB_MAP_REQUEST:
@@ -390,6 +470,13 @@
                 [connection handleMapRequest:mapRequestEvent];
                 [connection flush]; // serve?
                 [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_UNMAP_NOTIFY:
+                NSLog(@"");
+                xcb_unmap_notify_event_t* unmapNotifyEvent = (xcb_unmap_notify_event_t*)e;
+                NSLog(@"Unmap Notify for window %u", unmapNotifyEvent->window);
+                [connection handleUnMapNotify:unmapNotifyEvent];
                 break;
                 
             case XCB_DESTROY_NOTIFY:
@@ -408,6 +495,20 @@
                 [connection handleClientMessage:clientMessageEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
+                break;
+                
+            case XCB_CONFIGURE_REQUEST:
+                NSLog(@"");
+                xcb_configure_request_event_t* configRequest = (xcb_configure_request_event_t*)e;
+                NSLog(@"Configure request for window %u", configRequest->window);
+                [connection handleConfigureWindowRequest:configRequest];
+                [connection flush];
+                [connection setNeedFlush:NO];
+                break;
+            case XCB_PROPERTY_NOTIFY:
+                NSLog(@"");
+                xcb_property_notify_event_t* propEvent = (xcb_property_notify_event_t*)e;
+                NSLog(@"Window %u notify property change", propEvent->window);
                 break;
             default:
                 break;

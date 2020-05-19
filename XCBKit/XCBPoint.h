@@ -23,5 +23,6 @@
 - (int16_t) getY;
 - (uint32_t*) values;
 - (void) setValues:(uint32_t*)theValues;
+- (void) description;
 
 @end

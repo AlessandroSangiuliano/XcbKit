@@ -26,8 +26,8 @@
 @synthesize hideButtonColor;
 @synthesize minimizeButtonColor;
 @synthesize maximizeButtonColor;
-@synthesize titlebarColor;
-@synthesize windowRect;
+@synthesize titleBarUpColor;
+@synthesize titleBarDownColor;
 @synthesize ewmhService;
 
 
@@ -147,19 +147,8 @@
     return self;
 }
 
-- (void) drawArcs
+- (void) drawArcsForColor:(TitleBarColor)aColor
 {
-    /*int height = [[[hideWindowButton windowRect] size] getHeight] - 1;
-    int width = [[[hideWindowButton windowRect] size] getWidth] - 1;
-    arc.angle1 = 0;
-    arc.angle2 = 360 << 6;
-    arc.height = height;
-    arc.width = width;
-    arc.x = 0;
-    arc.y = 0;
-    
-    arcs[0] = arc;
-    int size = sizeof(arcs)/sizeof(arcs[0]);*/
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
@@ -170,51 +159,70 @@
     
     NSColor *stopColor = [NSColor colorWithCalibratedRed:1 green:1 blue:1 alpha:1];
     
-    [drawer drawTitleBarButtonWithColor:hideButtonColor withStopColor:stopColor];
+    [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
     
     drawer = nil;
     
     drawer = [[CairoDrawer alloc] initWithConnection:connection window:minimizeWindowButton visual:visual];
     
-    [drawer drawTitleBarButtonWithColor:minimizeButtonColor withStopColor:stopColor];
+    [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
     
     drawer = nil;
     
     drawer = [[CairoDrawer alloc] initWithConnection:connection window:maximizeWindowButton visual:visual];
     
-    [drawer drawTitleBarButtonWithColor:maximizeButtonColor withStopColor:stopColor];
+    [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
     
     drawer = nil;
-    
-    //xcb_poly_arc([connection connection], [hideWindowButton window], [hideWindowButton graphicContextId], size, arcs);
-    //xcb_poly_arc([connection connection], [minizeWindowButton window], [minizeWindowButton graphicContextId], size, arcs);
-    //xcb_poly_arc([connection connection], [maximizeWindowButton window], [hideWindowButton graphicContextId], size, arcs);
-    
 }
 
-- (void) drawTitleBar
+- (void) drawTitleBarForColor:(TitleBarColor)aColor
 {
+    NSColor* aux;
+    
+    if (aColor == TitleBarUpColor)
+        aux = titleBarUpColor;
+    
+    if (aColor == TitleBarDownColor)
+        aux = titleBarDownColor;
+    
+    
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
-    [drawer drawTitleBarWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
+    [drawer drawTitleBarWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:hideWindowButton visual:visual];
-    [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
+    /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
+     * a better solution to avoid all the sets methods/messages ***/
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:minimizeWindowButton visual:visual];
-    [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-    drawer = nil;
+    [drawer setWindow:hideWindowButton];
+    [drawer setHeight:[[[hideWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[hideWindowButton windowRect] size] getWidth]];
+    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    
+    [drawer setWindow:minimizeWindowButton];
+    [drawer setHeight:[[[minimizeWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[minimizeWindowButton windowRect] size] getWidth]];
+    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    
+    [drawer setWindow:maximizeWindowButton];
+    [drawer setHeight:[[[maximizeWindowButton windowRect] size] getHeight]];
+    [drawer setWidth:[[[maximizeWindowButton windowRect] size] getWidth]];
+    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
 
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:maximizeWindowButton visual:visual];
-    [drawer drawWindowWithColor:titlebarColor andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
     drawer = nil;
+    screen = nil;
+    visual = nil;
+    aux = nil;
+}
 
+- (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
+{
+    [self drawTitleBarForColor:aColor];
+    [self drawArcsForColor:aColor];
 }
 
 - (void) setWindowTitle:(NSString *) title
@@ -249,7 +257,8 @@
     hideButtonColor = nil;
     minimizeButtonColor = nil;
     maximizeButtonColor = nil;
-    titlebarColor = nil;
+    titleBarUpColor = nil;
+    titleBarDownColor = nil;
     ewmhService = nil;
 }
 

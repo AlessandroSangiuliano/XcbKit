@@ -95,7 +95,6 @@
 - (void) testCacheRootandWmWindowProperties
 {
     XCBConnection *connection = [XCBConnection sharedConnection];
-    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];

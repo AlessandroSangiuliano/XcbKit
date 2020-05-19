@@ -22,6 +22,7 @@
     uint32_t windowMask;
 }
 
+
 typedef NS_ENUM(NSInteger, WindowState)
 {
     ICCCM_WM_STATE_WITHDRAWN = 0,
@@ -32,6 +33,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) xcb_gcontext_t graphicContextId;
 @property (strong, nonatomic) XCBRect *windowRect;
 @property (strong, nonatomic) XCBRect* oldRect;
+@property (strong, nonatomic) XCBRect* originalRect;
 @property (nonatomic) BOOL decorated;
 @property (nonatomic) BOOL draggable; //TODO: forse no nmi serve
 @property (nonatomic) BOOL isCloseButton;
@@ -40,6 +42,10 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL isMaximized;
 @property (nonatomic) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
+@property (nonatomic) BOOL needDestroy;
+@property (nonatomic) xcb_pixmap_t pixmap;
+@property (nonatomic) BOOL firstRun; //find a better solution
+
 
 
 - (xcb_window_t) window;
@@ -60,6 +66,7 @@ typedef NS_ENUM(NSInteger, WindowState)
           withConnection:(XCBConnection*) aConnection;
 
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t) aMask andValues:(uint32_t*) values;
+- (void) createPixmap;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;
@@ -80,7 +87,10 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) createMiniWindowAtPosition:(XCBPoint*)position;
 - (void) restoreFromIconified;
 - (void) destroy;
-
+- (void) stackAbove;
+- (void) stackBelow;
+- (void) grabButton;
+- (void) ungrabButton;
 - (void) description;
 
 

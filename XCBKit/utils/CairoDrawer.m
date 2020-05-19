@@ -7,7 +7,7 @@
 //
 
 #import "CairoDrawer.h"
-#import "XCBScreen.h"
+#import "XCBScreen.h" 
 
 @implementation CairoDrawer
 
@@ -177,6 +177,15 @@
 
 }
 
+- (void) drawContent
+{
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+    
+    cairo_surface_flush(cairoSurface);
+    cairo_destroy(cr);
+}
+
 - (void) drawText:(NSString *)aText withColor:(NSColor *)aColor
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
@@ -190,15 +199,24 @@
     
     cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
     
+    NSFont* font = [NSFont fontWithName:@"Microsoft Sans Serif" size:11];
+    NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+    
+    NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
+    CGFloat halfLength = size.width / 2;
+    
     CGFloat textPositionX = (CGFloat) [[[window windowRect] size] getWidth] / 2;
     CGFloat textPositionY = (CGFloat) [[[window windowRect] size] getHeight] / 2 + 2;
     
-    cairo_move_to(cr, textPositionX, textPositionY);
+    cairo_move_to(cr, textPositionX - halfLength, textPositionY);
     
     cairo_show_text(cr, [aText cStringUsingEncoding: NSUTF8StringEncoding]);
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
+    
+    font = nil;
+    attributes = nil;
 }
 
 - (void) makePreviewImage
@@ -211,6 +229,7 @@
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+    size = nil;
 }
 
 - (void)setPreviewImage
@@ -226,7 +245,7 @@
     
     
     NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
-    NSLog(@"Immagine: %f, %f", [image size].width, [image size].height);
+    NSLog(@"Image: %f, %f", [image size].width, [image size].height);
     
     double scalingFactorW = 50 / [image size].width;
     double scalingFactorH = 50 / [image size].height;
@@ -246,7 +265,7 @@
     [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     [scaledImage unlockFocus];
     
-    NSLog(@"Immagine scalata %f, %f", [scaledImage size].height, [scaledImage size].width);
+    NSLog(@"Image scaled to %f, %f", [scaledImage size].height, [scaledImage size].width);
     
 
     NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];

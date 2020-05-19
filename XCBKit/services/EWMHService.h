@@ -11,6 +11,7 @@
 #import "XCBWindow.h"
 #import "XCBAtomService.h"
 
+
 //Actually it is a singleton
 
 @interface EWMHService : NSObject
@@ -343,6 +344,8 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
+- (id) initWithConnection:(XCBConnection*)aConnection;
+
 - (void) putPropertiesForRootWindow:(XCBWindow*) rootWindow andWmWindow:(XCBWindow*) wmWindow;
 
 - (void) changePropertiesForWindow:(XCBWindow*) aWindow
@@ -353,7 +356,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
                     withDataLength:(uint32_t) dataLength
                           withData:(const void *) data;
 
-- (void*) getProperty:(NSString*) aPropertyName
+- (void *) getProperty:(NSString*) aPropertyName
            forWindow:(XCBWindow*)aWindow
               delete:(BOOL)deleteProperty ;
 
