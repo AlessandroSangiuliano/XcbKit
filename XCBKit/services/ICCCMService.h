@@ -13,6 +13,7 @@
 @property (strong, nonatomic) NSArray* atomsArray;
 @property (strong, nonatomic) NSString* WMDeleteWindow;
 @property (strong, nonatomic) NSString* WMProtocols;
+@property (strong, nonatomic) NSString* WMName;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 

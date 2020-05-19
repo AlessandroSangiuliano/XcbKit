@@ -73,7 +73,10 @@
                              withDataLength:1
                                    withData:atom]; //questo è il valore della proerty è come un key-value...
     
-    xcb_atom_t* expected = (xcb_atom_t*)[icccmService getProperty:[icccmService WMProtocols] forWindow:window delete:NO];
+    xcb_atom_t* expected = (xcb_atom_t*)[icccmService getProperty:[icccmService WMProtocols]
+                                                     propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                                        forWindow:window
+                                                           delete:NO];
     
     NSLog(@"Atom id %u", expected[0]);
     

@@ -13,6 +13,7 @@
 #import "EWMHService.h"
 #import "XCBCreateWindowTypeRequest.h"
 #import "XCBWindowTypeResponse.h"
+#import "ICCCMService.h"
 
 
 @implementation XCBFrame
@@ -108,13 +109,30 @@
     
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
-    const char* value = [ewmhService getProperty:[ewmhService EWMHWMName] forWindow:clientWindow delete:NO];
-    NSString *windowTitle = [NSString stringWithUTF8String:(const char *)value];
+    char* value = [ewmhService getProperty:[ewmhService EWMHWMName]
+                              propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
+                                 forWindow:clientWindow
+                                    delete:NO];
+    
+    NSString *windowTitle = [NSString stringWithUTF8String:value];
     
     // for now f it is nil just set an empty string
     
     if (windowTitle == nil)
-        windowTitle = @"";
+    {
+        ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+        value = [icccmService getProperty:[icccmService WMName]
+                              propertyType:XCB_ATOM_STRING
+                                forWindow:clientWindow
+                                   delete:NO];
+        
+        windowTitle = [NSString stringWithUTF8String:value];
+        
+        if (windowTitle == nil)
+            windowTitle = @"";
+        
+        icccmService = nil;
+    }
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [titleBar setWindowTitle:windowTitle];

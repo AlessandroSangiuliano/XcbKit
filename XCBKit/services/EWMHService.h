@@ -357,7 +357,8 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
                           withData:(const void *) data;
 
 - (void *) getProperty:(NSString*) aPropertyName
-           forWindow:(XCBWindow*)aWindow
+          propertyType:(xcb_atom_t) propertyType
+             forWindow:(XCBWindow*)aWindow
               delete:(BOOL)deleteProperty ;
 
 - (void) dealloc;

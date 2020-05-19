@@ -507,7 +507,10 @@
 }
 
 
-- (void*) getProperty:(NSString *)aPropertyName forWindow:(XCBWindow *)aWindow delete:(BOOL)deleteProperty
+- (void*) getProperty:(NSString *)aPropertyName
+         propertyType:(xcb_atom_t)propertyType
+            forWindow:(XCBWindow *)aWindow
+               delete:(BOOL)deleteProperty
 {
     xcb_atom_t property = [[[atomService cachedAtoms] objectForKey:aPropertyName] unsignedIntValue];
     
@@ -515,7 +518,7 @@
                                                         deleteProperty,
                                                         [aWindow window],
                                                         property,
-                                                        XCB_GET_PROPERTY_TYPE_ANY,
+                                                        propertyType,
                                                         0,
                                                         UINT32_MAX);
     
@@ -524,7 +527,8 @@
                                                              cookie,
                                                              &error);
     
-    return xcb_get_property_value(reply);
+    void* value = xcb_get_property_value(reply);
+    return value;
 }
 
 

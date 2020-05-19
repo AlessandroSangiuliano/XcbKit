@@ -223,6 +223,7 @@
 {
     [self drawTitleBarForColor:aColor];
     [self drawArcsForColor:aColor];
+    [self setWindowTitle:windowTitle];
 }
 
 - (void) setWindowTitle:(NSString *) title
