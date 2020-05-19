@@ -214,8 +214,7 @@ extern XCBConnection *XCBConn;
     
     xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
     
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
     /*** restore dim and pos of the client window ***/
     
@@ -317,8 +316,7 @@ extern XCBConnection *XCBConn;
     /*** set the new title bar rect and redraw it ***/
     
     [titleBar setWindowRect:newRect];
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
     newSize = nil;
     newPoint = nil;
@@ -510,8 +508,7 @@ extern XCBConnection *XCBConn;
         [connection mapWindow:titleBar];
         
         [titleBar description];
-        [titleBar drawTitleBar];
-        [titleBar drawArcs];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
         
         [connection mapWindow:clientWindow];
         [clientWindow setIsMinimized:NO];

@@ -138,6 +138,7 @@ ICCCMService* icccmService;
     if (window != nil)
     {
         NSLog(@"Window %u previously added", [window window]);
+        window = nil;
         return;
     }
     
@@ -603,6 +604,7 @@ ICCCMService* icccmService;
 - (void) handleButtonPress:(xcb_button_press_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+    XCBFrame* frame;
     
     if ([window isCloseButton])
     {
@@ -664,24 +666,19 @@ ICCCMService* icccmService;
     
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        XCBFrame* frame = (XCBFrame*)window;
+        frame = (XCBFrame*)window;
         XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
-        [frame stackAbove];
-        
         [clientWindow ungrabButton];
-        frame = nil;
+        
         clientWindow = nil;
     }
     
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        XCBFrame* frameWindow = (XCBFrame*)[window parentWindow];
-        XCBWindow* clientWindow = [frameWindow childWindowForKey:ClientWindow];
-        
-        [frameWindow stackAbove];
+        frame = (XCBFrame*)[window parentWindow];
+        XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
         [clientWindow ungrabButton];
         
-        frameWindow = nil;
         clientWindow = nil;
     }
     
@@ -690,22 +687,28 @@ ICCCMService* icccmService;
     {
         [window ungrabButton];
         [[window parentWindow] stackAbove];
+        frame = (XCBFrame*)[window parentWindow];
+        
     }
-
     
-    XCBFrame *parent = (XCBFrame*)[window parentWindow];
-    XCBPoint *offset = [[parent windowRect] offset];
+    [frame stackAbove];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [self drawAllTitleBarsExcept:titleBar];
+
+    XCBPoint *offset = [[frame windowRect] offset];
     [offset setX:anEvent->event_x];
     [offset setY:anEvent->event_y];
 
-    if ([parent window] != anEvent->root)
+    if ([frame window] != anEvent->root)
         dragState = YES;
     else
         dragState = NO;
     
     offset = nil;
-    parent = nil;
+    frame = nil;
     window = nil;
+    titleBar = nil;
 }
 
 - (void) handleButtonRelease:(xcb_button_release_event_t *)anEvent
@@ -1025,6 +1028,32 @@ ICCCMService* icccmService;
     window = nil;
     
     return;
+}
+
+- (void) drawAllTitleBarsExcept:(XCBTitleBar*)aTitileBar
+{
+    
+    NSArray* windows = [windowsMap allValues];
+    NSUInteger size = [windows count];
+    
+    for (int i = 0; i < size; i++)
+    {
+        XCBWindow* tmp = [windows objectAtIndex:i];
+        if ([tmp isKindOfClass:[XCBTitleBar class]])
+        {
+            XCBTitleBar* titleBar = (XCBTitleBar*)tmp;
+            
+            if (titleBar != aTitileBar)
+            {
+                [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
+            }
+            
+            titleBar = nil;
+        }
+        
+        tmp = nil;
+    }
+    windows = nil;
 }
 
 - (void) sendClientMessageTo:(XCBWindow *)destination message:(Message)message

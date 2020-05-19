@@ -51,6 +51,7 @@
 		FABB114822756F0E007A0433 /* XCBWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = FABB114622756F0E007A0433 /* XCBWindow.h */; };
 		FABB114922756F0E007A0433 /* XCBWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB114722756F0E007A0433 /* XCBWindow.m */; };
 		FABB114A22756F0E007A0433 /* XCBWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FABB114722756F0E007A0433 /* XCBWindow.m */; };
+		FAC103B32472CD8D008EE044 /* ETitleBarColor.h in Headers */ = {isa = PBXBuildFile; fileRef = FAC103B12472CD8D008EE044 /* ETitleBarColor.h */; };
 		FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */ = {isa = PBXBuildFile; fileRef = FACACAF32317C88A00C826B3 /* XCBVisual.h */; };
 		FACACAF62317C89800C826B3 /* XCBVisual.m in Sources */ = {isa = PBXBuildFile; fileRef = FACACAF52317C89800C826B3 /* XCBVisual.m */; };
 		FAD5B31423DE148A00F1CB38 /* XCBSelection.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD5B31223DE148A00F1CB38 /* XCBSelection.h */; };
@@ -122,6 +123,7 @@
 		FABB11422274AEC1007A0433 /* XCBScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBScreen.m; sourceTree = "<group>"; };
 		FABB114622756F0E007A0433 /* XCBWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBWindow.h; sourceTree = "<group>"; };
 		FABB114722756F0E007A0433 /* XCBWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBWindow.m; sourceTree = "<group>"; };
+		FAC103B12472CD8D008EE044 /* ETitleBarColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ETitleBarColor.h; sourceTree = "<group>"; };
 		FACACAF32317C88A00C826B3 /* XCBVisual.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBVisual.h; sourceTree = "<group>"; };
 		FACACAF52317C89800C826B3 /* XCBVisual.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBVisual.m; sourceTree = "<group>"; };
 		FAD5B31223DE148A00F1CB38 /* XCBSelection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCBSelection.h; sourceTree = "<group>"; };
@@ -305,6 +307,7 @@
 			isa = PBXGroup;
 			children = (
 				FA8E88772434A32D002F0B35 /* EMessage.h */,
+				FAC103B12472CD8D008EE044 /* ETitleBarColor.h */,
 			);
 			path = enums;
 			sourceTree = "<group>";
@@ -317,6 +320,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA5ADC0C23CA1ABE00C8B403 /* Transformers.h in Headers */,
+				FAC103B32472CD8D008EE044 /* ETitleBarColor.h in Headers */,
 				FACACAF42317C88A00C826B3 /* XCBVisual.h in Headers */,
 				FA5ADBFB23C6444A00C8B403 /* EWMHService.h in Headers */,
 				FAF8685F23FC450F008A2FA2 /* XCBWindowTypeResponse.h in Headers */,

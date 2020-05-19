@@ -116,8 +116,7 @@
     if (windowTitle == nil)
         windowTitle = @"";
     
-    [titleBar drawTitleBar];
-    [titleBar drawArcs];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [titleBar setWindowTitle:windowTitle];
     
     [connection mapWindow:titleBar];
