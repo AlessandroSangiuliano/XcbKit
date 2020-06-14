@@ -1098,6 +1098,21 @@ ICCCMService* icccmService;
         [aFrame setBottomBorderClicked:YES];
 
     }
+    
+    if ((bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y) &&
+        (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x))
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        [aFrame setBottomBorderClicked:YES];
+        [aFrame setRightBorderClicked:YES];
+    }
 
 }
 
