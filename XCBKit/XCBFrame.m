@@ -64,7 +64,7 @@
         [request setXPosition:[[[aClientWindow windowRect] position] getY]];
         [request setWidth:width];
         [request setHeight:height];
-        [request setBorderWidth:1];
+        [request setBorderWidth:3];
         [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
         [request setVisual:visual];
         [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
@@ -119,7 +119,7 @@
     NSString *windowTitle = [NSString stringWithUTF8String:value];
     value = nil;
     
-    // for now f it is nil just set an empty string
+    // for now if it is nil just set an empty string
     
     if (windowTitle == nil)
     {
@@ -181,9 +181,15 @@
     {
         uint32_t values[] = {anEvent->event_y};
         xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
-        xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
         [[rect size] setHeight:anEvent->event_y];
-        [[[clientWindow windowRect] size] setHeight:anEvent->event_x];
+        NSLog(@"Frame:");
+        [self description];
+        
+        values[0] = [[rect size] getHeight] - 22;
+        xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+        [[[clientWindow windowRect] size] setHeight:values[0]];
+        NSLog(@"Client:");
+        [clientWindow  description];
     }
     
     rect = nil;

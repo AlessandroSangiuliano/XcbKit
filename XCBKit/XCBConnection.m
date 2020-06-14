@@ -1072,7 +1072,7 @@ ICCCMService* icccmService;
     int rightBorderPos = [[[aFrame windowRect] size] getWidth];
     int bottomBorderPos = [[[aFrame windowRect] size] getHeight];
     
-    if (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) == anEvent->event_x)
+    if (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x)
     {
         if (![aFrame grabPointer])
         {
@@ -1085,7 +1085,7 @@ ICCCMService* icccmService;
         [aFrame setRightBorderClicked:YES];
     }
     
-    if (bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) == anEvent->event_y)
+    if (bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y)
     {
         if (![aFrame grabPointer])
         {
