@@ -22,6 +22,8 @@ typedef NS_ENUM(NSInteger, childrenMask)
 }
 
 @property (strong, nonatomic) XCBConnection *connection;
+@property (nonatomic) BOOL rightBorderClicked;
+@property (nonatomic) BOOL bottomBorderClicked;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection withXcbWindow:(xcb_window_t) xcbWindow;
@@ -29,6 +31,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (void) addChildWindow:(XCBWindow*) aChild withKey:(childrenMask) keyMask;
 - (XCBWindow*) childWindowForKey:(childrenMask) key;
 - (void) removeChild:(childrenMask) frameChild;
+- (void) resize:(xcb_motion_notify_event_t *)anEvent;
 
 
  /********************************

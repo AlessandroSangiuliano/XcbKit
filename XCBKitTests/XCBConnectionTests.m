@@ -456,6 +456,15 @@
                 [connection setNeedFlush:NO];
                 break;
                 
+            case XCB_BUTTON_RELEASE:
+                NSLog(@"");
+                xcb_button_release_event_t* releaseEvent = (xcb_button_release_event_t*)e;
+                NSLog(@"Button Release Event for window %u: ", releaseEvent->event);
+                [connection handleButtonRelease:releaseEvent];
+                [connection flush];
+                [connection setNeedFlush:NO];
+                break;
+                
             case XCB_MAP_NOTIFY:
                 NSLog(@"");
                 xcb_map_notify_event_t *notifyEvent = (xcb_map_notify_event_t*)e;
@@ -468,7 +477,7 @@
                 xcb_map_request_event_t* mapRequestEvent = (xcb_map_request_event_t*)e;
                 NSLog(@"Map Request for window %u", mapRequestEvent->window);
                 [connection handleMapRequest:mapRequestEvent];
-                [connection flush]; // serve?
+                [connection flush];
                 [connection setNeedFlush:NO];
                 break;
                 

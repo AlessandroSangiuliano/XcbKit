@@ -45,6 +45,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL needDestroy;
 @property (nonatomic) xcb_pixmap_t pixmap;
 @property (nonatomic) BOOL firstRun; //find a better solution
+@property (nonatomic) BOOL pointerGrabbed;
 
 
 
@@ -92,6 +93,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) grabButton;
 - (void) ungrabButton;
 - (void) description;
+- (BOOL) grabPointer;
+- (void) ungrabPointer;
 
 
 @end

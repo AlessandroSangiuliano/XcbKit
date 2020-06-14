@@ -19,6 +19,8 @@
 @implementation XCBFrame
 
 @synthesize connection;
+@synthesize rightBorderClicked;
+@synthesize bottomBorderClicked;
 
 /* 
  quando il wm intercetta la finestra dell'app client inizializza il frame, poi si occupa di ridimensionare il frame per inserire
@@ -115,6 +117,7 @@
                                     delete:NO];
     
     NSString *windowTitle = [NSString stringWithUTF8String:value];
+    value = nil;
     
     // for now f it is nil just set an empty string
     
@@ -132,6 +135,7 @@
             windowTitle = @"";
         
         icccmService = nil;
+        value = nil;
     }
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
@@ -152,6 +156,41 @@
     ewmhService = nil;
     windowTitle = nil;
 }
+
+- (void) resize:(xcb_motion_notify_event_t *)anEvent
+{
+    /*** width ***/
+    
+    XCBRect* rect = [super windowRect];
+    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    
+    if ([[rect size] getWidth] < anEvent->event_x && rightBorderClicked)
+    {
+        uint32_t values[] = {anEvent->event_x};
+        xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_WIDTH, &values);
+        xcb_configure_window([connection connection], [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
+        xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
+        [[rect size] setWidth:anEvent->event_x];
+        [[[titleBar windowRect] size] setWidth:anEvent->event_x];
+        [[[clientWindow windowRect] size] setWidth:anEvent->event_x];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    }
+    
+    if ([[rect size] getHeight] < anEvent->event_y && bottomBorderClicked)
+    {
+        uint32_t values[] = {anEvent->event_y};
+        xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
+        xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+        [[rect size] setHeight:anEvent->event_y];
+        [[[clientWindow windowRect] size] setHeight:anEvent->event_x];
+    }
+    
+    rect = nil;
+    clientWindow = nil;
+    titleBar = nil;
+}
+
 
 
 

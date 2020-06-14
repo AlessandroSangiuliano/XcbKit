@@ -33,6 +33,7 @@
 @property (strong, nonatomic) EWMHService* ewmhService;
 @property (strong, nonatomic) XCBRegion* damagedRegions;
 @property (nonatomic) BOOL xfixesInitialized;
+@property (nonatomic) BOOL resizeState;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
@@ -102,6 +103,7 @@
 - (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (xcb_get_window_attributes_reply_t*) getAttributesForWindow:(XCBWindow*)aWindow;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
+- (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 
 
 - (xcb_timestamp_t) currentTime;

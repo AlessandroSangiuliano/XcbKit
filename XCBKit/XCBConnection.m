@@ -23,6 +23,7 @@
 @synthesize ewmhService;
 @synthesize damagedRegions;
 @synthesize xfixesInitialized;
+@synthesize resizeState;
 
 XCBConnection *XCBConn;
 ICCCMService* icccmService;
@@ -102,6 +103,7 @@ ICCCMService* icccmService;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
 	
     XCBConn = self;
+    resizeState = NO;
     [self flush];
     return self;
 }
@@ -597,7 +599,21 @@ ICCCMService* icccmService;
         frame = nil;
     }
     
-     window = nil;
+    if (resizeState)
+    {
+        NSLog(@"Resizing");
+        XCBFrame* frame;
+        
+        
+        if ([window isKindOfClass:[XCBFrame class]])
+            frame = (XCBFrame*) window;
+        
+        [frame resize:anEvent];
+        
+        frame = nil;
+    }
+    
+    window = nil;
     
 }
 
@@ -605,6 +621,7 @@ ICCCMService* icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame* frame;
+    
     
     if ([window isCloseButton])
     {
@@ -705,6 +722,11 @@ ICCCMService* icccmService;
     else
         dragState = NO;
     
+    
+    /*** RESIZE WINDOW BY CLICKING ON THE BORDER ***/
+    
+    [self borderClickedForFrameWindow:frame withEvent:anEvent];
+    
     offset = nil;
     frame = nil;
     window = nil;
@@ -713,7 +735,22 @@ ICCCMService* icccmService;
 
 - (void) handleButtonRelease:(xcb_button_release_event_t *)anEvent
 {
-   dragState = NO;
+    dragState = NO;
+    resizeState = NO;
+    
+    XCBWindow *window = [self windowForXCBId:anEvent->event];
+    XCBFrame* frame;
+    
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame*)window;
+        [frame setBottomBorderClicked:NO];
+        [frame setRightBorderClicked:NO];
+        
+        frame = nil;
+    }
+    
+    [window ungrabPointer];
 }
 
 - (void) handleFocusOut:(xcb_focus_out_event_t *)anEvent
@@ -903,20 +940,20 @@ ICCCMService* icccmService;
     XCBRect* exposeRectangle = [[XCBRect alloc] initWithExposeEvent:anEvent];
     xcb_rectangle_t expose_rectangle = [exposeRectangle xcbRectangle];
     
-    [window description];
-    NSLog(@"Event rectangle with cardinalities: %d %d %d %d",
+    //[window description];
+    /*NSLog(@"Event rectangle with cardinalities: %d %d %d %d",
           expose_rectangle.x,
           expose_rectangle.y,
           expose_rectangle.height,
-          expose_rectangle.width);
+          expose_rectangle.width);*/
     
-    NSLog(@"GC id: %u", [window graphicContextId]);
+    //NSLog(@"GC id: %u", [window graphicContextId]);
     
     /*** I get all the client window black here, and now maybe I know the reason. ***/
     
     //xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
     
-    XCBFrame* frame;
+    /*XCBFrame* frame;
     
     if ([window isKindOfClass:[XCBTitleBar class]] ||
         [window isMinimizeButton] ||
@@ -932,7 +969,7 @@ ICCCMService* icccmService;
         frame = (XCBFrame*) window;
     
     
-    xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, &expose_rectangle);
+    xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, &expose_rectangle);*/
         
     
     /*XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
@@ -1030,6 +1067,40 @@ ICCCMService* icccmService;
     return;
 }
 
+- (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t *)anEvent
+{
+    int rightBorderPos = [[[aFrame windowRect] size] getWidth];
+    int bottomBorderPos = [[[aFrame windowRect] size] getHeight];
+    
+    if (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) == anEvent->event_x)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        [aFrame setRightBorderClicked:YES];
+    }
+    
+    if (bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) == anEvent->event_y)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        [aFrame setBottomBorderClicked:YES];
+
+    }
+
+}
+
 - (void) drawAllTitleBarsExcept:(XCBTitleBar*)aTitileBar
 {
     
@@ -1082,19 +1153,6 @@ ICCCMService* icccmService;
             /*else
                 xcb_kill_client(connection, [destination window]);*/
             
-            /*event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
-            event.format = 32;
-            event.response_type = XCB_CLIENT_MESSAGE;
-            event.window = [destination window];
-            event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
-            event.data.data32[1] = currentTime;
-            
-            xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char*)&event);*/
-            
-            /*if (destination != Nil)
-            {
-                [[destination parentWindow] destroy];
-            }*/
             break;
             
         default:
