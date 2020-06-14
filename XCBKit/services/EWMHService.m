@@ -528,6 +528,7 @@
                                                              &error);
     
     void* value = xcb_get_property_value(reply);
+    free(reply);
     return value;
 }
 

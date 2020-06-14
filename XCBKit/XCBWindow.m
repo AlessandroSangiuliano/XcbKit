@@ -32,7 +32,9 @@
 @synthesize connection;
 @synthesize needDestroy;
 @synthesize pixmap;
+@synthesize pointerGrabbed;
 @synthesize firstRun;
+
 
 extern XCBConnection *XCBConn;
 
@@ -592,6 +594,38 @@ extern XCBConnection *XCBConn;
 {
     xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
 }
+
+- (BOOL) grabPointer
+{
+    uint16_t mask = XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_POINTER_MOTION;
+    xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply([connection connection],
+                                                             xcb_grab_pointer([connection connection],
+                                                                              0,
+                                                                              window,
+                                                                              BUTTONMASK | mask,
+                                                                              XCB_GRAB_MODE_ASYNC,
+                                                                              XCB_GRAB_MODE_ASYNC,
+                                                                              XCB_NONE,
+                                                                              XCB_NONE,
+                                                                              XCB_CURRENT_TIME), NULL);
+    
+    if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS)
+        return NO;
+    
+    pointerGrabbed = YES;
+    return YES;
+    
+}
+
+- (void) ungrabPointer
+{
+    if (pointerGrabbed)
+    {
+        xcb_ungrab_pointer([connection connection], XCB_CURRENT_TIME);
+        pointerGrabbed = NO;
+    }
+}
+
 
 - (void) description
 {
