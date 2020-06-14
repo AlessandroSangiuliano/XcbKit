@@ -32,6 +32,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (XCBWindow*) childWindowForKey:(childrenMask) key;
 - (void) removeChild:(childrenMask) frameChild;
 - (void) resize:(xcb_motion_notify_event_t *)anEvent;
+- (void) moveTo:(NSPoint)coordinates;
 
 
  /********************************

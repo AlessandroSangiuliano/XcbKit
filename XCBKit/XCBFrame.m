@@ -221,7 +221,7 @@
     NSLog(@"Frame:");
     [self description];
     
-    values[0] = [[rect size] getHeight] - 22;
+    values[0] = anEvent->event_y - 22;
     xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     [[[clientWindow windowRect] size] setHeight:values[0]];
     NSLog(@"Client:");
@@ -232,7 +232,30 @@
     titleBar = nil;
 }
 
-
+- (void) moveTo:(NSPoint)coordinates
+{
+    XCBPoint *pos = [[super windowRect] position]; //TODO: qundo faccio il restore da icone questo è nil. fixare
+    XCBPoint *offset = [[super windowRect] offset];
+    
+    if (pos == NULL)
+        return;
+    
+    int16_t x =  [pos getX];
+    int16_t y = [pos getY];
+    
+    x = x + coordinates.x - [offset getX];
+    y = y + coordinates.y - [offset getY];
+    
+    [pos setX:x];
+    [pos setY:y];
+    [[[super originalRect] position] setX:x];
+    [[[super originalRect] position] setY:y];
+    
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, [pos values]);
+    
+    pos = nil;
+    offset = nil;
+}
 
 
 /********************************

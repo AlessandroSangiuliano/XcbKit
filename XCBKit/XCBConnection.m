@@ -573,29 +573,12 @@ ICCCMService* icccmService;
     
     if (dragState && ([window window] != [[[[self screens] objectAtIndex:0] rootWindow] window]))
     {
-        XCBWindow *frame = [window parentWindow];
-        XCBPoint *pos = [[frame windowRect] position]; //TODO: qundo faccio il restore da icone questo è nil. fixare
-        XCBPoint *offset = [[frame windowRect] offset];
-        
-        if (pos == NULL)
-            return;
-        
-        int16_t x =  [pos getX];
-        int16_t y = [pos getY];
-        
-        x = x + anEvent->event_x - [offset getX];
-        y = y + anEvent->event_y - [offset getY];
-        
-        [pos setX:x];
-        [pos setY:y];
-        [[[frame originalRect] position] setX:x];
-        [[[frame originalRect] position] setY:y];
-        
-        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, [pos values]);
+        XCBFrame *frame = (XCBFrame*)[window parentWindow];
+       
+        NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
+        [frame moveTo:destPoint];
         
         needFlush = YES;
-        pos = nil;
-        offset = nil;
         frame = nil;
     }
     
