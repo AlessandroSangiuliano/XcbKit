@@ -423,8 +423,6 @@ ICCCMService* icccmService;
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
     XCBScreen* screen = [screens objectAtIndex:0];
-    uint32_t gcValues[1] = {0};
-    uint32_t mask = XCB_GC_GRAPHICS_EXPOSURES;
 	
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
@@ -440,28 +438,12 @@ ICCCMService* icccmService;
     {
         NSLog(@"Window with id %u already decorated", [window window]);
         
-        //FIXME: If I maximize then i iconify, the restore to normal window is working bad
-        
-        /*if (![[window parentWindow] isMapped]) // non so se è corretto.
-        {
-            NSLog(@"ENTER");
-            XCBFrame* frame = (XCBFrame*) [window parentWindow];
-            XCBTitleBar* titleBar = (XCBTitleBar*) [frame childWindowForKey:TitleBar];
-            [self mapWindow:frame];
-            [titleBar drawTitleBar];
-            [titleBar drawArcs];
-            [self mapWindow:titleBar];
-            [self mapWindow:window];
-        }*/
-        
         return;
     }
 
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-        //[window createGraphicContextWithMask:mask andValues:gcValues];
-        //[window createPixmap];
         
         /* check the ovveride redirect flag, if yes the WM must not handle the window */
         
@@ -469,7 +451,7 @@ ICCCMService* icccmService;
         
         if (reply->override_redirect == YES)
         {
-            NSLog(@"Override redirect detected"); //da eliminare
+            NSLog(@"Override redirect detected"); //useless log
             return;
         }
         
