@@ -22,7 +22,6 @@
 @synthesize minimizeWindowButton;
 @synthesize maximizeWindowButton;
 @synthesize arc;
-//@synthesize connection;
 @synthesize hideButtonColor;
 @synthesize minimizeButtonColor;
 @synthesize maximizeButtonColor;
@@ -54,7 +53,7 @@
     [request setParentWindow:aFrame];
     [request setXPosition:0];
     [request setYPosition:0];
-    [request setWidth:[[[aFrame windowRect] size] getWidth]];
+    [request setWidth:[aFrame windowRect].size.width];
     [request setHeight:22];
     [request setBorderWidth:0.2];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
@@ -199,18 +198,18 @@
      * a better solution to avoid all the sets methods/messages ***/
     
     [drawer setWindow:hideWindowButton];
-    [drawer setHeight:[[[hideWindowButton windowRect] size] getHeight]];
-    [drawer setWidth:[[[hideWindowButton windowRect] size] getWidth]];
+    [drawer setHeight:[hideWindowButton windowRect].size.height];
+    [drawer setWidth:[hideWindowButton windowRect].size.width];
     [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
     [drawer setWindow:minimizeWindowButton];
-    [drawer setHeight:[[[minimizeWindowButton windowRect] size] getHeight]];
-    [drawer setWidth:[[[minimizeWindowButton windowRect] size] getWidth]];
+    [drawer setHeight:[minimizeWindowButton windowRect].size.height];
+    [drawer setWidth:[minimizeWindowButton windowRect].size.width];
     [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
     [drawer setWindow:maximizeWindowButton];
-    [drawer setHeight:[[[maximizeWindowButton windowRect] size] getHeight]];
-    [drawer setWidth:[[[maximizeWindowButton windowRect] size] getWidth]];
+    [drawer setHeight:[maximizeWindowButton windowRect].size.height];
+    [drawer setWidth:[maximizeWindowButton windowRect].size.width];
     [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
 
     

@@ -7,10 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XCBRect.h"
+#import "XCBShape.h"
 #include <xcb/xcb.h>
 
 @class XCBConnection;
+
 
 @interface XCBWindow : NSObject
 {
@@ -31,11 +32,11 @@ typedef NS_ENUM(NSInteger, WindowState)
 };
 
 @property (nonatomic) xcb_gcontext_t graphicContextId;
-@property (strong, nonatomic) XCBRect *windowRect;
-@property (strong, nonatomic) XCBRect* oldRect;
-@property (strong, nonatomic) XCBRect* originalRect;
+@property (nonatomic) XCBRect windowRect;
+@property (nonatomic) XCBRect oldRect;
+@property (nonatomic) XCBRect originalRect;
 @property (nonatomic) BOOL decorated;
-@property (nonatomic) BOOL draggable; //TODO: forse no nmi serve
+@property (nonatomic) BOOL draggable; //TODO: maybe not necessary
 @property (nonatomic) BOOL isCloseButton;
 @property (nonatomic) BOOL isMinimizeButton;
 @property (nonatomic) BOOL isMaximizeButton;
@@ -85,7 +86,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) minimize;
 - (void) hide;
 - (void) restoreDimensionAndPosition;
-- (void) createMiniWindowAtPosition:(XCBPoint*)position;
+- (void) createMiniWindowAtPosition:(XCBPoint)position;
 - (void) restoreFromIconified;
 - (void) destroy;
 - (void) stackAbove;
