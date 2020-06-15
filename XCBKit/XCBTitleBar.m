@@ -22,7 +22,7 @@
 @synthesize minimizeWindowButton;
 @synthesize maximizeWindowButton;
 @synthesize arc;
-@synthesize connection;
+//@synthesize connection;
 @synthesize hideButtonColor;
 @synthesize minimizeButtonColor;
 @synthesize maximizeButtonColor;
@@ -38,9 +38,10 @@
     
     windowMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 
-    connection = aConnection;
+    //connection = aConnection;
+    [super setConnection:aConnection];
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     
     [rootVisual setVisualTypeForScreen:screen];
@@ -61,10 +62,10 @@
     [request setValueMask:windowMask];
     [request setValueList:values];
     
-    XCBWindowTypeResponse* response = [connection createWindowForRequest:request registerWindow:NO];
+    XCBWindowTypeResponse* response = [[super connection] createWindowForRequest:request registerWindow:NO];
     
     CsMapXCBWindowToXCBTitleBar([response titleBar], self);
-    [connection registerWindow:self];
+    [[super connection] registerWindow:self];
     
     response = nil;
     request = nil;
@@ -74,7 +75,7 @@
     
     uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     
-    hideWindowButton = [connection createWindowWithDepth:XCB_COPY_FROM_PARENT
+    hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
                   withParentWindow:self
                      withXPosition:5
                      withYPosition:5
@@ -100,7 +101,7 @@
     
     [hideWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
     
-    minimizeWindowButton = [connection createWindowWithDepth:XCB_COPY_FROM_PARENT
+    minimizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
                                            withParentWindow:self
                                               withXPosition:24
                                               withYPosition:5
@@ -119,7 +120,7 @@
     
     minimizeButtonColor = [NSColor colorWithCalibratedRed: 0.9 green: 0.7 blue: 0.3 alpha: 1];
     
-    maximizeWindowButton = [connection createWindowWithDepth:XCB_COPY_FROM_PARENT
+    maximizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
                                              withParentWindow:self
                                                 withXPosition:44
                                                 withYPosition:5
@@ -138,11 +139,11 @@
     
     maximizeButtonColor = [NSColor colorWithCalibratedRed:0 green:0.74 blue:1 alpha:1];
     
-    [connection mapWindow:self];
-    [connection mapWindow:hideWindowButton];
-    [connection mapWindow:minimizeWindowButton];
-    [connection mapWindow:maximizeWindowButton];
-    ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    [[super connection] mapWindow:self];
+    [[super connection] mapWindow:hideWindowButton];
+    [[super connection] mapWindow:minimizeWindowButton];
+    [[super connection] mapWindow:maximizeWindowButton];
+    ewmhService = [EWMHService sharedInstanceWithConnection:[super connection]];
     
     return self;
 }
@@ -150,26 +151,26 @@
 - (void) drawArcsForColor:(TitleBarColor)aColor
 {
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
     
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:hideWindowButton visual:visual];
-    
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
+
     NSColor *stopColor = [NSColor colorWithCalibratedRed:1 green:1 blue:1 alpha:1];
     
     [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
     
     drawer = nil;
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:minimizeWindowButton visual:visual];
+    drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
     
     [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
     
     drawer = nil;
     
-    drawer = [[CairoDrawer alloc] initWithConnection:connection window:maximizeWindowButton visual:visual];
+    drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
     
     [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
     
@@ -187,11 +188,11 @@
         aux = titleBarDownColor;
     
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
     [drawer drawTitleBarWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
     
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
@@ -223,6 +224,7 @@
 {
     [self drawTitleBarForColor:aColor];
     [self drawArcsForColor:aColor];
+    [self setWindowTitle:windowTitle];
 }
 
 - (void) setWindowTitle:(NSString *) title
@@ -234,11 +236,11 @@
         return;
     }
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
     [drawer drawText:windowTitle withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
     drawer = nil;
 }
@@ -253,7 +255,6 @@
     hideWindowButton = nil;
     minimizeWindowButton = nil;
     maximizeWindowButton = nil;
-    connection = nil;
     hideButtonColor = nil;
     minimizeButtonColor = nil;
     maximizeButtonColor = nil;

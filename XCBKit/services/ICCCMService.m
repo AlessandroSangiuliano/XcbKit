@@ -13,6 +13,7 @@
 @synthesize WMDeleteWindow;
 @synthesize WMProtocols;
 @synthesize atomsArray;
+@synthesize WMName;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -26,11 +27,13 @@
     
     WMDeleteWindow = @"WM_DELETE_WINDOW";
     WMProtocols = @"WM_PROTOCOLS";
+    WMName = @"WM_NAME";
     
     NSString* icccmAtoms[] =
     {
         WMProtocols,
-        WMDeleteWindow
+        WMDeleteWindow,
+        WMName
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -57,7 +60,10 @@
     
     xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:protocol];
     
-    xcb_atom_t* windowProtocols = (xcb_atom_t*)[self getProperty:WMProtocols forWindow:window delete:NO];
+    xcb_atom_t* windowProtocols = (xcb_atom_t*)[self getProperty:WMProtocols
+                                                    propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                                       forWindow:window
+                                                          delete:NO];
     
     int size = sizeof(windowProtocols)/ sizeof(windowProtocols);
     
@@ -74,6 +80,7 @@
 {
     WMDeleteWindow = nil;
     WMProtocols = nil;
+    WMName = nil;
     atomsArray = nil;
 }
 

@@ -13,11 +13,14 @@
 #import "EWMHService.h"
 #import "XCBCreateWindowTypeRequest.h"
 #import "XCBWindowTypeResponse.h"
+#import "ICCCMService.h"
 
 
 @implementation XCBFrame
 
 @synthesize connection;
+@synthesize rightBorderClicked;
+@synthesize bottomBorderClicked;
 
 /* 
  quando il wm intercetta la finestra dell'app client inizializza il frame, poi si occupa di ridimensionare il frame per inserire
@@ -61,7 +64,7 @@
         [request setXPosition:[[[aClientWindow windowRect] position] getY]];
         [request setWidth:width];
         [request setHeight:height];
-        [request setBorderWidth:1];
+        [request setBorderWidth:3];
         [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
         [request setVisual:visual];
         [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
@@ -108,13 +111,32 @@
     
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
-    const char* value = [ewmhService getProperty:[ewmhService EWMHWMName] forWindow:clientWindow delete:NO];
-    NSString *windowTitle = [NSString stringWithUTF8String:(const char *)value];
+    char* value = [ewmhService getProperty:[ewmhService EWMHWMName]
+                              propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
+                                 forWindow:clientWindow
+                                    delete:NO];
     
-    // for now f it is nil just set an empty string
+    NSString *windowTitle = [NSString stringWithUTF8String:value];
+    value = nil;
+    
+    // for now if it is nil just set an empty string
     
     if (windowTitle == nil)
-        windowTitle = @"";
+    {
+        ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+        value = [icccmService getProperty:[icccmService WMName]
+                              propertyType:XCB_ATOM_STRING
+                                forWindow:clientWindow
+                                   delete:NO];
+        
+        windowTitle = [NSString stringWithUTF8String:value];
+        
+        if (windowTitle == nil)
+            windowTitle = @"";
+        
+        icccmService = nil;
+        value = nil;
+    }
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [titleBar setWindowTitle:windowTitle];
@@ -135,6 +157,105 @@
     windowTitle = nil;
 }
 
+- (void) resize:(xcb_motion_notify_event_t *)anEvent
+{
+    /*** width ***/
+    
+    XCBRect* rect = [super windowRect];
+    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    
+    if (rightBorderClicked && !bottomBorderClicked)
+        [self resizeFromRightForEvent:anEvent];
+    
+    
+    /** height **/
+    
+    if (bottomBorderClicked && !rightBorderClicked)
+        [self resizeFromBottomForEvent:anEvent];
+    
+    /** width and height **/
+    
+    if (rightBorderClicked && bottomBorderClicked)
+    {
+        [self resizeFromBottomForEvent:anEvent];
+        [self resizeFromRightForEvent:anEvent];
+    }
+    
+    
+    
+    rect = nil;
+    clientWindow = nil;
+    titleBar = nil;
+}
+
+- (void) resizeFromRightForEvent:(xcb_motion_notify_event_t *)anEvent
+{
+    XCBRect* rect = [super windowRect];
+    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    
+    uint32_t values[] = {anEvent->event_x};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window([connection connection], [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    [[rect size] setWidth:anEvent->event_x];
+    [[[titleBar windowRect] size] setWidth:anEvent->event_x];
+    [[[clientWindow windowRect] size] setWidth:anEvent->event_x];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    
+    rect = nil;
+    clientWindow = nil;
+    titleBar = nil;
+}
+
+- (void) resizeFromBottomForEvent:(xcb_motion_notify_event_t *)anEvent
+{
+    XCBRect* rect = [super windowRect];
+    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    
+    uint32_t values[] = {anEvent->event_y};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
+    [[rect size] setHeight:anEvent->event_y];
+    NSLog(@"Frame:");
+    [self description];
+    
+    values[0] = anEvent->event_y - 22;
+    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+    [[[clientWindow windowRect] size] setHeight:values[0]];
+    NSLog(@"Client:");
+    [clientWindow  description];
+
+    rect = nil;
+    clientWindow = nil;
+    titleBar = nil;
+}
+
+- (void) moveTo:(NSPoint)coordinates
+{
+    XCBPoint *pos = [[super windowRect] position]; //TODO: qundo faccio il restore da icone questo è nil. fixare
+    XCBPoint *offset = [[super windowRect] offset];
+    
+    if (pos == NULL)
+        return;
+    
+    int16_t x =  [pos getX];
+    int16_t y = [pos getY];
+    
+    x = x + coordinates.x - [offset getX];
+    y = y + coordinates.y - [offset getY];
+    
+    [pos setX:x];
+    [pos setY:y];
+    [[[super originalRect] position] setX:x];
+    [[[super originalRect] position] setY:y];
+    
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, [pos values]);
+    
+    pos = nil;
+    offset = nil;
+}
 
 
 /********************************
