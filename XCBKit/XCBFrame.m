@@ -161,9 +161,6 @@
 {
     /*** width ***/
     
-    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
-    
     if (rightBorderClicked && !bottomBorderClicked)
         [self resizeFromRightForEvent:anEvent];
     
@@ -180,10 +177,6 @@
         [self resizeFromAngleForEvent:anEvent];
     }
     
-    
-    
-    clientWindow = nil;
-    titleBar = nil;
 }
 
 - (void) resizeFromRightForEvent:(xcb_motion_notify_event_t *)anEvent
@@ -215,7 +208,6 @@
 {
     XCBRect rect = [super windowRect];
     XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
     
     uint32_t values[] = {anEvent->event_y};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
@@ -228,7 +220,6 @@
     [clientWindow setWindowRect:clientRect];
 
     clientWindow = nil;
-    titleBar = nil;
 }
 
 - (void) resizeFromAngleForEvent:(xcb_motion_notify_event_t*)anEvent

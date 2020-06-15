@@ -418,7 +418,6 @@ ICCCMService* icccmService;
     
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
-    XCBScreen* screen = [screens objectAtIndex:0];
 	
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
@@ -478,7 +477,6 @@ ICCCMService* icccmService;
     
     window = nil;
     frame = nil;
-    screen = nil;
 }
 
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
