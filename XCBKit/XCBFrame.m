@@ -177,8 +177,7 @@
     
     if (rightBorderClicked && bottomBorderClicked)
     {
-        [self resizeFromBottomForEvent:anEvent];
-        [self resizeFromRightForEvent:anEvent];
+        [self resizeFromAngleForEvent:anEvent];
     }
     
     
@@ -199,6 +198,7 @@
     xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
     rect.size.width = anEvent->event_x;
     [super setWindowRect:rect];
+    
     XCBRect titleBarRect = [titleBar windowRect];
     titleBarRect.size.width = anEvent->event_x;
     [titleBar setWindowRect:titleBarRect];
@@ -220,19 +220,42 @@
     uint32_t values[] = {anEvent->event_y};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
     rect.size.height = anEvent->event_y;
-    NSLog(@"Frame:");
-    [self description];
     
     values[0] = anEvent->event_y - 22;
     xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     XCBRect clientRect = [clientWindow windowRect];
     clientRect.size.height = values[0];
     [clientWindow setWindowRect:clientRect];
-    NSLog(@"Client:");
-    [clientWindow  description];
 
     clientWindow = nil;
     titleBar = nil;
+}
+
+- (void) resizeFromAngleForEvent:(xcb_motion_notify_event_t*)anEvent
+{
+    XCBRect rect = [super windowRect];
+    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    
+    uint32_t values[] = {anEvent->event_x, anEvent->event_y};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window([connection connection], [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    values[1] = values[1] - 22;
+    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    
+    rect.size.width = anEvent->event_x;
+    rect.size.height = anEvent->event_y;
+    [super setWindowRect:rect];
+    
+    XCBRect titleBarRect = [titleBar windowRect];
+    titleBarRect.size.width = anEvent->event_x;
+    [titleBar setWindowRect:titleBarRect];
+    
+    XCBRect clientRect = [clientWindow windowRect];
+    clientRect.size.width = anEvent->event_x;
+    clientRect.size.height = values[1];
+    [clientWindow setWindowRect:clientRect];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 }
 
 - (void) moveTo:(NSPoint)coordinates
