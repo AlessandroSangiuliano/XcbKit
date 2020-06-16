@@ -548,8 +548,11 @@ ICCCMService* icccmService;
 - (void) handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+    XCBWindow* rootWindow = [self rootWindowForScreenNumber:0];
     
-    if (dragState && ([window window] != [[[[self screens] objectAtIndex:0] rootWindow] window]))
+    if (dragState &&
+        ([window window] != [rootWindow window]) &&
+        ([[window parentWindow] window] != [rootWindow window]))
     {
         XCBFrame *frame = (XCBFrame*)[window parentWindow];
        
@@ -575,7 +578,7 @@ ICCCMService* icccmService;
     }
     
     window = nil;
-    
+    rootWindow = nil;
 }
 
 - (void) handleButtonPress:(xcb_button_press_event_t *)anEvent
@@ -999,7 +1002,7 @@ ICCCMService* icccmService;
         
     }
     
-    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluet if the check on destroy window is necessary or not */
+    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluete if the check on destroy window is necessary or not */
     {
         titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
         [self unregisterWindow:[titleBarWindow hideWindowButton]];
