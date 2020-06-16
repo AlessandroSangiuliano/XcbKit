@@ -123,6 +123,8 @@
     NSLog(@"Notify: %u", XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
     pause();
     
+    free(reply);
+    
 }
 
 - (void) testChangeAttributes
@@ -163,7 +165,7 @@
     xcb_get_window_attributes_reply_t *reply = [connection getAttributesForWindow:window];
     
     STAssertTrue(reply->override_redirect == YES, @"");
-    
+    free(reply);
 }
 
 - (void) testCreateWindow
@@ -381,8 +383,14 @@
     [self eventLoopWithConnection:connection andDrawer:drawer andClientWindow:clientWindow];
     
     //pause();
-
-
+    
+    clientWindow = nil;
+    selectionManagerWindow = nil;
+    screen = nil;
+    visual = nil;
+    connection = nil;
+    ewmhService = nil;
+    drawer = nil;
 }
 
 - (void) eventLoopWithConnection:(XCBConnection*)connection

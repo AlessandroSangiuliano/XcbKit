@@ -367,6 +367,8 @@ ICCCMService* icccmService;
     else
         attributesChanged = YES;
     
+    free(error);
+    
     return attributesChanged;
 }
 
@@ -455,6 +457,7 @@ ICCCMService* icccmService;
         [window setOriginalRect:rect];
         [self registerWindow:window];
         [window setFirstRun:YES];
+        free(reply);
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
@@ -596,23 +599,17 @@ ICCCMService* icccmService;
         //XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
         
         if (frameWindow != nil && check) //probably unnecessary check when fixed
-        {
-            /*[self unregisterWindow:clientWindow];
-            [self unregisterWindow:[frameWindow childWindowForKey:TitleBar]];*/
-            
+        {            
             /* i was using an artifact with [frameWindow setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
              an expose event is generated for the frame and close button, so i was calling [frame destroy]
              in handleExpose method (XCBConnection). I think that is toally wrong and bad */
             
             [frameWindow setNeedDestroy:YES];
-            //[frameWindow destroy];
-            //[window destroy];
         }
         
         frameWindow = nil;
         window = nil;
         clientWindow = nil;
-        //point = nil;
         return;
     }
     

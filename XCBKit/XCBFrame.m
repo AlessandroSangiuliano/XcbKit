@@ -162,91 +162,109 @@
     /*** width ***/
     
     if (rightBorderClicked && !bottomBorderClicked)
-        [self resizeFromRightForEvent:anEvent];
+        resizeFromRightForEvent(anEvent, self);
     
     
     /** height **/
     
     if (bottomBorderClicked && !rightBorderClicked)
-        [self resizeFromBottomForEvent:anEvent];
+        resizeFromBottomForEvent(anEvent, self);
     
     /** width and height **/
     
     if (rightBorderClicked && bottomBorderClicked)
     {
-        [self resizeFromAngleForEvent:anEvent];
+        resizeFromAngleForEvent(anEvent, self);
     }
     
 }
 
-- (void) resizeFromRightForEvent:(xcb_motion_notify_event_t *)anEvent
+void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window)
 {
-    XCBRect rect = [super windowRect];
-    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    XCBRect rect = [window windowRect];
+    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
+    xcb_connection_t *connection = [[window connection] connection];
     
     uint32_t values[] = {anEvent->event_x};
-    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_WIDTH, &values);
-    xcb_configure_window([connection connection], [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
-    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
     rect.size.width = anEvent->event_x;
-    [super setWindowRect:rect];
+    [window setWindowRect:rect]; //TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [window setOriginalRect:rect]; //TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     
     XCBRect titleBarRect = [titleBar windowRect];
     titleBarRect.size.width = anEvent->event_x;
-    [titleBar setWindowRect:titleBarRect];
+    [titleBar setWindowRect:titleBarRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [titleBar setOriginalRect:titleBarRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     XCBRect clientRect = [clientWindow windowRect];
     clientRect.size.width = anEvent->event_x;
-    [clientWindow setWindowRect:clientRect];
+    [clientWindow setWindowRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [clientWindow setOriginalRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
     clientWindow = nil;
     titleBar = nil;
+    connection = nil;
 }
 
-- (void) resizeFromBottomForEvent:(xcb_motion_notify_event_t *)anEvent
+void resizeFromBottomForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window)
 {
-    XCBRect rect = [super windowRect];
-    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
+    XCBRect rect = [window windowRect];
+    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
+    xcb_connection_t *connection = [[window connection] connection];
     
     uint32_t values[] = {anEvent->event_y};
-    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     rect.size.height = anEvent->event_y;
+    [window setWindowRect:rect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [window setOriginalRect:rect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     
     values[0] = anEvent->event_y - 22;
-    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     XCBRect clientRect = [clientWindow windowRect];
     clientRect.size.height = values[0];
-    [clientWindow setWindowRect:clientRect];
+    [clientWindow setWindowRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [clientWindow setOriginalRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
 
     clientWindow = nil;
+    connection = nil;
 }
 
-- (void) resizeFromAngleForEvent:(xcb_motion_notify_event_t*)anEvent
+void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *window)
 {
-    XCBRect rect = [super windowRect];
-    XCBWindow* clientWindow = [self childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+    XCBRect rect = [window windowRect];
+    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
+    xcb_connection_t *connection = [[window connection] connection];
     
     uint32_t values[] = {anEvent->event_x, anEvent->event_y};
-    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
-    xcb_configure_window([connection connection], [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
     values[1] = values[1] - 22;
-    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
     
     rect.size.width = anEvent->event_x;
     rect.size.height = anEvent->event_y;
-    [super setWindowRect:rect];
+    [window setWindowRect:rect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [window setOriginalRect:rect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     
     XCBRect titleBarRect = [titleBar windowRect];
     titleBarRect.size.width = anEvent->event_x;
-    [titleBar setWindowRect:titleBarRect];
+    [titleBar setWindowRect:titleBarRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [titleBar setOriginalRect:titleBarRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     
     XCBRect clientRect = [clientWindow windowRect];
     clientRect.size.width = anEvent->event_x;
     clientRect.size.height = values[1];
-    [clientWindow setWindowRect:clientRect];
+    [clientWindow setWindowRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
+    [clientWindow setOriginalRect:clientRect];//TODO: access to the window rect without sending the setWindowRect message should improve the perfromances
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    
+    titleBar = nil;
+    clientWindow = nil;
+    connection = nil;
 }
 
 - (void) moveTo:(NSPoint)coordinates
