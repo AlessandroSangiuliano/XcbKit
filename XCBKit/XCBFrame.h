@@ -24,6 +24,8 @@ typedef NS_ENUM(NSInteger, childrenMask)
 @property (strong, nonatomic) XCBConnection *connection;
 @property (nonatomic) BOOL rightBorderClicked;
 @property (nonatomic) BOOL bottomBorderClicked;
+@property (nonatomic) BOOL leftBorderClicked;
+@property (nonatomic) BOOL topBorderClicked;
 @property (nonatomic) XCBPoint offset;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;

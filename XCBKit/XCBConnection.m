@@ -599,7 +599,6 @@ ICCCMService* icccmService;
         
         [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
         
-        //XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
         
         if (frameWindow != nil && check) //probably unnecessary check when fixed
         {            
@@ -681,7 +680,8 @@ ICCCMService* icccmService;
     
     /*** RESIZE WINDOW BY CLICKING ON THE BORDER ***/
     
-    [self borderClickedForFrameWindow:frame withEvent:anEvent];
+    if ([titleBar window] != anEvent->event)
+        [self borderClickedForFrameWindow:frame withEvent:anEvent];
     
     frame = nil;
     window = nil;
@@ -701,6 +701,8 @@ ICCCMService* icccmService;
         frame = (XCBFrame*)window;
         [frame setBottomBorderClicked:NO];
         [frame setRightBorderClicked:NO];
+        [frame setLeftBorderClicked:NO];
+        [frame setTopBorderClicked:NO];
         
         frame = nil;
     }
@@ -1023,10 +1025,12 @@ ICCCMService* icccmService;
 
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t *)anEvent
 {
-    int rightBorderPos = [aFrame windowRect].size.width;
-    int bottomBorderPos = [aFrame windowRect].size.height;
+    int rightBorder = [aFrame windowRect].size.width;
+    int bottomBorder = [aFrame windowRect].size.height;
+    int leftBorder = [aFrame windowRect].position.x;
+    int topBorder = [aFrame windowRect].position.y;
     
-    if (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x)
+    if (rightBorder == anEvent->event_x || (rightBorder - 1) < anEvent->event_x)
     {
         if (![aFrame grabPointer])
         {
@@ -1039,7 +1043,7 @@ ICCCMService* icccmService;
         [aFrame setRightBorderClicked:YES];
     }
     
-    if (bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y)
+    if (bottomBorder == anEvent->event_y || (bottomBorder - 1) < anEvent->event_y)
     {
         if (![aFrame grabPointer])
         {
@@ -1053,8 +1057,8 @@ ICCCMService* icccmService;
 
     }
     
-    if ((bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y) &&
-        (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x))
+    if ((bottomBorder == anEvent->event_y || (bottomBorder - 1) < anEvent->event_y) &&
+        (rightBorder == anEvent->event_x || (rightBorder - 1) < anEvent->event_x))
     {
         if (![aFrame grabPointer])
         {
@@ -1067,7 +1071,35 @@ ICCCMService* icccmService;
         [aFrame setBottomBorderClicked:YES];
         [aFrame setRightBorderClicked:YES];
     }
-
+    
+    if (leftBorder == anEvent->root_x || (leftBorder + 1) > anEvent->root_x)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        
+        [aFrame setLeftBorderClicked:YES];
+    }
+    
+    if (topBorder == anEvent->root_y)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        
+        [aFrame setTopBorderClicked:YES];
+    }
+    
 }
 
 - (void) drawAllTitleBarsExcept:(XCBTitleBar*)aTitileBar
