@@ -1,6 +1,6 @@
 XcbKit is a Kit (SDK) for window managers developed in Objective-C.
 
-Version: 0.0.4
+Version: 0.0.6
 
 ----------------------------------------------------------------------------------
 
@@ -14,6 +14,8 @@ Actual status:
 - It can maximize a window
 
 - It can iconify/minimize a window
+
+- It can resize from the right, left, top, bottom borders and bottom-right corner.
 
 - It can restore maximized and iconified windows to the previous status
 
