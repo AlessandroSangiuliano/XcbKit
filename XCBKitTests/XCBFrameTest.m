@@ -20,13 +20,13 @@
 {
     XCBConnection *connection = [XCBConnection sharedConnection];
     XCBWindow *clientWindow = [[XCBWindow alloc] initWithXCBWindow:xcb_generate_id([connection connection]) andConnection:connection];
-    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:1 andY:1];
-    XCBSize *sizes = [[XCBSize alloc] initWithWidht:300 andHeight:300];
-    XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:sizes];
+    XCBPoint coordinates = XCBMakePoint(1, 1);
+    XCBSize sizes = XCBMakeSize(300, 300);
+    XCBRect windowRect = XCBMakeRect(coordinates, sizes);
     [clientWindow setWindowRect:windowRect];
     
     
-    XCBSize *frameSize = [[XCBSize alloc] initWithWidht:[sizes getWidth] + 1 andHeight:[sizes getHeight] + 1];
+    XCBSize frameSize = XCBMakeSize(sizes.width+1, sizes.height+1);
     
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
@@ -38,10 +38,10 @@
     
     XCBWindow *frameWindow = [connection createWindowWithDepth:[screen screen]->root_depth
                      withParentWindow:[screen rootWindow]
-                        withXPosition:[coordinates getX]
-                        withYPosition:[coordinates getY]
-                            withWidth:[frameSize getWidth]
-                           withHeight:[frameSize getHeight]
+                        withXPosition:coordinates.x
+                        withYPosition:coordinates.y
+                            withWidth:frameSize.width
+                           withHeight:frameSize.height
                      withBorrderWidth:10
                          withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
                          withVisualId:visual

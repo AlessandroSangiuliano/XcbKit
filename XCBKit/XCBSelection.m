@@ -75,14 +75,14 @@
         
         /* Wait for the old owner to go away */
         
-        XCBRect *geometry = nil;
+        XCBRect geometry = XCBInvalidRect;
         
         do
         {
-            geometry = nil;
+            //geometry = XCBInvalidRect;
             geometry = [connection geometryForWindow:currentOwner];
             
-        } while (geometry != nil);
+        } while (FnCheckXCBRectIsValid(geometry));
         
         aquired = YES;
     }

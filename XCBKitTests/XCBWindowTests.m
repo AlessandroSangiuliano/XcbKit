@@ -266,8 +266,8 @@
     cairo_surface_t *surface = cairo_xcb_surface_create([aConnection connection],
                                                         [aWindow window],
                                                         [aVisual visualType],
-                                                        [[[aWindow windowRect] size] getWidth],
-                                                        [[[aWindow windowRect] size] getHeight]);
+                                                        [aWindow windowRect].size.width,
+                                                        [aWindow windowRect].size.height);
     
         
     cairo_t* cr = cairo_create(surface);

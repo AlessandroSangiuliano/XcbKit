@@ -95,9 +95,9 @@ XCBWindow * FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnect
 {
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:connection];
     
-    XCBSize *size = [[XCBSize alloc] initWithWidht:anEvent->window andHeight:anEvent->height];
-    XCBPoint *point = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
-    XCBRect *rect = [[XCBRect alloc] initWithPosition:point andSize:size];
+    XCBSize size = XCBMakeSize(anEvent->width, anEvent->height);
+    XCBPoint point = XCBMakePoint(anEvent->x, anEvent->y);
+    XCBRect rect = XCBMakeRect(point, size);
     
     [window setWindowRect:rect];
     
