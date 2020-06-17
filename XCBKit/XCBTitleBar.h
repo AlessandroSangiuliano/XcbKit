@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "XCBWindow.h"
 #import "XCBFrame.h"
-#import "XCBSize.h"
 #import "EWMHService.h"
 #import "ETitleBarColor.h"
 #import "ETitleBarColor.h"

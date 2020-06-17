@@ -39,8 +39,8 @@
     window = aWindow;
     visual = aVisual;
     
-    height = [[[window windowRect] size] getHeight];
-    width = [[[window windowRect] size] getWidth];
+    height = [window windowRect].size.height;
+    width = [window windowRect].size.width;
     
     XCBScreen *screen = [[connection screens] objectAtIndex:0];
     
@@ -115,7 +115,7 @@
     CGFloat startXPosition = 0;
     CGFloat endXPosition = 0;
     CGFloat startYPosition = height;
-    CGFloat endYPosition = [[[window windowRect] position] getY];
+    CGFloat endYPosition = [window windowRect].position.y;
     
     CGFloat stopGradientOffset = 0.99;
     CGFloat colorGradientOffset = 0.2;
@@ -129,7 +129,7 @@
     
     cairo_set_source(cr, pat);
     
-    cairo_rectangle(cr, [[[window windowRect] position] getX], [[[window windowRect] position] getY], width, height-1);
+    cairo_rectangle(cr, [window windowRect].position.x, [window windowRect].position.y, width, height-1);
     cairo_fill(cr);
     
     cairo_surface_flush(cairoSurface);
@@ -205,8 +205,8 @@
     NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
     CGFloat halfLength = size.width / 2;
     
-    CGFloat textPositionX = (CGFloat) [[[window windowRect] size] getWidth] / 2;
-    CGFloat textPositionY = (CGFloat) [[[window windowRect] size] getHeight] / 2 + 2;
+    CGFloat textPositionX = (CGFloat) [window windowRect].size.width / 2;
+    CGFloat textPositionY = (CGFloat) [window windowRect].size.height / 2 + 2;
     
     cairo_move_to(cr, textPositionX - halfLength, textPositionY);
     
@@ -221,21 +221,20 @@
 
 - (void) makePreviewImage
 {
-    XCBSize* size = [[window windowRect] size];
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], [size getWidth], [size getHeight]);
+    XCBSize size = [window windowRect].size;
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
     cr = cairo_create(cairoSurface);
     
     cairo_surface_write_to_png(cairoSurface, "/tmp/Preview.png");
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-    size = nil;
 }
 
 - (void)setPreviewImage
 {
-    XCBSize* size = [[window windowRect] size];
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], [size getWidth], [size getHeight]);
+    XCBSize size = [window windowRect].size;
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
     cr = cairo_create(cairoSurface);
     
     /* CHECK IF THE COMPOSITORE IS ACTIVE, IF TRUE I CAN SET THE TRANSPARENCY
@@ -285,7 +284,6 @@
     scaledImage = nil;
     data = nil;
     imgRep = nil;
-    size = nil;
 }
 
 - (void) saveContext

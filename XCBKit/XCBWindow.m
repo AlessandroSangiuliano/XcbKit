@@ -98,8 +98,8 @@ extern XCBConnection *XCBConn;
                       [screen screen]->root_depth,
                       pixmap,
                       window,
-                      [[windowRect size] getWidth],
-                      [[windowRect size] getHeight]);
+                      windowRect.size.width,
+                      windowRect.size.height);
     screen = nil;
 }
 
@@ -193,14 +193,14 @@ extern XCBConnection *XCBConn;
     /*** restore to the previous dimension and position of the frame ***/
     
     [frame setWindowRect:[frame originalRect]];
-    [frame setOldRect:nil];
+    [frame setOldRect:XCBInvalidRect];
     
     uint32_t valueList[4] =
     {
-        [[[frame windowRect] position] getX],
-        [[[frame windowRect] position] getY],
-        [[[frame windowRect] size] getWidth],
-        [[[frame windowRect] size] getHeight]
+        [frame windowRect].position.x,
+        [frame windowRect].position.y,
+        [frame windowRect].size.width,
+        [frame windowRect].size.height
     };
     
     xcb_configure_window([XCBConn connection], [frame window], mask, &valueList);
@@ -208,11 +208,11 @@ extern XCBConnection *XCBConn;
     /*** restore the title bar pos and dim ***/
     
     [titleBar setWindowRect:[titleBar oldRect]];
-    [titleBar setOldRect:nil];
-    valueList[0] = [[[titleBar windowRect] position] getX];
-    valueList[1] = [[[titleBar windowRect] position] getY];
-    valueList[2] = [[[titleBar windowRect] size] getWidth];
-    valueList[3] = [[[titleBar windowRect] size] getHeight];
+    [titleBar setOldRect:XCBInvalidRect];
+    valueList[0] = [titleBar windowRect].position.x;
+    valueList[1] = [titleBar windowRect].position.y;
+    valueList[2] = [titleBar windowRect].size.width;
+    valueList[3] = [titleBar windowRect].size.height;
     
     xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
     
@@ -223,11 +223,11 @@ extern XCBConnection *XCBConn;
     XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
     
     [clientWindow setWindowRect:[clientWindow originalRect]];
-    [clientWindow setOldRect:nil];
-    valueList[0] = [[[clientWindow windowRect] position] getX];
-    valueList[1] = [[[clientWindow windowRect] position] getY];
-    valueList[2] = [[[clientWindow windowRect] size] getWidth];
-    valueList[3] = [[[clientWindow windowRect] size] getHeight];
+    [clientWindow setOldRect:XCBInvalidRect];
+    valueList[0] = [clientWindow windowRect].position.x;
+    valueList[1] = [clientWindow windowRect].position.y;
+    valueList[2] = [clientWindow windowRect].size.width;
+    valueList[3] = [clientWindow windowRect].size.height;
     
     xcb_configure_window([XCBConn connection], [clientWindow window], mask, &valueList);
     
@@ -292,26 +292,22 @@ extern XCBConnection *XCBConn;
     
     /*** set the new position and window rect dimension for the frame ***/
     
-    XCBSize* newSize = [[XCBSize alloc] initWithWidht:width-2 andHeight:height-2];
-    XCBPoint* newPoint = [[XCBPoint alloc] initWithX:0 andY:0];
-    XCBRect* newRect = [[XCBRect alloc] initWithPosition:newPoint andSize:newSize];
+    XCBSize newSize = XCBMakeSize(width-2, height-2);
+    XCBPoint newPoint = XCBMakePoint(0, 0);
+    XCBRect newRect = XCBMakeRect(newPoint, newSize);
     [frame setWindowRect:newRect];
-    
-    newSize = nil;
-    newPoint = nil;
-    newRect = nil;
     
     /*** resize the title bar and save the old rect ***/
     
     [titleBar setOldRect:[titleBar windowRect]];
     
-    uint16_t oldHeight = [[[titleBar windowRect] size] getHeight];
+    uint16_t oldHeight = [titleBar windowRect].size.height;
     
-    newSize = [[XCBSize alloc] initWithWidht:width-2 andHeight:oldHeight];
-    newPoint = [[XCBPoint alloc] initWithX:0 andY:0];
-    newRect = [[XCBRect alloc] initWithPosition:newPoint andSize:newSize];
+    newSize = XCBMakeSize(width-2, oldHeight);
+    newPoint = XCBMakePoint(0, 0);
+    newRect = XCBMakeRect(newPoint, newSize);
     
-    valueList[3] = [[[titleBar windowRect] size] getHeight];
+    valueList[3] = [titleBar windowRect].size.height;
     
     xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
     
@@ -320,9 +316,6 @@ extern XCBConnection *XCBConn;
     [titleBar setWindowRect:newRect];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
-    newSize = nil;
-    newPoint = nil;
-    newRect = nil;
     
     /*** resize the client window and save the old rect ***/
     
@@ -339,9 +332,9 @@ extern XCBConnection *XCBConn;
     
     /*** set the new position and dimensions of the client window ***/
     
-    newSize = [[XCBSize alloc] initWithWidht:width-2 andHeight:height-2];
-    newPoint = [[XCBPoint alloc] initWithX:0 andY:23];
-    newRect = [[XCBRect alloc] initWithPosition:newPoint andSize:newSize];
+    newSize = XCBMakeSize(width-2, height-2);
+    newPoint = XCBMakePoint(0, 23);
+    newRect = XCBMakeRect(newPoint, newSize);
     
     [clientWindow setWindowRect:newRect];
     
@@ -367,9 +360,6 @@ extern XCBConnection *XCBConn;
     titleBar = nil;
     clientWindow = nil;
     frame = nil;
-    newRect = nil;
-    newSize = nil;
-    newPoint = nil;
     atomService = nil;
     ewmhSerive = nil;
     
@@ -407,13 +397,13 @@ extern XCBConnection *XCBConn;
     
 }
 
-- (void) createMiniWindowAtPosition:(XCBPoint*)position
+- (void) createMiniWindowAtPosition:(XCBPoint)position
 {
     oldRect = windowRect;
     XCBTitleBar* titleBar;
     
-    XCBSize* newSize =[[XCBSize alloc] initWithWidht:50 andHeight:50]; //misure di prova
-    XCBRect* newRect = [[XCBRect alloc] initWithPosition:position andSize:newSize];
+    XCBSize newSize = XCBMakeSize(50, 50); //misure di prova
+    XCBRect newRect = XCBMakeRect(position, newSize);
     
     windowRect = newRect;
     
@@ -433,7 +423,7 @@ extern XCBConnection *XCBConn;
     }
     
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
-    uint32_t valueList[4] = {[position getX], [position getY], [newSize getWidth], [newSize getHeight]};
+    uint32_t valueList[4] = {position.x, position.y, newSize.width, newSize.height};
     
     xcb_configure_window([connection connection], window, mask, &valueList);
     
@@ -470,8 +460,6 @@ extern XCBConnection *XCBConn;
     
     atomService = nil;
     ewmhService = nil;
-    newSize = nil;
-    newRect = nil;
     
     isMinimized = YES;
     
@@ -489,11 +477,11 @@ extern XCBConnection *XCBConn;
     xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
     [atomService cacheAtom:@"WM_STATE"];
     
-    XCBPoint* position = [windowRect position];
-    XCBSize* size =  [windowRect size];
+    XCBPoint position = windowRect.position;
+    XCBSize size =  windowRect.size;
     
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
-    uint32_t valueList[4] = {[position getX], [position getY], [size getWidth], [size getHeight]};
+    uint32_t valueList[4] = {position.x, position.y, size.width, size.height};
     
     xcb_configure_window([connection connection], window, mask, &valueList);
     
@@ -538,8 +526,6 @@ extern XCBConnection *XCBConn;
                             withDataLength:1
                                   withData:state];
     
-    position = nil;
-    size = nil;
     ewmhService = nil;
     atomService = nil;
 }
@@ -547,6 +533,7 @@ extern XCBConnection *XCBConn;
 - (void) destroy
 {
     xcb_destroy_window([connection connection], window);
+    [connection unregisterWindow:self];
     [connection setNeedFlush:YES];
 }
 
@@ -629,18 +616,13 @@ extern XCBConnection *XCBConn;
 
 - (void) description
 {
-    NSLog(@" Window id: %u. Parent window id: %u.\nWindow Size and Position:", window, [parentWindow window]);
-    [[windowRect size] description];
-    [[windowRect position] description];
+    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@", window, [parentWindow window], FnFromXCBRectToString(windowRect));
 }
 	 
 - (void) dealloc
 {
     parentWindow = nil;
     aboveWindow = nil;
-    windowRect = nil;
-    oldRect = nil;
-    originalRect = nil;
 }
 
 @end

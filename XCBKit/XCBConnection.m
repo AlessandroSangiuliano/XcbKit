@@ -258,9 +258,9 @@ ICCCMService* icccmService;
 	xcb_window_t winId = xcb_generate_id(connection);
 	XCBWindow *winToCreate = [[XCBWindow alloc] initWithXCBWindow:winId withParentWindow:aParentWindow andConnection:self];
     
-    XCBPoint *coordinates = [[XCBPoint alloc] initWithX:xPosition andY:yPosition];
-    XCBSize *windowSize = [[XCBSize alloc] initWithWidht:width andHeight:height];
-    XCBRect *windowRect = [[XCBRect alloc] initWithPosition:coordinates andSize:windowSize];
+    XCBPoint coordinates = XCBMakePoint(xPosition, yPosition);
+    XCBSize windowSize = XCBMakeSize(width, height);
+    XCBRect windowRect = XCBMakeRect(coordinates, windowSize);
     
     [winToCreate setWindowRect:windowRect];
     [winToCreate setOriginalRect:windowRect];
@@ -269,10 +269,10 @@ ICCCMService* icccmService;
 					  depth,
 					  winId,
 					  [aParentWindow window],
-					  [[[winToCreate windowRect] position] getX],
-					  [[[winToCreate windowRect] position] getY],
-					  [[[winToCreate windowRect] size] getWidth],
-					  [[[winToCreate windowRect] size] getHeight],
+					  [winToCreate windowRect].position.x,
+					  [winToCreate windowRect].position.y,
+					  [winToCreate windowRect].size.width,
+					  [winToCreate windowRect].size.height,
 					  borderWidth,
 					  xcbClass,
 					  [aVisual visualId],
@@ -298,11 +298,14 @@ ICCCMService* icccmService;
     [aWindow setIsMapped:NO];
 }
 
-- (void) reparentWindow:(XCBWindow *)aWindow toWindow:(XCBWindow *)parentWindow position:(XCBPoint*)position
+- (void) reparentWindow:(XCBWindow *)aWindow toWindow:(XCBWindow *)parentWindow position:(XCBPoint)position
 {
-    xcb_reparent_window(connection, [aWindow window], [parentWindow window], [position getX], [position getY]);
-    [[[aWindow windowRect] position] setX:[position getX]];
-    [[[aWindow windowRect] position] setY:[position getY]];
+    xcb_reparent_window(connection, [aWindow window], [parentWindow window], position.x, position.y);
+    XCBRect newRect = XCBMakeRect(XCBMakePoint(position.x, position.y),
+                                  XCBMakeSize([aWindow windowRect].size.width, [aWindow windowRect].size.height));
+    
+    [aWindow setWindowRect:newRect];
+    [aWindow setOriginalRect:newRect];
     [aWindow setParentWindow:parentWindow];
 }
 
@@ -316,15 +319,13 @@ ICCCMService* icccmService;
     
     XCBWindow *parent = [[XCBWindow alloc] initWithXCBWindow:reply->parent andConnection:self];
     
-    XCBRect *windowRect = [self geometryForWindow:parent];
+    XCBRect windowRect = [self geometryForWindow:parent];
     [parent setWindowRect:windowRect];
-    
-    windowRect = nil;
     
     return parent;
 }
 
-- (XCBRect*) geometryForWindow:(XCBWindow *)aWindow
+- (XCBRect) geometryForWindow:(XCBWindow *)aWindow
 {
     xcb_get_geometry_cookie_t cookie = xcb_get_geometry(connection, [aWindow window]);
     xcb_generic_error_t *error;
@@ -332,16 +333,12 @@ ICCCMService* icccmService;
     
     if (reply == NULL)
     {
-        return nil;
+        return XCBInvalidRect;
     }
     
-    XCBPoint *position = [[XCBPoint alloc] initWithX:reply->x andY:reply->y];
-    XCBSize *size = [[XCBSize alloc] initWithWidht:reply->width andHeight:reply->height];
+    XCBRect rect = XCBMakeRect(XCBMakePoint(reply->x, reply->y), XCBMakeSize(reply->width, reply->height));
     
-    XCBRect * rect = [[XCBRect alloc] initWithPosition:position andSize:size];
-    
-    position = nil;
-    size = nil;
+    free(reply);
     
     return rect;
 }
@@ -369,6 +366,8 @@ ICCCMService* icccmService;
         NSLog(@"Unable to change the attributes for window %u with error code: %d", [aWindow window], error->error_code);
     else
         attributesChanged = YES;
+    
+    free(error);
     
     return attributesChanged;
 }
@@ -406,11 +405,10 @@ ICCCMService* icccmService;
     if (frameWindow && ![frameWindow isMinimized])
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
-        XCBRect* rect = [window windowRect];
-        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:[rect position]];
+        XCBRect rect = [window windowRect];
+        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:rect.position];
         [window setDecorated:NO];
         [frameWindow destroy];
-        rect = nil;
     }
     
     window = nil;
@@ -422,7 +420,6 @@ ICCCMService* icccmService;
     
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
-    XCBScreen* screen = [screens objectAtIndex:0];
 	
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
@@ -455,12 +452,12 @@ ICCCMService* icccmService;
             return;
         }
         
-        XCBRect *rect = [self geometryForWindow:window];
+        XCBRect rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
         [window setOriginalRect:rect];
         [self registerWindow:window];
         [window setFirstRun:YES];
-        rect = nil;
+        free(reply);
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
@@ -483,7 +480,6 @@ ICCCMService* icccmService;
     
     window = nil;
     frame = nil;
-    screen = nil;
 }
 
 - (void) handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -552,8 +548,11 @@ ICCCMService* icccmService;
 - (void) handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+    XCBWindow* rootWindow = [self rootWindowForScreenNumber:0];
     
-    if (dragState && ([window window] != [[[[self screens] objectAtIndex:0] rootWindow] window]))
+    if (dragState &&
+        ([window window] != [rootWindow window]) &&
+        ([[window parentWindow] window] != [rootWindow window]))
     {
         XCBFrame *frame = (XCBFrame*)[window parentWindow];
        
@@ -579,7 +578,7 @@ ICCCMService* icccmService;
     }
     
     window = nil;
-    
+    rootWindow = nil;
 }
 
 - (void) handleButtonPress:(xcb_button_press_event_t *)anEvent
@@ -600,26 +599,19 @@ ICCCMService* icccmService;
         
         [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
         
-        //XCBPoint* point = [[XCBPoint alloc] initWithX:0 andY:0];
         
         if (frameWindow != nil && check) //probably unnecessary check when fixed
-        {
-            /*[self unregisterWindow:clientWindow];
-            [self unregisterWindow:[frameWindow childWindowForKey:TitleBar]];*/
-            
+        {            
             /* i was using an artifact with [frameWindow setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
              an expose event is generated for the frame and close button, so i was calling [frame destroy]
              in handleExpose method (XCBConnection). I think that is toally wrong and bad */
             
             [frameWindow setNeedDestroy:YES];
-            //[frameWindow destroy];
-            //[window destroy];
         }
         
         frameWindow = nil;
         window = nil;
         clientWindow = nil;
-        //point = nil;
         return;
     }
     
@@ -677,10 +669,8 @@ ICCCMService* icccmService;
     XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
-
-    XCBPoint *offset = [[frame windowRect] offset];
-    [offset setX:anEvent->event_x];
-    [offset setY:anEvent->event_y];
+    
+    [frame setOffset:XCBMakePoint(anEvent->event_x, anEvent->event_y)];
 
     if ([frame window] != anEvent->root)
         dragState = YES;
@@ -690,9 +680,9 @@ ICCCMService* icccmService;
     
     /*** RESIZE WINDOW BY CLICKING ON THE BORDER ***/
     
-    [self borderClickedForFrameWindow:frame withEvent:anEvent];
+    if ([titleBar window] != anEvent->event)
+        [self borderClickedForFrameWindow:frame withEvent:anEvent];
     
-    offset = nil;
     frame = nil;
     window = nil;
     titleBar = nil;
@@ -711,6 +701,8 @@ ICCCMService* icccmService;
         frame = (XCBFrame*)window;
         [frame setBottomBorderClicked:NO];
         [frame setRightBorderClicked:NO];
+        [frame setLeftBorderClicked:NO];
+        [frame setTopBorderClicked:NO];
         
         frame = nil;
     }
@@ -794,10 +786,9 @@ ICCCMService* icccmService;
         {
             drawer = [[CairoDrawer alloc] initWithConnection:self window:clientWindow visual:visual];
             [drawer makePreviewImage];
-            XCBPoint* position = [[XCBPoint alloc] initWithX:100 andY:100]; //tmp position until i dont have a dock bar
+            XCBPoint position = XCBMakePoint(100, 100); //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
             [frame setIsMinimized:YES];
-            position = nil;
         }
         
         if (titleBar != nil)
@@ -902,8 +893,8 @@ ICCCMService* icccmService;
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow* window = [self windowForXCBId:anEvent->window];
-    XCBRect* exposeRectangle = [[XCBRect alloc] initWithExposeEvent:anEvent];
-    xcb_rectangle_t expose_rectangle = [exposeRectangle xcbRectangle];
+    XCBRect exposeRectangle = XCBMakeRect(XCBMakePoint(anEvent->x, anEvent->y), XCBMakeSize(anEvent->width, anEvent->height));
+    xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(exposeRectangle);
     
     //[window description];
     /*NSLog(@"Event rectangle with cardinalities: %d %d %d %d",
@@ -1013,7 +1004,7 @@ ICCCMService* icccmService;
         
     }
     
-    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluet if the check on destroy window is necessary or not */
+    if (frameWindow != nil && [frameWindow needDestroy]) /*evaluete if the check on destroy window is necessary or not */
     {
         titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
         [self unregisterWindow:[titleBarWindow hideWindowButton]];
@@ -1034,10 +1025,12 @@ ICCCMService* icccmService;
 
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t *)anEvent
 {
-    int rightBorderPos = [[[aFrame windowRect] size] getWidth];
-    int bottomBorderPos = [[[aFrame windowRect] size] getHeight];
+    int rightBorder = [aFrame windowRect].size.width;
+    int bottomBorder = [aFrame windowRect].size.height;
+    int leftBorder = [aFrame windowRect].position.x;
+    int topBorder = [aFrame windowRect].position.y;
     
-    if (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x)
+    if (rightBorder == anEvent->event_x || (rightBorder - 1) < anEvent->event_x)
     {
         if (![aFrame grabPointer])
         {
@@ -1050,7 +1043,7 @@ ICCCMService* icccmService;
         [aFrame setRightBorderClicked:YES];
     }
     
-    if (bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y)
+    if (bottomBorder == anEvent->event_y || (bottomBorder - 1) < anEvent->event_y)
     {
         if (![aFrame grabPointer])
         {
@@ -1064,8 +1057,8 @@ ICCCMService* icccmService;
 
     }
     
-    if ((bottomBorderPos == anEvent->event_y || (bottomBorderPos - 1) < anEvent->event_y) &&
-        (rightBorderPos == anEvent->event_x || (rightBorderPos - 1) < anEvent->event_x))
+    if ((bottomBorder == anEvent->event_y || (bottomBorder - 1) < anEvent->event_y) &&
+        (rightBorder == anEvent->event_x || (rightBorder - 1) < anEvent->event_x))
     {
         if (![aFrame grabPointer])
         {
@@ -1078,7 +1071,35 @@ ICCCMService* icccmService;
         [aFrame setBottomBorderClicked:YES];
         [aFrame setRightBorderClicked:YES];
     }
-
+    
+    if (leftBorder == anEvent->root_x || (leftBorder + 1) > anEvent->root_x)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        
+        [aFrame setLeftBorderClicked:YES];
+    }
+    
+    if (topBorder == anEvent->root_y)
+    {
+        if (![aFrame grabPointer])
+        {
+            NSLog(@"Unable to grab the pointer");
+            return;
+        }
+        
+        resizeState = YES;
+        dragState = NO;
+        
+        [aFrame setTopBorderClicked:YES];
+    }
+    
 }
 
 - (void) drawAllTitleBarsExcept:(XCBTitleBar*)aTitileBar
