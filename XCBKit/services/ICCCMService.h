@@ -7,6 +7,7 @@
 //
 
 #import "EWMHService.h"
+#include <xcb/xcb_icccm.h>
 
 @interface ICCCMService : EWMHService
 
@@ -14,10 +15,13 @@
 @property (strong, nonatomic) NSString* WMDeleteWindow;
 @property (strong, nonatomic) NSString* WMProtocols;
 @property (strong, nonatomic) NSString* WMName;
+@property (strong, nonatomic) NSString* WMNormalHints;
+@property (strong, nonatomic) NSString* WMSizeHints;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (BOOL)hasProtocol:(NSString*)protocol forWindow:(XCBWindow*)window;
+- (xcb_size_hints_t*) wmNormalHintsForWindow:(XCBWindow*)aWindow;
 
 @end

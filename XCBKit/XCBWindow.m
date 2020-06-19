@@ -14,7 +14,7 @@
 #import "CairoDrawer.h"
 #import "EWMHService.h"
 
-#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
+#define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
 @implementation XCBWindow
 
@@ -36,7 +36,6 @@
 @synthesize firstRun;
 
 
-extern XCBConnection *XCBConn;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
            andConnection:(XCBConnection *)aConnection
@@ -174,7 +173,7 @@ extern XCBConnection *XCBConn;
     uint16_t tempMask = XCB_CONFIG_WINDOW_BORDER_WIDTH;
     uint32_t valueForBorder[1] = {border};
     
-    xcb_configure_window([XCBConn connection], window, tempMask, valueForBorder);
+    xcb_configure_window([connection connection], window, tempMask, valueForBorder);
 }
 
 - (void) restoreDimensionAndPosition
@@ -203,7 +202,7 @@ extern XCBConnection *XCBConn;
         [frame windowRect].size.height
     };
     
-    xcb_configure_window([XCBConn connection], [frame window], mask, &valueList);
+    xcb_configure_window([connection connection], [frame window], mask, &valueList);
     
     /*** restore the title bar pos and dim ***/
     
@@ -214,7 +213,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = [titleBar windowRect].size.width;
     valueList[3] = [titleBar windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
+    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
@@ -229,7 +228,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = [clientWindow windowRect].size.width;
     valueList[3] = [clientWindow windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [clientWindow window], mask, &valueList);
+    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
     
     [frame setIsMaximized:NO];
     
@@ -288,7 +287,7 @@ extern XCBConnection *XCBConn;
     
     uint32_t valueList[4] = {0, 0, width-2, height-2};
     
-    xcb_configure_window([XCBConn connection], [frame window], mask, &valueList);
+    xcb_configure_window([connection connection], [frame window], mask, &valueList);
     
     /*** set the new position and window rect dimension for the frame ***/
     
@@ -309,7 +308,7 @@ extern XCBConnection *XCBConn;
     
     valueList[3] = [titleBar windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
+    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
     
     /*** set the new title bar rect and redraw it ***/
     
@@ -328,7 +327,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = width-2;
     valueList[3] = height-2;
     
-    xcb_configure_window([XCBConn connection], [clientWindow window], mask, &valueList);
+    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
     
     /*** set the new position and dimensions of the client window ***/
     

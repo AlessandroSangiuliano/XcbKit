@@ -14,6 +14,8 @@
 @synthesize WMProtocols;
 @synthesize atomsArray;
 @synthesize WMName;
+@synthesize WMNormalHints;
+@synthesize WMSizeHints;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -28,12 +30,16 @@
     WMDeleteWindow = @"WM_DELETE_WINDOW";
     WMProtocols = @"WM_PROTOCOLS";
     WMName = @"WM_NAME";
+    WMNormalHints = @"WM_NORMAL_HINTS";
+    WMSizeHints = @"WM_SIZE_HINS";
     
     NSString* icccmAtoms[] =
     {
         WMProtocols,
         WMDeleteWindow,
-        WMName
+        WMName,
+        WMNormalHints,
+        WMSizeHints
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -74,6 +80,19 @@
     }
     
     return hasProtocol;
+}
+
+- (xcb_size_hints_t*) wmNormalHintsForWindow:(XCBWindow *)aWindow
+{
+    xcb_connection_t *connection = [[aWindow connection] connection];
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(connection, [aWindow window]);
+    
+    xcb_size_hints_t* sizeHints = malloc(sizeof(xcb_size_hints_t));
+    
+    xcb_icccm_get_wm_normal_hints_reply(connection, cookie, sizeHints, NULL);
+    
+    connection = NULL;
+    return sizeHints;
 }
 
 - (void) dealloc
