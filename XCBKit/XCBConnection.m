@@ -420,7 +420,8 @@ ICCCMService* icccmService;
     
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
-	
+    
+    
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
     

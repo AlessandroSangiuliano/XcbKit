@@ -49,7 +49,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL pointerGrabbed;
 
 
-
 - (xcb_window_t) window;
 - (void) setWindow:(xcb_window_t) aWindow;
 - (NSString*) windowIdStringValue;
