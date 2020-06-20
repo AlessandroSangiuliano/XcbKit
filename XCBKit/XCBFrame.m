@@ -39,6 +39,7 @@
     [self setWindowRect:[aClientWindow windowRect]];
     [self setOriginalRect:[aClientWindow windowRect]];
     
+    /*** checks normal hints for client window **/
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t* sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
     minHeightHint = sizeHints->min_height;

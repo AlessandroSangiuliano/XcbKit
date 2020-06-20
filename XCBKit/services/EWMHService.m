@@ -527,6 +527,9 @@
                                                              cookie,
                                                              &error);
     
+    if (error)
+        return NULL;
+    
     void* value = xcb_get_property_value(reply);
     free(reply);
     return value;

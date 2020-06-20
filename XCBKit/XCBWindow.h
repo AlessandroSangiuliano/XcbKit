@@ -47,6 +47,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) xcb_pixmap_t pixmap;
 @property (nonatomic) BOOL firstRun; //find a better solution
 @property (nonatomic) BOOL pointerGrabbed;
+@property (strong, nonatomic) NSMutableArray* allowedActions;
 
 
 - (xcb_window_t) window;

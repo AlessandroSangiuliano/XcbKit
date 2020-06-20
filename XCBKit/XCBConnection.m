@@ -462,8 +462,6 @@ ICCCMService* icccmService;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
-    //[frame createGraphicContextWithMask:mask andValues:gcValues];
-    //[frame createPixmap];
     
     const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
     [icccmService changePropertiesForWindow:frame

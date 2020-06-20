@@ -34,7 +34,7 @@
 @synthesize pixmap;
 @synthesize pointerGrabbed;
 @synthesize firstRun;
-
+@synthesize allowedActions;
 
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
@@ -73,7 +73,30 @@
     isMaximizeButton = NO;
     connection = aConnection;
     needDestroy = NO;
-	   
+    
+    /*** checks _net_wm_allowed_action for client window ***/
+    
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    xcb_atom_t* allowed_actions = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+                                             propertyType:XCB_ATOM_ATOM
+                                                forWindow:self
+                                                   delete:NO];
+    
+    int allowedActionSize = 0;
+    
+    (allowed_actions != NULL) ? (allowedActionSize = sizeof(allowedActions)/sizeof(allowed_actions[0])) : (allowedActionSize = 0);
+    
+    if (allowedActionSize > 0)
+    {
+        allowedActions = [[NSMutableArray alloc] initWithCapacity:allowedActionSize];
+        
+        for (int i = 0; i < allowedActionSize; i++)
+            [allowedActions addObject:[NSNumber numberWithUnsignedInt:allowed_actions[i]]];
+        
+        free(allowed_actions);
+    }
+    
 	return self;
 }
 
