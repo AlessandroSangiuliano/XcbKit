@@ -27,6 +27,8 @@ typedef NS_ENUM(NSInteger, childrenMask)
 @property (nonatomic) BOOL leftBorderClicked;
 @property (nonatomic) BOOL topBorderClicked;
 @property (nonatomic) XCBPoint offset;
+@property (nonatomic) int minWidthHint;
+@property (nonatomic) int minHeightHint;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection withXcbWindow:(xcb_window_t) xcbWindow;

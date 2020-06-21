@@ -544,6 +544,7 @@
 					"-lxcb",
 					"-lcairo",
 					"-lxcb-xfixes",
+					"-lxcb-icccm",
 				);
 				SDKROOT = macosx;
 			};
@@ -583,6 +584,7 @@
 					"-lxcb",
 					"-lcairo",
 					"-lxcb-xfixes",
+					"-lxcb-icccm",
 				);
 				SDKROOT = macosx;
 			};

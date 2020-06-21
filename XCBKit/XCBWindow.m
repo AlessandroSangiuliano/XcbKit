@@ -14,7 +14,7 @@
 #import "CairoDrawer.h"
 #import "EWMHService.h"
 
-#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
+#define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
 @implementation XCBWindow
 
@@ -22,7 +22,6 @@
 @synthesize windowRect;
 @synthesize originalRect;
 @synthesize decorated;
-@synthesize draggable;
 @synthesize isCloseButton;
 @synthesize isMinimizeButton;
 @synthesize isMaximizeButton;
@@ -34,9 +33,17 @@
 @synthesize pixmap;
 @synthesize pointerGrabbed;
 @synthesize firstRun;
-
-
-extern XCBConnection *XCBConn;
+@synthesize allowedActions;
+@synthesize canMove;
+@synthesize canResize;
+@synthesize canMinimize;
+@synthesize canMaximizeVert;
+@synthesize canMaximizeHorz;
+@synthesize canFullscreen;
+@synthesize canChangeDesktop;
+@synthesize canClose;
+@synthesize canShade;
+@synthesize canStick;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
            andConnection:(XCBConnection *)aConnection
@@ -68,13 +75,27 @@ extern XCBConnection *XCBConn;
 	aboveWindow = anAbove;
 	isMapped = NO;
     decorated = NO;
-    draggable = YES;
     isCloseButton = NO;
     isMinimizeButton = NO;
     isMaximizeButton = NO;
     connection = aConnection;
     needDestroy = NO;
-	   
+    canMove = NO;
+    canResize = NO;
+    canMinimize = NO;
+    canMaximizeVert = NO;
+    canMaximizeHorz = NO;
+    canFullscreen = NO;
+    canShade = NO;
+    canStick = NO;
+    canChangeDesktop = NO;
+    canClose = NO;
+    
+    /*** checks _net_wm_allowed_action for client window ***/
+    
+    [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:self withObject:nil];
+    
+    
 	return self;
 }
 
@@ -88,6 +109,113 @@ extern XCBConnection *XCBConn;
                                                theValues);
     return gcCookie;
     
+}
+
+- (void) checkNetWMAllowedActions
+{
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    xcb_atom_t* allowed_actions = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+                                              propertyType:XCB_ATOM_ATOM
+                                                 forWindow:self
+                                                    delete:NO];
+    
+    int allowedActionSize = 0;
+    
+    (allowed_actions != NULL) ? (allowedActionSize = sizeof(allowed_actions)/sizeof(allowed_actions[0])) : (allowedActionSize = 0);
+    
+    if (allowedActionSize > 0)
+    {
+        allowedActions = [[NSMutableArray alloc] initWithCapacity:allowedActionSize];
+        
+        for (int i = 0; i < allowedActionSize; i++)
+            [allowedActions addObject:[NSNumber numberWithUnsignedInt:allowed_actions[i]]];
+        
+        free(allowed_actions);
+    }
+    
+    if (allowed_actions == NULL)
+    {
+        canMove = YES;
+        canResize = YES;
+        canMinimize = YES;
+        canMaximizeVert = YES;
+        canMaximizeHorz = YES;
+        canFullscreen = YES;
+        canShade = YES;
+        canStick = YES;
+        canChangeDesktop = YES;
+        canClose = YES;
+        
+        ewmhService = nil;
+        return;
+    }
+    
+    XCBAtomService *atomService = [ewmhService atomService];
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionClose]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canClose = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionFullscreen]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canFullscreen = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionChangeDesktop]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canChangeDesktop = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMaximizeHorz]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+    
+            canMaximizeHorz = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMaximizeVert]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMaximizeVert = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMinimize]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMinimize = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMove]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMove = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionStick]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canStick = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionShade]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canShade = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionResize]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canResize = YES;
+    
+    ewmhService = nil;
+    atomService = nil;
+
 }
 
 - (void) createPixmap
@@ -174,7 +302,7 @@ extern XCBConnection *XCBConn;
     uint16_t tempMask = XCB_CONFIG_WINDOW_BORDER_WIDTH;
     uint32_t valueForBorder[1] = {border};
     
-    xcb_configure_window([XCBConn connection], window, tempMask, valueForBorder);
+    xcb_configure_window([connection connection], window, tempMask, valueForBorder);
 }
 
 - (void) restoreDimensionAndPosition
@@ -203,7 +331,7 @@ extern XCBConnection *XCBConn;
         [frame windowRect].size.height
     };
     
-    xcb_configure_window([XCBConn connection], [frame window], mask, &valueList);
+    xcb_configure_window([connection connection], [frame window], mask, &valueList);
     
     /*** restore the title bar pos and dim ***/
     
@@ -214,7 +342,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = [titleBar windowRect].size.width;
     valueList[3] = [titleBar windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
+    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     
@@ -229,7 +357,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = [clientWindow windowRect].size.width;
     valueList[3] = [clientWindow windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [clientWindow window], mask, &valueList);
+    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
     
     [frame setIsMaximized:NO];
     
@@ -288,7 +416,7 @@ extern XCBConnection *XCBConn;
     
     uint32_t valueList[4] = {0, 0, width-2, height-2};
     
-    xcb_configure_window([XCBConn connection], [frame window], mask, &valueList);
+    xcb_configure_window([connection connection], [frame window], mask, &valueList);
     
     /*** set the new position and window rect dimension for the frame ***/
     
@@ -309,7 +437,7 @@ extern XCBConnection *XCBConn;
     
     valueList[3] = [titleBar windowRect].size.height;
     
-    xcb_configure_window([XCBConn connection], [titleBar window], mask, &valueList);
+    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
     
     /*** set the new title bar rect and redraw it ***/
     
@@ -328,7 +456,7 @@ extern XCBConnection *XCBConn;
     valueList[2] = width-2;
     valueList[3] = height-2;
     
-    xcb_configure_window([XCBConn connection], [clientWindow window], mask, &valueList);
+    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
     
     /*** set the new position and dimensions of the client window ***/
     
@@ -623,6 +751,7 @@ extern XCBConnection *XCBConn;
 {
     parentWindow = nil;
     aboveWindow = nil;
+    allowedActions = nil;
 }
 
 @end

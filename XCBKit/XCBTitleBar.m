@@ -37,9 +37,8 @@
     
     windowMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 
-    //connection = aConnection;
     [super setConnection:aConnection];
-    
+        
     XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     
@@ -74,69 +73,77 @@
     
     uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     
-    hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                  withParentWindow:self
-                     withXPosition:5
-                     withYPosition:5
-                         withWidth:14
-                        withHeight:14
-                  withBorrderWidth:0
-                      withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                      withVisualId:rootVisual
-                     withValueMask:mask
-                     withValueList:values];
-    
-    [hideWindowButton setWindowMask:mask];
-    [hideWindowButton setDraggable:NO];
-    [hideWindowButton setIsCloseButton:YES];
-    
-    hideButtonColor = [NSColor colorWithCalibratedRed: 0.411 green: 0.176 blue: 0.673 alpha: 1]; //original: 0.7 0.427 1 1
-    
-    
-    uint32_t gcMask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES;
+    uint32_t gcMask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES; //necessary code?
     uint32_t gcValues[2];
     gcValues[0] = [screen screen]->black_pixel;
     gcValues[1] = 0;
     
-    [hideWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
+    if ([[aFrame childWindowForKey:ClientWindow] canClose])
+    {
+        hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                    withParentWindow:self
+                                                       withXPosition:5
+                                                       withYPosition:5
+                                                           withWidth:14
+                                                          withHeight:14
+                                                    withBorrderWidth:0
+                                                        withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                        withVisualId:rootVisual
+                                                       withValueMask:mask
+                                                       withValueList:values];
+        
+        [hideWindowButton setWindowMask:mask];
+        [hideWindowButton setCanMove:NO];
+        [hideWindowButton setIsCloseButton:YES];
+        
+        hideButtonColor = [NSColor colorWithCalibratedRed: 0.411 green: 0.176 blue: 0.673 alpha: 1]; //original: 0.7 0.427 1 1
+        
+        [hideWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
+    }
     
-    minimizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                           withParentWindow:self
-                                              withXPosition:24
-                                              withYPosition:5
-                                                  withWidth:14
-                                                 withHeight:14
-                                           withBorrderWidth:0
-                                               withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                               withVisualId:rootVisual
-                                              withValueMask:mask
-                                              withValueList:values];
+    if ([[aFrame childWindowForKey:ClientWindow] canMinimize])
+    {
+        minimizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                        withParentWindow:self
+                                                           withXPosition:24
+                                                           withYPosition:5
+                                                               withWidth:14
+                                                              withHeight:14
+                                                        withBorrderWidth:0
+                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                            withVisualId:rootVisual
+                                                           withValueMask:mask
+                                                           withValueList:values];
+        
+        [minimizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
+        [minimizeWindowButton setWindowMask:mask];
+        [minimizeWindowButton setCanMove:NO];
+        [minimizeWindowButton setIsMinimizeButton:YES];
+        
+        minimizeButtonColor = [NSColor colorWithCalibratedRed: 0.9 green: 0.7 blue: 0.3 alpha: 1];
+    }
     
-    [minimizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
-    [minimizeWindowButton setWindowMask:mask];
-    [minimizeWindowButton setDraggable:NO];
-    [minimizeWindowButton setIsMinimizeButton:YES];
-    
-    minimizeButtonColor = [NSColor colorWithCalibratedRed: 0.9 green: 0.7 blue: 0.3 alpha: 1];
-    
-    maximizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                             withParentWindow:self
-                                                withXPosition:44
-                                                withYPosition:5
-                                                    withWidth:14
-                                                   withHeight:14
-                                             withBorrderWidth:0
-                                                 withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                 withVisualId:rootVisual
-                                                withValueMask:mask
-                                                withValueList:values];
-    
-    [maximizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
-    [maximizeWindowButton setWindowMask:mask];
-    [maximizeWindowButton setDraggable:NO];
-    [maximizeWindowButton setIsMaximizeButton:YES];
-    
-    maximizeButtonColor = [NSColor colorWithCalibratedRed:0 green:0.74 blue:1 alpha:1];
+    if ([[aFrame childWindowForKey:ClientWindow] canFullscreen])
+    {
+        maximizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                        withParentWindow:self
+                                                           withXPosition:44
+                                                           withYPosition:5
+                                                               withWidth:14
+                                                              withHeight:14
+                                                        withBorrderWidth:0
+                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                            withVisualId:rootVisual
+                                                           withValueMask:mask
+                                                           withValueList:values];
+        
+        [maximizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
+        [maximizeWindowButton setWindowMask:mask];
+        [maximizeWindowButton setCanMove:NO];
+        [maximizeWindowButton setIsMaximizeButton:YES];
+        
+        maximizeButtonColor = [NSColor colorWithCalibratedRed:0 green:0.74 blue:1 alpha:1];
+    }
     
     [[super connection] mapWindow:self];
     [[super connection] mapWindow:hideWindowButton];
@@ -149,31 +156,40 @@
 
 - (void) drawArcsForColor:(TitleBarColor)aColor
 {
-    
+    NSColor *stopColor = [NSColor colorWithCalibratedRed:1 green:1 blue:1 alpha:1];
     XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
+    CairoDrawer *drawer = nil;
     
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
+    
+    if (hideWindowButton != nil)
+    {
+        drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
+        
+        [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
+        
+        drawer = nil;
+    }
 
-    NSColor *stopColor = [NSColor colorWithCalibratedRed:1 green:1 blue:1 alpha:1];
+    if (minimizeWindowButton != nil)
+    {
+        drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
+        
+        [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        
+        drawer = nil;
+    }
     
-    [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
-    
-    drawer = nil;
-    
-    drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
-    
-    [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-    
-    drawer = nil;
-    
-    drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
-    
-    [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-    
-    drawer = nil;
+    if (maximizeWindowButton != nil)
+    {
+        drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
+        
+        [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        
+        drawer = nil;
+    }
 }
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor
@@ -197,21 +213,29 @@
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
      * a better solution to avoid all the sets methods/messages ***/
     
-    [drawer setWindow:hideWindowButton];
-    [drawer setHeight:[hideWindowButton windowRect].size.height];
-    [drawer setWidth:[hideWindowButton windowRect].size.width];
-    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    if (hideWindowButton != nil)
+    {
+        [drawer setWindow:hideWindowButton];
+        [drawer setHeight:[hideWindowButton windowRect].size.height];
+        [drawer setWidth:[hideWindowButton windowRect].size.width];
+        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    }
     
-    [drawer setWindow:minimizeWindowButton];
-    [drawer setHeight:[minimizeWindowButton windowRect].size.height];
-    [drawer setWidth:[minimizeWindowButton windowRect].size.width];
-    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    if (minimizeWindowButton != nil)
+    {
+        [drawer setWindow:minimizeWindowButton];
+        [drawer setHeight:[minimizeWindowButton windowRect].size.height];
+        [drawer setWidth:[minimizeWindowButton windowRect].size.width];
+        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    }
     
-    [drawer setWindow:maximizeWindowButton];
-    [drawer setHeight:[maximizeWindowButton windowRect].size.height];
-    [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-    [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
-
+    if (maximizeWindowButton != nil)
+    {
+        [drawer setWindow:maximizeWindowButton];
+        [drawer setHeight:[maximizeWindowButton windowRect].size.height];
+        [drawer setWidth:[maximizeWindowButton windowRect].size.width];
+        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    }
     
     drawer = nil;
     screen = nil;
