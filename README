@@ -1,6 +1,6 @@
 XcbKit is a Kit (SDK) for window managers developed in Objective-C.
 
-Version: 0.0.6
+Version: 0.0.8
 
 ----------------------------------------------------------------------------------
 
@@ -35,6 +35,10 @@ Actual status:
 
 - Handle “WM_DELETE_WINDOW” client message to quit an App or close a window.
 
+- Support of WM_NORMAL_HINTS
+
+- Support for _NET_WM_ALLOWED_ACTIONS
+
 
 There are a lot of things to add, for example:
 
@@ -46,7 +50,7 @@ There are a lot of things to add, for example:
 
 
 
-These above points are the next step for the 0.0.5
+Port to linux on GNUStep is the next step for the 0.0.8
 
 ----------------------------------------------------------------------------------
 
