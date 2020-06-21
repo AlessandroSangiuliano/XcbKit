@@ -476,7 +476,7 @@ ICCCMService* icccmService;
     NSLog(@"Client window decorated with id %u", [window window]);
     
 	[self setNeedFlush:YES];
-    
+
     window = nil;
     frame = nil;
 }
@@ -669,9 +669,12 @@ ICCCMService* icccmService;
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
     
+    /*XCBWindow *clientWindw = [frame childWindowForKey:ClientWindow];
+    [clientWindw checkNetWMAllowedActions];*/
+    
     [frame setOffset:XCBMakePoint(anEvent->event_x, anEvent->event_y)];
 
-    if ([frame window] != anEvent->root)
+    if ([frame window] != anEvent->root && [[frame childWindowForKey:ClientWindow] canMove])
         dragState = YES;
     else
         dragState = NO;
@@ -679,7 +682,7 @@ ICCCMService* icccmService;
     
     /*** RESIZE WINDOW BY CLICKING ON THE BORDER ***/
     
-    if ([titleBar window] != anEvent->event)
+    if ([titleBar window] != anEvent->event && [[frame childWindowForKey:ClientWindow] canResize])
         [self borderClickedForFrameWindow:frame withEvent:anEvent];
     
     frame = nil;

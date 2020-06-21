@@ -126,6 +126,8 @@
                                     delete:NO];
     
     NSString *windowTitle = [NSString stringWithUTF8String:value];
+    
+    //free(value);
     value = nil;
     
     // for now if it is nil just set an empty string
@@ -133,18 +135,14 @@
     if (windowTitle == nil)
     {
         ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
-        value = [icccmService getProperty:[icccmService WMName]
-                              propertyType:XCB_ATOM_STRING
-                                forWindow:clientWindow
-                                   delete:NO];
         
-        windowTitle = [NSString stringWithUTF8String:value];
+        windowTitle = [icccmService getWmNameForWindow:clientWindow];
+        
         
         if (windowTitle == nil)
             windowTitle = @"";
         
         icccmService = nil;
-        value = nil;
     }
     
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];

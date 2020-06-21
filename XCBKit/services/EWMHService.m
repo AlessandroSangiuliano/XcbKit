@@ -530,6 +530,9 @@
     if (error)
         return NULL;
     
+    if (reply->length == 0 && reply->format == 0 && reply->type == 0)
+        return NULL;
+    
     void* value = xcb_get_property_value(reply);
     free(reply);
     return value;

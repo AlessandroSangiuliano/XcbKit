@@ -81,6 +81,11 @@
     return [[cachedAtoms objectForKey:atomName] unsignedIntValue];
 }
 
+- (NSNumber*) atomNumberFromCachedAtomsWithKey:(NSString *)atomName
+{
+    return [cachedAtoms objectForKey:atomName];
+}
+
 - (void) dealloc
 {
     connection = nil;
