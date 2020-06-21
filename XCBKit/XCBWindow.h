@@ -36,7 +36,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBRect oldRect;
 @property (nonatomic) XCBRect originalRect;
 @property (nonatomic) BOOL decorated;
-@property (nonatomic) BOOL draggable; //TODO: maybe not necessary
 @property (nonatomic) BOOL isCloseButton;
 @property (nonatomic) BOOL isMinimizeButton;
 @property (nonatomic) BOOL isMaximizeButton;
@@ -47,6 +46,20 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) xcb_pixmap_t pixmap;
 @property (nonatomic) BOOL firstRun; //find a better solution
 @property (nonatomic) BOOL pointerGrabbed;
+@property (strong, nonatomic) NSMutableArray* allowedActions;
+
+/*** ALLOWED ACTIONS ***/
+
+@property (nonatomic) BOOL canMove;
+@property (nonatomic) BOOL canResize;
+@property (nonatomic) BOOL canMinimize;
+@property (nonatomic) BOOL canMaximizeVert;
+@property (nonatomic) BOOL canMaximizeHorz;
+@property (nonatomic) BOOL canFullscreen;
+@property (nonatomic) BOOL canChangeDesktop;
+@property (nonatomic) BOOL canClose;
+@property (nonatomic) BOOL canShade;
+@property (nonatomic) BOOL canStick;
 
 
 - (xcb_window_t) window;
@@ -80,6 +93,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
 - (void) setWindowBorderWidth:(uint32_t)border;
+- (void) checkNetWMAllowedActions;
 
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;

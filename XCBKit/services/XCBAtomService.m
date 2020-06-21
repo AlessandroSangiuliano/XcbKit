@@ -60,8 +60,8 @@
     atomValue = [NSNumber numberWithUnsignedInt:atom];
     [cachedAtoms setObject:atomValue forKey:atomName];
     
-    atomValue = nil;
-    return reply->atom;
+    free(reply);
+    return [atomValue unsignedIntValue];
 }
 
 - (void) cacheAtoms:(NSArray *)atoms
@@ -79,6 +79,11 @@
 - (xcb_atom_t) atomFromCachedAtomsWithKey:(NSString *)atomName
 {
     return [[cachedAtoms objectForKey:atomName] unsignedIntValue];
+}
+
+- (NSNumber*) atomNumberFromCachedAtomsWithKey:(NSString *)atomName
+{
+    return [cachedAtoms objectForKey:atomName];
 }
 
 - (void) dealloc

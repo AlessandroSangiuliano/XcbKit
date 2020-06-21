@@ -22,7 +22,6 @@
 @synthesize windowRect;
 @synthesize originalRect;
 @synthesize decorated;
-@synthesize draggable;
 @synthesize isCloseButton;
 @synthesize isMinimizeButton;
 @synthesize isMaximizeButton;
@@ -34,8 +33,17 @@
 @synthesize pixmap;
 @synthesize pointerGrabbed;
 @synthesize firstRun;
-
-
+@synthesize allowedActions;
+@synthesize canMove;
+@synthesize canResize;
+@synthesize canMinimize;
+@synthesize canMaximizeVert;
+@synthesize canMaximizeHorz;
+@synthesize canFullscreen;
+@synthesize canChangeDesktop;
+@synthesize canClose;
+@synthesize canShade;
+@synthesize canStick;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
            andConnection:(XCBConnection *)aConnection
@@ -67,13 +75,27 @@
 	aboveWindow = anAbove;
 	isMapped = NO;
     decorated = NO;
-    draggable = YES;
     isCloseButton = NO;
     isMinimizeButton = NO;
     isMaximizeButton = NO;
     connection = aConnection;
     needDestroy = NO;
-	   
+    canMove = NO;
+    canResize = NO;
+    canMinimize = NO;
+    canMaximizeVert = NO;
+    canMaximizeHorz = NO;
+    canFullscreen = NO;
+    canShade = NO;
+    canStick = NO;
+    canChangeDesktop = NO;
+    canClose = NO;
+    
+    /*** checks _net_wm_allowed_action for client window ***/
+    
+    [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:self withObject:nil];
+    
+    
 	return self;
 }
 
@@ -87,6 +109,113 @@
                                                theValues);
     return gcCookie;
     
+}
+
+- (void) checkNetWMAllowedActions
+{
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    xcb_atom_t* allowed_actions = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+                                              propertyType:XCB_ATOM_ATOM
+                                                 forWindow:self
+                                                    delete:NO];
+    
+    int allowedActionSize = 0;
+    
+    (allowed_actions != NULL) ? (allowedActionSize = sizeof(allowed_actions)/sizeof(allowed_actions[0])) : (allowedActionSize = 0);
+    
+    if (allowedActionSize > 0)
+    {
+        allowedActions = [[NSMutableArray alloc] initWithCapacity:allowedActionSize];
+        
+        for (int i = 0; i < allowedActionSize; i++)
+            [allowedActions addObject:[NSNumber numberWithUnsignedInt:allowed_actions[i]]];
+        
+        free(allowed_actions);
+    }
+    
+    if (allowed_actions == NULL)
+    {
+        canMove = YES;
+        canResize = YES;
+        canMinimize = YES;
+        canMaximizeVert = YES;
+        canMaximizeHorz = YES;
+        canFullscreen = YES;
+        canShade = YES;
+        canStick = YES;
+        canChangeDesktop = YES;
+        canClose = YES;
+        
+        ewmhService = nil;
+        return;
+    }
+    
+    XCBAtomService *atomService = [ewmhService atomService];
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionClose]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canClose = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionFullscreen]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canFullscreen = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionChangeDesktop]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canChangeDesktop = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMaximizeHorz]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+    
+            canMaximizeHorz = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMaximizeVert]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMaximizeVert = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMinimize]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMinimize = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionMove]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canMove = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionStick]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canStick = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionShade]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canShade = YES;
+    
+    for (int i = 0; i < [allowedActions count]; i++)
+        if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMActionResize]] ==
+            [[allowedActions objectAtIndex:i] unsignedIntegerValue])
+            
+            canResize = YES;
+    
+    ewmhService = nil;
+    atomService = nil;
+
 }
 
 - (void) createPixmap
@@ -622,6 +751,7 @@
 {
     parentWindow = nil;
     aboveWindow = nil;
+    allowedActions = nil;
 }
 
 @end
