@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 #import <cairo/cairo-xcb.h>
 #import <cairo/cairo.h>
 #import <XCBConnection.h>

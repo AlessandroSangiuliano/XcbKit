@@ -8,12 +8,12 @@
 
 #import "XCBFrame.h"
 #import "XCBVisual.h"
-#import "Transformers.h"
+#import "functions/Transformers.h"
 #import "XCBTitleBar.h"
-#import "EWMHService.h"
-#import "XCBCreateWindowTypeRequest.h"
-#import "XCBWindowTypeResponse.h"
-#import "ICCCMService.h"
+#import "services/EWMHService.h"
+#import "utils/XCBCreateWindowTypeRequest.h"
+#import "utils/XCBWindowTypeResponse.h"
+#import "services/ICCCMService.h"
 
 
 @implementation XCBFrame

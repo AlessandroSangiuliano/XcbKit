@@ -9,10 +9,10 @@
 #import "XCBWindow.h"
 #import "XCBConnection.h"
 #import "XCBTitleBar.h"
-#import "XCBAtomService.h"
-#import <Transformers.h>
-#import "CairoDrawer.h"
-#import "EWMHService.h"
+#import "services/XCBAtomService.h"
+#import <functions/Transformers.h>
+#import "utils/CairoDrawer.h"
+#import "services/EWMHService.h"
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 

@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "XCBScreen.h"
 #import "XCBVisual.h"
-#import "XCBCreateWindowTypeRequest.h"
-#import "XCBWindowTypeResponse.h"
-#import "EMessage.h"
+#import "utils/XCBCreateWindowTypeRequest.h"
+#import "utils/XCBWindowTypeResponse.h"
+#import "enums/EMessage.h"
 #include <xcb/xcb.h>
 
 @class XCBWindow;
