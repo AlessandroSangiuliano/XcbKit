@@ -52,8 +52,8 @@
     NSLog(@"Atom value for name: %u", atomWmName);
     NSLog(@"Atom value for supported: %u", atomSupported);
     
-    STAssertEquals(atomWmName, 256u, @"Expected 256");
-    STAssertEquals(atomSupported, 294u, @"Expected 294");
+    STAssertEquals(atomWmName, 271u, @"Expected 271");
+    STAssertEquals(atomSupported, 252u, @"Expected 252");
 }
 
 - (void) testCacheAtoms
@@ -70,8 +70,8 @@
     
     NSDictionary *cachedAtoms = [atomService cachedAtoms];
     
-    STAssertEquals([[cachedAtoms objectForKey:atoms[0]] unsignedIntValue], 256u, @"Expected 256");
-    STAssertEquals([[cachedAtoms objectForKey:atoms[1]] unsignedIntValue], 294u, @"Expected 294");
+    STAssertEquals([[cachedAtoms objectForKey:atoms[0]] unsignedIntValue], 271u, @"Expected 271");
+    STAssertEquals([[cachedAtoms objectForKey:atoms[1]] unsignedIntValue], 252u, @"Expected 252");
 }
 
 - (void) testAtomFromCachedAtomsWithKey
