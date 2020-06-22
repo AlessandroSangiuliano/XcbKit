@@ -52,7 +52,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 
 ADDITIONAL_OBJCFLAGS = -std=c99 -g -fobjc-arc #-Wno-unused -Werror -Wall
 
-LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
+LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes) -lgnustep-gui -lgnustep-base $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 
 include $(GNUSTEP_MAKEFILES)/aggregate.make
 include $(GNUSTEP_MAKEFILES)/framework.make

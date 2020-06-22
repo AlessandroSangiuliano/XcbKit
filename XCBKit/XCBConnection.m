@@ -554,7 +554,7 @@ ICCCMService* icccmService;
         ([[window parentWindow] window] != [rootWindow window]))
     {
         XCBFrame *frame = (XCBFrame*)[window parentWindow];
-        [frame grabPointer];
+        [[frame childWindowForKey:(TitleBar)] grabPointer];
 
         NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];

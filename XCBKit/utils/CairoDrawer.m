@@ -8,6 +8,7 @@
 
 #import "CairoDrawer.h"
 #import "XCBScreen.h"
+#import <AppKit/AppKit.h>
 
 #ifndef M_PI
   #define M_PI        3.14159265358979323846264338327950288
@@ -203,7 +204,7 @@
 
     cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
 
-    NSFont* font = [NSFont fontWithName:@"Microsoft Sans Serif" size:11];
+    NSFont* font = [NSFont systemFontOfSize:11]; //[NSFont fontWithName:@"Microsoft Sans Serif" size:11];
     NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
 
     NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
