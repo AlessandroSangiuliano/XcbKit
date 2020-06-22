@@ -728,6 +728,7 @@
         return NO;
 
     pointerGrabbed = YES;
+    NSLog(@"Pointer grabbed");
     return YES;
 
 }
@@ -738,6 +739,7 @@
     {
         xcb_ungrab_pointer([connection connection], XCB_CURRENT_TIME);
         pointerGrabbed = NO;
+        NSLog(@"Pointer ungrabbed");
     }
 }
 
