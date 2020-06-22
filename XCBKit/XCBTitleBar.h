@@ -10,8 +10,8 @@
 #import <AppKit/AppKit.h>
 #import "XCBWindow.h"
 #import "XCBFrame.h"
-#import "services/EWMHService.h"
-#import "enums/ETitleBarColor.h"
+#import "EWMHService.h"
+#import "ETitleBarColor.h"
 
 
 #ifndef TITLE_MASK
@@ -43,7 +43,7 @@ XCB_EVENT_MASK_KEY_PRESS
 - (id) initWithFrame:(XCBFrame*) aFrame withConnection:(XCBConnection*) aConnection;
 - (void) drawArcsForColor:(TitleBarColor)aColor;
 
-/*** 
+/***
 * Draws the titlebar with the color argument.
 * aColor: The color to draw the title bar; if nil titleBarStandardColor is used.
 ***/

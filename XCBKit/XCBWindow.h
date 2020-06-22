@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "utils/XCBShape.h"
+#import "XCBShape.h"
 #include <xcb/xcb.h>
 
 @class XCBConnection;

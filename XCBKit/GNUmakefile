@@ -7,6 +7,8 @@ FRAMEWORK_NAME = XCBKit
 
 $(FRAMEWORK_NAME)_LANGUAGES = English
 
+XCBKit_INCLUDE_DIRS = -Iservices/ -Ienums/ -Ifunctions/ -Iutils/
+
 $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBKit.m \
 			XCBConnection.m \
