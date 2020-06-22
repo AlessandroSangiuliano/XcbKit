@@ -10,8 +10,8 @@
 #import <AppKit/AppKit.h>
 #import "XCBWindow.h"
 #import "XCBFrame.h"
-#import "EWMHService.h"
-#import "ETitleBarColor.h"
+#import "services/EWMHService.h"
+#import "enums/ETitleBarColor.h"
 
 
 #ifndef TITLE_MASK

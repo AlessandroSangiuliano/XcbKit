@@ -9,7 +9,7 @@
 #import "EWMHService.h"
 #import <xcb/xcb.h>
 #import <xcb/xcb_atom.h>
-#import <Transformers.h>
+#import "../functions/Transformers.h"
 
 @implementation EWMHService
 

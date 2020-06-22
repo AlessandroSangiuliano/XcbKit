@@ -11,10 +11,10 @@
 #import "XCBFrame.h"
 #import <cairo/cairo.h>
 #import <cairo/cairo-xcb.h>
-#import "CairoDrawer.h"
-#import "XCBCreateWindowTypeRequest.h"
-#import "XCBWindowTypeResponse.h"
-#import "Transformers.h"
+#import "utils/CairoDrawer.h"
+#import "utils/XCBCreateWindowTypeRequest.h"
+#import "utils/XCBWindowTypeResponse.h"
+#import "functions/Transformers.h"
 
 @implementation XCBTitleBar
 

@@ -7,13 +7,13 @@
 //
 
 #import "XCBConnection.h"
-#import "EWMHService.h"
+#import "services/EWMHService.h"
 #import "XCBFrame.h"
 #import "XCBSelection.h"
 #import "XCBTitleBar.h"
-#import "Transformers.h"
-#import "CairoDrawer.h"
-#import "ICCCMService.h"
+#import "functions/Transformers.h"
+#import "utils/CairoDrawer.h"
+#import "services/ICCCMService.h"
 #import "XCBRegion.h"
 
 
