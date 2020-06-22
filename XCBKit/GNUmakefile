@@ -2,8 +2,10 @@ PACKAGE_NAME = XCBKit
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.8
+VERSION = 0.0.7
+
 FRAMEWORK_NAME = XCBKit
+export FRAMEWORK_NAME
 
 $(FRAMEWORK_NAME)_LANGUAGES = English
 
@@ -52,4 +54,5 @@ ADDITIONAL_OBJCFLAGS = -std=c99 -g -fobjc-arc #-Wno-unused -Werror -Wall
 
 LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 
+include $(GNUSTEP_MAKEFILES)/aggregate.make
 include $(GNUSTEP_MAKEFILES)/framework.make
