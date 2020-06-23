@@ -89,7 +89,7 @@
         request = nil;
     }
 
-
+    [super setIsAbove:YES];
     [connection mapWindow:self];
     free(sizeHints);
     icccmService = nil;

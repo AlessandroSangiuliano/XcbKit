@@ -435,7 +435,7 @@ ICCCMService* icccmService;
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
-        
+
         window = nil;
 
         return;
@@ -452,10 +452,11 @@ ICCCMService* icccmService;
         if (reply->override_redirect == YES)
         {
             NSLog(@"Override redirect detected"); //useless log
-            
+
             window = nil;
             return;
         }
+
 
         XCBRect rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
@@ -906,78 +907,23 @@ ICCCMService* icccmService;
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow* window = [self windowForXCBId:anEvent->window];
-    XCBRect exposeRectangle = XCBMakeRect(XCBMakePoint(anEvent->x, anEvent->y), XCBMakeSize(anEvent->width, anEvent->height));
-    xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(exposeRectangle);
-
-    //[window description];
-    /*NSLog(@"Event rectangle with cardinalities: %d %d %d %d",
-          expose_rectangle.x,
-          expose_rectangle.y,
-          expose_rectangle.height,
-          expose_rectangle.width);*/
-
-    //NSLog(@"GC id: %u", [window graphicContextId]);
-
-    /*** I get all the client window black here, and now maybe I know the reason. ***/
-
-    //xcb_poly_fill_rectangle(connection, [window window], [window graphicContextId], 1, &expose_rectangle);
-
-    /*XCBFrame* frame;
-
-    if ([window isKindOfClass:[XCBTitleBar class]] ||
-        [window isMinimizeButton] ||
-        [window isMaximizeButton] ||
-        [window isCloseButton])
-    {
-        window = nil;
-        exposeRectangle = nil;
-        return;
-    }
-
-    if ([window isKindOfClass:[XCBFrame class]])
-        frame = (XCBFrame*) window;
-
-
-    xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, &expose_rectangle);*/
-
-
-    /*XCBPoint* position = [[XCBPoint alloc] initWithX:anEvent->x andY:anEvent->y];
-    XCBSize* size = [[XCBSize alloc] initWithWidht:anEvent->width andHeight:anEvent->height];
-    XCBRect* exposeRectangle = [[XCBRect alloc] initWithPosition:position andSize:size];
-    xcb_rectangle_t rectangles = [exposeRectangle xcbRectangle];
-    XCBRegion* damagedRegion = [[XCBRegion alloc] initWithConnection:self rectagles:&rectangles count:1];
-
-    if (!xfixesInitialized)
-    {
-        xfixesInitialized = [damagedRegion initXFixesProtocol]; // che cosa brutta
-    }
-
-    [self addDamagedRegion:damagedRegion];*/
-
-
-    /*** this was another try ***/
-
-    XCBScreen *screen = [[self screens] objectAtIndex:0];
+		XCBScreen *screen = [[self screens] objectAtIndex:0];
     XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-    CairoDrawer* drawer = [[CairoDrawer alloc] initWithConnection:self window:window visual:visual];
-    [drawer drawContent];
-    /*xcb_copy_area(connection,
-                  [window pixmap],
-                  [window window],
-                  [window graphicContextId],
-                  anEvent->x,
-                  anEvent->y,
-                  anEvent->x,
-                  anEvent->y,
-                  anEvent->width,
-                  anEvent->height);*/
+		if ([window isKindOfClass:[XCBTitleBar class]])
+		{
+				XCBTitleBar* titleBar = (XCBTitleBar*)window;
+				XCBFrame* frame = (XCBFrame*)[titleBar parentWindow];
+				[titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
 
-    screen = nil;
-    visual = nil;
+				titleBar = nil;
+				frame = nil;
+		}
+
     window = nil;
-    drawer = nil;
+		screen = nil;
+		visual = nil;
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
@@ -1025,7 +971,7 @@ ICCCMService* icccmService;
         }
 
     }
-    
+
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
         titleBarWindow = (XCBTitleBar*)window;
@@ -1046,13 +992,13 @@ ICCCMService* icccmService;
     }
 
     [self unregisterWindow:window];
-    
-    
+
+
     frameWindow = nil;
     titleBarWindow = nil;
     window = nil;
     clientWindow = nil;
-    
+
     return;
 }
 
@@ -1151,6 +1097,7 @@ ICCCMService* icccmService;
             if (titleBar != aTitileBar)
             {
                 [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
+								[[titleBar parentWindow] setIsAbove:NO];
             }
 
             titleBar = nil;
@@ -1239,7 +1186,7 @@ ICCCMService* icccmService;
         }
 
         NSLog(@"Subtructure redirect was set to the root window");
-        
+
         rootWindow = nil;
         screen = nil;
         return;
@@ -1264,7 +1211,7 @@ ICCCMService* icccmService;
         if (!attributesChanged)
         {
             NSLog(@"Can't register as window manager.");
-            
+
             rootWindow = nil;
             screen = nil;
             selector = nil;

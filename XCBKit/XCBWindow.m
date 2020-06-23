@@ -44,6 +44,7 @@
 @synthesize canClose;
 @synthesize canShade;
 @synthesize canStick;
+@synthesize isAbove;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
            andConnection:(XCBConnection *)aConnection
@@ -109,6 +110,11 @@
                                                theValues);
     return gcCookie;
 
+}
+
+- (void) destroyGraphicsContext
+{
+    xcb_free_gc([connection connection], graphicContextId);
 }
 
 - (void) checkNetWMAllowedActions
@@ -522,7 +528,7 @@
                    (const char*) &event);
 
     /*** set iconic hints? or normal if not iconized hints? ***/
-    
+
     atomService = nil;
     screen = nil;
 
@@ -680,12 +686,14 @@
 {
     uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
+    isAbove = YES;
 }
 
 - (void) stackBelow
 {
     uint32_t values[1] = {XCB_STACK_MODE_BELOW};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
+    isAbove = NO;
 }
 
 - (void) grabButton

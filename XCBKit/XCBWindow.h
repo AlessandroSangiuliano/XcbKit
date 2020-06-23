@@ -47,6 +47,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL firstRun; //find a better solution
 @property (nonatomic) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
+@property (nonatomic) BOOL isAbove;
 
 /*** ALLOWED ACTIONS ***/
 
@@ -80,6 +81,7 @@ typedef NS_ENUM(NSInteger, WindowState)
           withConnection:(XCBConnection*) aConnection;
 
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t) aMask andValues:(uint32_t*) values;
+- (void) destroyGraphicsContext;
 - (void) createPixmap;
 
 - (XCBWindow*) parentWindow;

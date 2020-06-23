@@ -190,7 +190,7 @@
 
         drawer = nil;
     }
-    
+
     stopColor = nil;
     screen = nil;
     visual = nil;
@@ -212,7 +212,7 @@
     [visual setVisualTypeForScreen:screen];
 
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
-    
+
     NSColor *stopColor = [NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1];
     [drawer drawTitleBarWithColor:aux andStopColor: stopColor];
 
@@ -273,7 +273,7 @@
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
     NSColor* black = [NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1];
     [drawer drawText:windowTitle withColor:black];
-    
+
     drawer = nil;
     screen = nil;
     visual = nil;
