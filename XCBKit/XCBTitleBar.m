@@ -190,6 +190,10 @@
 
         drawer = nil;
     }
+    
+    stopColor = nil;
+    screen = nil;
+    visual = nil;
 }
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor
@@ -208,7 +212,9 @@
     [visual setVisualTypeForScreen:screen];
 
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
-    [drawer drawTitleBarWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+    
+    NSColor *stopColor = [NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1];
+    [drawer drawTitleBarWithColor:aux andStopColor: stopColor];
 
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
      * a better solution to avoid all the sets methods/messages ***/
@@ -218,7 +224,7 @@
         [drawer setWindow:hideWindowButton];
         [drawer setHeight:[hideWindowButton windowRect].size.height];
         [drawer setWidth:[hideWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+        [drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
 
     if (minimizeWindowButton != nil)
@@ -226,7 +232,7 @@
         [drawer setWindow:minimizeWindowButton];
         [drawer setHeight:[minimizeWindowButton windowRect].size.height];
         [drawer setWidth:[minimizeWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+        [drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
 
     if (maximizeWindowButton != nil)
@@ -234,12 +240,13 @@
         [drawer setWindow:maximizeWindowButton];
         [drawer setHeight:[maximizeWindowButton windowRect].size.height];
         [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:[NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1]];
+        [drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
 
     drawer = nil;
     screen = nil;
     visual = nil;
+    stopColor = nil;
     aux = nil;
 }
 
@@ -264,8 +271,13 @@
     [visual setVisualTypeForScreen:screen];
 
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
-    [drawer drawText:windowTitle withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
+    NSColor* black = [NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1];
+    [drawer drawText:windowTitle withColor:black];
+    
     drawer = nil;
+    screen = nil;
+    visual = nil;
+    black = nil;
 }
 
 - (xcb_arc_t*) arcs

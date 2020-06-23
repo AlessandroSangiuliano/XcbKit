@@ -106,7 +106,7 @@
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 
-
+    black = nil;
 
 }
 

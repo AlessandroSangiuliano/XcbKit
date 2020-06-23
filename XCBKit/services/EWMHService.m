@@ -483,6 +483,8 @@
                         &pid);
 
     //TODO: wm-specs says that if the _NET_WM_PID is set the ICCCM WM_CLIENT_MACHINE atom must be set.
+    
+    rootAtoms = nil;
 
 }
 

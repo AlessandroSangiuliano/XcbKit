@@ -435,6 +435,8 @@ ICCCMService* icccmService;
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
+        
+        window = nil;
 
         return;
     }
@@ -450,6 +452,8 @@ ICCCMService* icccmService;
         if (reply->override_redirect == YES)
         {
             NSLog(@"Override redirect detected"); //useless log
+            
+            window = nil;
             return;
         }
 
@@ -620,6 +624,7 @@ ICCCMService* icccmService;
         XCBWindow* frameWindow = [[window parentWindow] parentWindow];
         [frameWindow minimize];
         frameWindow = nil;
+        window = nil;
         return;
     }
 
@@ -628,6 +633,7 @@ ICCCMService* icccmService;
         XCBScreen* screen = [screens objectAtIndex:0];
         [window maximizeToWidth:[screen width] andHeight:[screen height]];
         screen = nil;
+        window = nil;
         return;
     }
 
@@ -711,6 +717,7 @@ ICCCMService* icccmService;
     }
 
     [window ungrabPointer];
+    window = nil;
 }
 
 - (void) handleFocusOut:(xcb_focus_out_event_t *)anEvent
@@ -750,6 +757,9 @@ ICCCMService* icccmService;
     if (window == nil && frame == nil && titleBar == nil)
     {
         NSLog(@"No existing window for id: %u", anEvent->window);
+        screen = nil;
+        visual = nil;
+        atomService = nil;
         return;
     }
 
@@ -966,6 +976,7 @@ ICCCMService* icccmService;
 
     screen = nil;
     visual = nil;*/
+    window = nil;
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
@@ -985,10 +996,13 @@ ICCCMService* icccmService;
     XCBWindow* window = [self windowForXCBId:anEvent->window];
     XCBFrame* frameWindow = nil;
     XCBTitleBar* titleBarWindow = nil;
+    XCBWindow* clientWindow = nil;
 
     if ([window isKindOfClass:[XCBFrame class]])
     {
         frameWindow = (XCBFrame*)window;
+        titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
+        clientWindow = [frameWindow childWindowForKey:ClientWindow];
     }
 
     if ([window isKindOfClass:[XCBWindow class]])
@@ -996,6 +1010,8 @@ ICCCMService* icccmService;
         if ([[window parentWindow] isKindOfClass:[XCBFrame class]]) /* then is the client window */
         {
             frameWindow = (XCBFrame*) [window parentWindow];
+            clientWindow = window;
+            titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
             [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
         }
 
@@ -1003,8 +1019,17 @@ ICCCMService* icccmService;
         {
             frameWindow = (XCBFrame*) [[window parentWindow] parentWindow];
             [frameWindow setNeedDestroy:YES]; /* at this point maybe i can avoid to force this to YES */
+            titleBarWindow = (XCBTitleBar*)[frameWindow childWindowForKey:TitleBar];
+            clientWindow = [frameWindow childWindowForKey:ClientWindow];
         }
 
+    }
+    
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        titleBarWindow = (XCBTitleBar*)window;
+        frameWindow = (XCBFrame*)[titleBarWindow parentWindow];
+        clientWindow = [frameWindow childWindowForKey:ClientWindow];
     }
 
     if (frameWindow != nil && [frameWindow needDestroy]) /*evaluete if the check on destroy window is necessary or not */
@@ -1014,15 +1039,24 @@ ICCCMService* icccmService;
         [self unregisterWindow:[titleBarWindow minimizeWindowButton]];
         [self unregisterWindow:[titleBarWindow maximizeWindowButton]];
         [self unregisterWindow:titleBarWindow];
+        [self unregisterWindow:clientWindow];
+        [[frameWindow getChildren] removeAllObjects];
         [frameWindow destroy];
+        
+        XCBWindow* test = [self windowForXCBId:[frameWindow window]];
+        
+        if (test == frameWindow)
+            NSLog(@"Ciccio Pasticcio!");
     }
 
     [self unregisterWindow:window];
-
+    
+    
     frameWindow = nil;
     titleBarWindow = nil;
     window = nil;
-
+    clientWindow = nil;
+    
     return;
 }
 
@@ -1128,6 +1162,7 @@ ICCCMService* icccmService;
 
         tmp = nil;
     }
+
     windows = nil;
 }
 
@@ -1202,10 +1237,13 @@ ICCCMService* icccmService;
              {
                 NSLog(@"Can't co-running too");
              }*/
+            rootWindow = nil;
+            screen = nil;
             return;
         }
 
         NSLog(@"Subtructure redirect was set to the root window");
+        
         rootWindow = nil;
         screen = nil;
         return;
@@ -1230,8 +1268,11 @@ ICCCMService* icccmService;
         if (!attributesChanged)
         {
             NSLog(@"Can't register as window manager.");
+            
             rootWindow = nil;
             screen = nil;
+            selector = nil;
+            atomName = nil;
             return;
         }
     }

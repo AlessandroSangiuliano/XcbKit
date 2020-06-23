@@ -522,6 +522,9 @@
                    (const char*) &event);
 
     /*** set iconic hints? or normal if not iconized hints? ***/
+    
+    atomService = nil;
+    screen = nil;
 
 }
 
@@ -588,6 +591,7 @@
 
     atomService = nil;
     ewmhService = nil;
+    titleBar = nil;
 
     isMinimized = YES;
 
@@ -656,6 +660,7 @@
 
     ewmhService = nil;
     atomService = nil;
+    frame = nil;
 }
 
 - (void) destroy
@@ -753,6 +758,7 @@
 {
     parentWindow = nil;
     aboveWindow = nil;
+    [allowedActions removeAllObjects];
     allowedActions = nil;
 }
 

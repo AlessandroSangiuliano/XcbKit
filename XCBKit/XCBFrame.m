@@ -93,6 +93,8 @@
     [connection mapWindow:self];
     free(sizeHints);
     icccmService = nil;
+    visual = nil;
+    screen = nil;
     return self;
 }
 
