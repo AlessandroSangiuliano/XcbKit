@@ -957,13 +957,13 @@ ICCCMService* icccmService;
 
     /*** this was another try ***/
 
-    /*XCBScreen *screen = [[self screens] objectAtIndex:0];
+    XCBScreen *screen = [[self screens] objectAtIndex:0];
     XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
     CairoDrawer* drawer = [[CairoDrawer alloc] initWithConnection:self window:window visual:visual];
     [drawer drawContent];
-    xcb_copy_area(connection,
+    /*xcb_copy_area(connection,
                   [window pixmap],
                   [window window],
                   [window graphicContextId],
@@ -972,11 +972,12 @@ ICCCMService* icccmService;
                   anEvent->x,
                   anEvent->y,
                   anEvent->width,
-                  anEvent->height);
+                  anEvent->height);*/
 
     screen = nil;
-    visual = nil;*/
+    visual = nil;
     window = nil;
+    drawer = nil;
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
@@ -1042,11 +1043,6 @@ ICCCMService* icccmService;
         [self unregisterWindow:clientWindow];
         [[frameWindow getChildren] removeAllObjects];
         [frameWindow destroy];
-        
-        XCBWindow* test = [self windowForXCBId:[frameWindow window]];
-        
-        if (test == frameWindow)
-            NSLog(@"Ciccio Pasticcio!");
     }
 
     [self unregisterWindow:window];
