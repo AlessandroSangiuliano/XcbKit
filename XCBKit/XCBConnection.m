@@ -919,7 +919,7 @@ ICCCMService* icccmService;
         
         titleBar = nil;
         frame = nil;
-		}
+    }
 
     window = nil;
     screen = nil;
