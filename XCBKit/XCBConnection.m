@@ -478,6 +478,8 @@ ICCCMService* icccmService;
                                    withData:atomProtocols];
     [frame decorateClientWindow];
 
+	[window createPixmap];
+
     NSLog(@"Client window decorated with id %u", [window window]);
 
 	[self setNeedFlush:YES];
@@ -799,6 +801,7 @@ ICCCMService* icccmService;
         if (frame != nil)
         {
             drawer = [[CairoDrawer alloc] initWithConnection:self window:clientWindow visual:visual];
+			[window updatePixmap]; //oppure window
             [drawer makePreviewImage];
             XCBPoint position = XCBMakePoint(100, 100); //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
@@ -916,29 +919,24 @@ ICCCMService* icccmService;
         XCBTitleBar* titleBar = (XCBTitleBar*)window;
         XCBFrame* frame = (XCBFrame*)[titleBar parentWindow];
         [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
-        
+
         titleBar = nil;
         frame = nil;
     }
-    
+
     if ([window isKindOfClass:[XCBFrame class]])
     {
         XCBFrame* frame = (XCBFrame*)window;
         NSLog(@"AISSALARAISS");
-        
-        uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
-        uint32_t values[] = {[screen screen]->white_pixel, [screen screen]->white_pixel, 0};
-        
-        [frame createGraphicContextWithMask:mask andValues:values];
-        
-        xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle([frame windowRect]);
+
+        /*xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle([frame windowRect]);
         expose_rectangle.x = 0;
         expose_rectangle.y = 0;
-        
+
         xcb_rectangle_t rectangles[] = {expose_rectangle};
-        
-        xcb_poly_rectangle(connection, [frame window], [frame graphicContextId], 1, rectangles);
-        
+
+        xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, rectangles);*/
+
         frame = nil;
     }
 

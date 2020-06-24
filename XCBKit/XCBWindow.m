@@ -228,15 +228,49 @@
 {
     pixmap = xcb_generate_id([connection connection]);
     XCBScreen* screen = [[connection screens] objectAtIndex:0];
+
+    uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
+	uint32_t values[] = {[screen screen]->white_pixel, [screen screen]->white_pixel, 0};
+	[self createGraphicContextWithMask:mask andValues:values];
+
     xcb_create_pixmap([connection connection],
                       [screen screen]->root_depth,
                       pixmap,
                       window,
                       windowRect.size.width,
                       windowRect.size.height);
+
+    xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(windowRect);
+
+    xcb_rectangle_t rectangles[] = {expose_rectangle};
+
+    //xcb_poly_fill_rectangle([connection connection], pixmap, graphicContextId, 1, rectangles);
+
+    xcb_copy_area([connection connection], pixmap, window, graphicContextId, windowRect.position.x, windowRect.position.y, windowRect.position.x, windowRect.position.x, windowRect.size.width, windowRect.size.height);
+
     screen = nil;
 }
 
+- (void) updatePixmap
+{
+    if (pixmap == 0)
+    {
+        NSLog(@"Pixmap not allocated");
+        return;
+    }
+
+    xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(windowRect);
+
+    xcb_rectangle_t rectangles[] = {expose_rectangle};
+
+    xcb_poly_fill_rectangle([connection connection], pixmap, graphicContextId, 1, rectangles);
+    xcb_copy_area([connection connection], window, pixmap, graphicContextId, windowRect.position.x, windowRect.position.y, windowRect.position.x, windowRect.position.x, windowRect.size.width, windowRect.size.height);
+}
+
+- (void) destroyPixmap
+{
+    xcb_free_pixmap([connection connection], pixmap);
+}
 - (xcb_window_t) window
 {
 	return window;

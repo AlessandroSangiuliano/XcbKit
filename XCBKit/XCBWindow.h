@@ -83,6 +83,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (xcb_void_cookie_t) createGraphicContextWithMask:(uint32_t) aMask andValues:(uint32_t*) values;
 - (void) destroyGraphicsContext;
 - (void) createPixmap;
+- (void) destroyPixmap;
+- (void) updatePixmap;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;

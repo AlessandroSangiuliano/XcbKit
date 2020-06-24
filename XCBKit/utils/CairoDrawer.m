@@ -227,7 +227,14 @@
 - (void) makePreviewImage
 {
     XCBSize size = [window windowRect].size;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+
+    if ([[window parentWindow] isAbove] == NO)
+    {
+        cairoSurface = cairo_xcb_surface_create([connection connection], [[window parentWindow] pixmap], [visual visualType], size.width, size.height);
+    }
+    else
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+
     cr = cairo_create(cairoSurface);
 
     cairo_surface_write_to_png(cairoSurface, "/tmp/Preview.png");
