@@ -907,23 +907,23 @@ ICCCMService* icccmService;
 - (void) handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow* window = [self windowForXCBId:anEvent->window];
-		XCBScreen *screen = [[self screens] objectAtIndex:0];
+    XCBScreen *screen = [[self screens] objectAtIndex:0];
     XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-		if ([window isKindOfClass:[XCBTitleBar class]])
-		{
-				XCBTitleBar* titleBar = (XCBTitleBar*)window;
-				XCBFrame* frame = (XCBFrame*)[titleBar parentWindow];
-				[titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
-
-				titleBar = nil;
-				frame = nil;
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        XCBTitleBar* titleBar = (XCBTitleBar*)window;
+        XCBFrame* frame = (XCBFrame*)[titleBar parentWindow];
+        [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
+        
+        titleBar = nil;
+        frame = nil;
 		}
 
     window = nil;
-		screen = nil;
-		visual = nil;
+    screen = nil;
+    visual = nil;
 }
 
 - (void) handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
