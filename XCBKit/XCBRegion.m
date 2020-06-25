@@ -43,7 +43,7 @@
     
     
     return self;
-
+    
 }
 
 - (id) initWithConnection:(XCBConnection *)aConnection rectagles:(xcb_rectangle_t *)rects count:(int)rectsNumber
