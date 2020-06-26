@@ -415,7 +415,7 @@
             case XCB_MOTION_NOTIFY:
                 NSLog(@"");
                 xcb_motion_notify_event_t *motionEvent = (xcb_motion_notify_event_t *)e;
-                NSLog(@"Motion Notify for window %u: ", motionEvent->event);
+                //NSLog(@"Motion Notify for window %u: ", motionEvent->event);
                 [connection handleMotionNotify:motionEvent];
                 [connection flush];
                 [connection setNeedFlush:NO];
@@ -455,6 +455,7 @@
                 NSLog(@"");
                 xcb_visibility_notify_event_t* visibilityEvent = (xcb_visibility_notify_event_t*)e;
                 NSLog(@"Enter notify for window %u", visibilityEvent->window);
+                [connection handleVisibilityEvent:visibilityEvent];
                 break;
                 
             case XCB_BUTTON_PRESS:

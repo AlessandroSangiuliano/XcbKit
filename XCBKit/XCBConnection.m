@@ -921,12 +921,15 @@ ICCCMService* icccmService;
 	if ([window isKindOfClass:[XCBFrame class]])
 	{
 		frame = (XCBFrame*)window;
-		clientWindow = frame;
+		clientWindow = [frame childWindowForKey:ClientWindow];
 	}
 
 	if (anEvent->state == XCB_VISIBILITY_UNOBSCURED)
 	{
-		[clientWindow pixmap] == 0 ? [clientWindow createPixmap] : [clientWindow updatePixmap];
+        if ([clientWindow pixmap] == 0)
+            [clientWindow createPixmap];
+        else
+            [clientWindow updatePixmap];
 	}
 
 	window = nil;

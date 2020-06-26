@@ -803,7 +803,7 @@
         return NO;
 
     pointerGrabbed = YES;
-    NSLog(@"Pointer grabbed");
+    //NSLog(@"Pointer grabbed");
     return YES;
 
 }
