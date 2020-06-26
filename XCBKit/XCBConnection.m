@@ -98,7 +98,7 @@ ICCCMService* icccmService;
         rootWindow = nil;
 	}
     
-    NSLog(@"Number of screens: %lud", (unsigned long)[screens count]);
+    NSLog(@"Number of screens: %lu", (unsigned long)[screens count]);
     
     ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
