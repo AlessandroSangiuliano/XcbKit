@@ -135,7 +135,11 @@
         allowedActions = [[NSMutableArray alloc] initWithCapacity:allowedActionSize];
         
         for (int i = 0; i < allowedActionSize; i++)
-            [allowedActions addObject:[NSNumber numberWithUnsignedInt:allowed_actions[i]]];
+        {
+            NSNumber* number = [NSNumber numberWithUnsignedInt:allowed_actions[i]];
+            [allowedActions addObject:number];
+            number = nil;
+        }
         
         free(allowed_actions);
     }

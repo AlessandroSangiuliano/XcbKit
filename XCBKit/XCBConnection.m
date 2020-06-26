@@ -141,16 +141,21 @@ ICCCMService* icccmService;
     {
         NSLog(@"Window %u previously added", [window window]);
         window = nil;
+        key = nil;
         return;
     }
     
     [windowsMap setObject:aWindow forKey:key];
+    window = nil;
+    key = nil;
 }
 
 - (void) unregisterWindow:(XCBWindow *)aWindow
 {
 	NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", [aWindow window]);
-    [windowsMap removeObjectForKey:[[NSNumber alloc] initWithInt:[aWindow window]]];
+    NSNumber *key = [[NSNumber alloc] initWithInt:[aWindow window]];
+    [windowsMap removeObjectForKey:key];
+    key = nil;
 }
 
 - (void) closeConnection
@@ -161,7 +166,9 @@ ICCCMService* icccmService;
 - (XCBWindow *) windowForXCBId:(xcb_window_t)anId
 {
     NSNumber *key = [NSNumber numberWithInt:anId];
-	return [windowsMap objectForKey:key];
+    XCBWindow* window = [windowsMap objectForKey:key];
+    key = nil;
+	return window;
 }
 
 - (int) flush

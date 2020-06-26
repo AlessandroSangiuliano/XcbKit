@@ -82,11 +82,13 @@
         CsMapXCBWindoToXCBFrame([response frame], self);
         
         children = [[NSMutableDictionary alloc] init];
-        [children setObject:aClientWindow forKey: [NSNumber numberWithInteger:ClientWindow]];
+        NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
+        [children setObject:aClientWindow forKey: key];
         [connection registerWindow:self];
         
         response = nil;
         request = nil;
+        key= nil;
     }
     
     [super setIsAbove:YES];
@@ -100,22 +102,30 @@
 
 - (void) addChildWindow:(XCBWindow *)aChild withKey:(childrenMask) keyMask
 {
-    [children setObject:aChild forKey: [NSNumber numberWithInteger:keyMask]];
+    NSNumber* key = [NSNumber numberWithInteger:keyMask];
+    [children setObject:aChild forKey: key];
+    key = nil;
 }
 
 - (XCBWindow*) childWindowForKey:(childrenMask)key
 {
-    return [children objectForKey:[NSNumber numberWithInteger:key]];
+    NSNumber* keyNumber = [NSNumber numberWithInteger:key];
+    return [children objectForKey:keyNumber];
+    keyNumber = nil;
 }
 
 -(void)removeChild:(childrenMask)frameChild
 {
-    [children removeObjectForKey:[NSNumber numberWithInteger:frameChild]];
+    NSNumber* key = [NSNumber numberWithInteger:frameChild];
+    [children removeObjectForKey:key];
+    key = nil;
 }
 
 - (void) decorateClientWindow
 {
-    XCBWindow *clientWindow = [children objectForKey:[NSNumber numberWithInteger:ClientWindow]];
+    NSNumber* key = [NSNumber numberWithInteger:ClientWindow];
+    XCBWindow *clientWindow = [children objectForKey:key];
+    key = nil;
     
     XCBTitleBar *titleBar = [[XCBTitleBar alloc] initWithFrame:self withConnection:connection];
     [self addChildWindow:titleBar withKey:TitleBar];

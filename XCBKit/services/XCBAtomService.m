@@ -61,7 +61,9 @@
     [cachedAtoms setObject:atomValue forKey:atomName];
     
     free(reply);
-    return [atomValue unsignedIntValue];
+    atomValue = nil;
+    
+    return atom;
 }
 
 - (void) cacheAtoms:(NSArray *)atoms
