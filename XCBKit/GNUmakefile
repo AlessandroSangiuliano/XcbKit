@@ -50,7 +50,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			enums/EMessage.h \
 			enums/ETitleBarColor.h
 
-ADDITIONAL_OBJCFLAGS = -std=c99 -g -fobjc-arc #-Wno-unused -Werror -Wall
+ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc #-Wno-unused -Werror -Wall
 
 LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes) -lgnustep-gui -lgnustep-base $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 

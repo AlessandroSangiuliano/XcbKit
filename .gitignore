@@ -10,3 +10,5 @@ XCBKit/derived_src/
 XCBKit/obj/
 
 XCBKit/XCBKit.framework/
+
+XCBKit/cmake-build-debug/CMakeFiles/clion-log.txt

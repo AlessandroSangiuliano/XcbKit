@@ -286,6 +286,15 @@
                   0,
                   windowRect.size.width,
                   windowRect.size.height);
+
+    /** FIXME: REMEMBER TO DELETE ALL THIS */
+
+    XCBScreen* screen = [[connection screens] objectAtIndex:0];
+    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
+
+    [drawer drawContent];
 }
 
 - (void) destroyPixmap
@@ -748,7 +757,6 @@
     uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
     isAbove = YES;
-    [self destroyPixmap];
 }
 
 - (void) stackBelow
@@ -803,7 +811,7 @@
         return NO;
 
     pointerGrabbed = YES;
-    //NSLog(@"Pointer grabbed");
+    NSLog(@"Pointer grabbed");
     return YES;
 
 }

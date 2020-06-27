@@ -186,6 +186,8 @@
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
+
+    cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
@@ -283,6 +285,10 @@
     
     cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Scaled.png");
     cairo_set_source_surface(cr, imageSurface, 0, 0);
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError* error;
+    [fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
+    [fileManager removeItemAtPath:@"/tmp/Preview.png" error:&error];
     
     cairo_paint(cr);
     
@@ -294,6 +300,8 @@
     scaledImage = nil;
     data = nil;
     imgRep = nil;
+    error = nil;
+    fileManager = nil;
 }
 
 - (void) saveContext

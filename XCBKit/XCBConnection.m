@@ -722,7 +722,22 @@ ICCCMService* icccmService;
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
 
+        if ([frame isAbove])
+            [[frame childWindowForKey:ClientWindow] updatePixmap];
+
         frame = nil;
+    }
+
+    if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        XCBTitleBar* titleBar = (XCBTitleBar*)window;
+        frame = (XCBFrame*)[titleBar parentWindow];
+
+        if ([frame isAbove])
+            [[frame childWindowForKey:ClientWindow] updatePixmap];
+
+        frame = nil;
+        titleBar = nil;
     }
 
     [window ungrabPointer];
@@ -924,12 +939,12 @@ ICCCMService* icccmService;
 		clientWindow = [frame childWindowForKey:ClientWindow];
 	}
 
-	if (anEvent->state == XCB_VISIBILITY_UNOBSCURED)
+	if (anEvent->state == XCB_VISIBILITY_UNOBSCURED &&
+        anEvent->window == [frame window] &&
+        [frame isAbove])
 	{
         if ([clientWindow pixmap] == 0)
             [clientWindow createPixmap];
-        else
-            [clientWindow updatePixmap];
 	}
 
 	window = nil;
@@ -958,13 +973,11 @@ ICCCMService* icccmService;
         XCBFrame* frame = (XCBFrame*)window;
         NSLog(@"AISSALARAISS");
 
-        /*xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle([frame windowRect]);
-         expose_rectangle.x = 0;
-         expose_rectangle.y = 0;
+        /*if ([frame isMinimized])
+        {
+            [frame createPixmap];
 
-         xcb_rectangle_t rectangles[] = {expose_rectangle};
-
-         xcb_poly_fill_rectangle(connection, [frame window], [frame graphicContextId], 1, rectangles);*/
+        }*/
 
         frame = nil;
     }
