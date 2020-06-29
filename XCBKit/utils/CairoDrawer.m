@@ -8,7 +8,6 @@
 
 #import "CairoDrawer.h"
 #import "XCBScreen.h"
-#import <AppKit/AppKit.h>
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -58,14 +57,14 @@
     return self;
 }
 
-- (void) drawTitleBarButtonWithColor:(NSColor *)buttonColor withStopColor:(NSColor *)stopColor
+- (void) drawTitleBarButtonWithColor:(XCBColor)buttonColor withStopColor:(XCBColor)stopColor
 {
     height = height - 2;
     width = width - 2;
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
     
-    cairo_set_source_rgb(cr, [buttonColor redComponent], [buttonColor greenComponent], [buttonColor blueComponent]);
+    cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
     
     CGFloat startXPosition = 2;
     CGFloat endXPosition = 2;
@@ -77,9 +76,9 @@
     
     cairo_pattern_t *pat = cairo_pattern_create_linear(startXPosition, startYPosition, endXPosition, endYPosition);
     
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, [buttonColor redComponent], [buttonColor greenComponent], [buttonColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
     
     cairo_set_source(cr, pat);
     
@@ -96,8 +95,8 @@
     
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
-    NSColor *black = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:1];
-    cairo_set_source_rgb(cr, [black redComponent], [black greenComponent], [black blueComponent]);
+    XCBColor black = XCBMakeColor(0,0,0,1);
+    cairo_set_source_rgb(cr, black.redComponent, black.greenComponent, black.blueComponent);
     cairo_stroke(cr);
     cairo_surface_flush(cairoSurface);
     
@@ -106,16 +105,14 @@
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
     
-    black = nil;
-    
 }
 
-- (void) drawTitleBarWithColor:(NSColor *)titleColor andStopColor :(NSColor *)stopColor
+- (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height-1);
     cr = cairo_create(cairoSurface);
     
-    cairo_set_source_rgb(cr, [titleColor redComponent], [titleColor greenComponent], [titleColor blueComponent]);
+    cairo_set_source_rgb(cr, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
     
     CGFloat startXPosition = 0;
     CGFloat endXPosition = 0;
@@ -127,9 +124,9 @@
     
     cairo_pattern_t *pat = cairo_pattern_create_linear(startXPosition, startYPosition, endXPosition, endYPosition);
     
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, [titleColor redComponent], [titleColor greenComponent], [titleColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
     
     
     cairo_set_source(cr, pat);
@@ -146,12 +143,12 @@
     
 }
 
-- (void) drawWindowWithColor:(NSColor*)aColor andStopColor:(NSColor*)stopColor
+- (void) drawWindowWithColor:(XCBColor)aColor andStopColor:(XCBColor)stopColor
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
     
-    cairo_set_source_rgb(cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
+    cairo_set_source_rgb(cr, aColor.redComponent, aColor.greenComponent, aColor.blueComponent);
     
     CGFloat startXPosition = 0;
     CGFloat endXPosition = 0;
@@ -163,9 +160,9 @@
     
     cairo_pattern_t *pat = cairo_pattern_create_linear(startXPosition, startYPosition, endXPosition, endYPosition);
     
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
-    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, colorGradientOffset, aColor.redComponent, aColor.greenComponent, aColor.blueComponent);
+    cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, stopColor.redComponent, stopColor.greenComponent, stopColor.blueComponent);
     
     
     cairo_set_source(cr, pat);
@@ -193,42 +190,38 @@
     cairo_destroy(cr);
 }
 
-- (void) drawText:(NSString *)aText withColor:(NSColor *)aColor
+- (void) drawText:(NSString *)aText withColor:(XCBColor)aColor
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
     
-    cairo_set_source_rgb(cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
+    cairo_set_source_rgb(cr, aColor.redComponent, aColor.greenComponent, aColor.blueComponent);
     
     cairo_select_font_face(cr, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     
     cairo_set_font_size (cr, 11);
     
-    cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
+    cairo_set_source_rgb (cr, aColor.redComponent, aColor.greenComponent, aColor.blueComponent);
     
-    NSFont* font = [NSFont systemFontOfSize:11]; //[NSFont fontWithName:@"Microsoft Sans Serif" size:11];
-    NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
-    
-    NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
-    CGFloat halfLength = size.width / 2;
+    cairo_text_extents_t  extents;
+    cairo_text_extents(cr, [aText UTF8String], &extents);
+
+    CGFloat halfLength = extents.width / 2;
     
     CGFloat textPositionX = (CGFloat) [window windowRect].size.width / 2;
     CGFloat textPositionY = (CGFloat) [window windowRect].size.height / 2 + 2;
     
     cairo_move_to(cr, textPositionX - halfLength, textPositionY);
     
-    cairo_show_text(cr, [aText cStringUsingEncoding: NSUTF8StringEncoding]);
+    cairo_show_text(cr, [aText UTF8String]);
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
-    
-    font = nil;
-    attributes = nil;
 }
 
 - (void) makePreviewImage
 {
-    XCBSize size = [window windowRect].size;
+    XCBSize size = [window pixmapSize];
 
     cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
     /*if ([[window parentWindow] isAbove] == NO)
@@ -255,52 +248,36 @@
      cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
      cairo_paint(cr);*/
     
+    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Preview.png");
+    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, size.width, size.height);
+    cairo_t* aux = cairo_create(similar);
     
-    NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
-    NSLog(@"Image: %f, %f", [image size].width, [image size].height);
+    double scalingFactorW = 50.0 /(double) cairo_image_surface_get_width(imageSurface);
+    double scalingFactorH = 50.0 /(double) cairo_image_surface_get_height(imageSurface);
     
-    double scalingFactorW = 50 / [image size].width;
-    double scalingFactorH = 50 / [image size].height;
+    cairo_scale(aux, scalingFactorW, scalingFactorH);
+    cairo_set_source_surface(aux, imageSurface, 0, 0);
+    cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(aux);
     
-    double scaledWidth = [image size].width * scalingFactorW;
-    double scaledHeight = [image size].width * scalingFactorH;
+    cairo_set_source_surface(cr, similar, 0, 0);
+    cairo_paint(cr);
+
+    //cairo_surface_write_to_png(similar, "/tmp/Scaled.png");
     
-    NSSize targetSize = NSMakeSize(50, 50);
-    NSPoint origin = NSMakePoint(0, 0);
-    NSRect rect;
-    rect.origin = origin;
-    rect.size.width = scaledWidth;
-    rect.size.height = scaledHeight;
-    
-    NSImage *scaledImage = [[NSImage alloc] initWithSize:targetSize];
-    [scaledImage lockFocus];
-    [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [scaledImage unlockFocus];
-    
-    NSLog(@"Image scaled to %f, %f", [scaledImage size].height, [scaledImage size].width);
-    
-    
-    NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];
-    NSData* data = [imgRep representationUsingType:NSPNGFileType properties:nil];
-    [data writeToFile:@"/tmp/Scaled.png" atomically:NO];
-    
-    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Scaled.png");
-    cairo_set_source_surface(cr, imageSurface, 0, 0);
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError* error;
-    [fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
+    //[fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
     [fileManager removeItemAtPath:@"/tmp/Preview.png" error:&error];
     
     cairo_paint(cr);
     
     cairo_surface_destroy(cairoSurface);
     cairo_surface_destroy(imageSurface);
+    cairo_surface_destroy(similar);
     cairo_destroy(cr);
+    cairo_destroy(aux);
     
-    image = nil;
-    scaledImage = nil;
-    data = nil;
-    imgRep = nil;
     error = nil;
     fileManager = nil;
 }

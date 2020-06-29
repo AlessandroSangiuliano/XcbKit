@@ -29,10 +29,23 @@ typedef struct _XCBRect
     XCBSize size;
 } XCBRect;
 
+typedef struct _XCBColor
+{
+    double redComponent;
+    double greenComponent;
+    double blueComponent;
+    double alphaComponent;
+} XCBColor;
+
 static const XCBRect XCBInvalidRect = {{0xffff, 0xffff}, {0xffff, 0xffff}};
 
 /*** Utility functions ***/
 
+static inline XCBColor XCBMakeColor(double redComponent, double greenComponent, double blueComponent, double alphaComponent)
+{
+    XCBColor color = {redComponent, greenComponent, blueComponent, alphaComponent};
+    return color;
+}
 
 static inline XCBPoint XCBMakePoint(int16_t x, int16_t y)
 {

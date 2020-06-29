@@ -141,7 +141,7 @@
     NSString *windowTitle = [NSString stringWithUTF8String:value];
 
     //free(value);
-    value = nil;
+    value = NULL;
 
     // for now if it is nil just set an empty string
 

@@ -95,8 +95,8 @@
         [hideWindowButton setWindowMask:mask];
         [hideWindowButton setCanMove:NO];
         [hideWindowButton setIsCloseButton:YES];
-        
-        hideButtonColor = [NSColor colorWithCalibratedRed: 0.411 green: 0.176 blue: 0.673 alpha: 1]; //original: 0.7 0.427 1 1
+
+        hideButtonColor = XCBMakeColor(0.411, 0.176, 0.673, 1); //original: 0.7 0.427 1 1
         
         [hideWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
     }
@@ -120,7 +120,7 @@
         [minimizeWindowButton setCanMove:NO];
         [minimizeWindowButton setIsMinimizeButton:YES];
         
-        minimizeButtonColor = [NSColor colorWithCalibratedRed: 0.9 green: 0.7 blue: 0.3 alpha: 1];
+        minimizeButtonColor = XCBMakeColor(0.9,0.7,0.3,1);
     }
     
     if ([[aFrame childWindowForKey:ClientWindow] canFullscreen])
@@ -142,7 +142,7 @@
         [maximizeWindowButton setCanMove:NO];
         [maximizeWindowButton setIsMaximizeButton:YES];
         
-        maximizeButtonColor = [NSColor colorWithCalibratedRed:0 green:0.74 blue:1 alpha:1];
+        maximizeButtonColor = XCBMakeColor(0,0.74,1,1);
     }
     
     [[super connection] mapWindow:self];
@@ -156,13 +156,12 @@
 
 - (void) drawArcsForColor:(TitleBarColor)aColor
 {
-    NSColor *stopColor = [NSColor colorWithCalibratedRed:1 green:1 blue:1 alpha:1];
+    XCBColor stopColor = XCBMakeColor(1,1,1,1);
     XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
     CairoDrawer *drawer = nil;
-    
     
     if (hideWindowButton != nil)
     {
@@ -191,14 +190,13 @@
         drawer = nil;
     }
     
-    stopColor = nil;
     screen = nil;
     visual = nil;
 }
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor
 {
-    NSColor* aux;
+    XCBColor aux;
     
     if (aColor == TitleBarUpColor)
         aux = titleBarUpColor;
@@ -213,7 +211,7 @@
     
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
     
-    NSColor *stopColor = [NSColor colorWithCalibratedRed:0.850 green:0.850 blue:0.850 alpha:1];
+    XCBColor stopColor = XCBMakeColor(0.850, 0.850, 0.850, 1);
     [drawer drawTitleBarWithColor:aux andStopColor: stopColor];
     
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
@@ -246,8 +244,6 @@
     drawer = nil;
     screen = nil;
     visual = nil;
-    stopColor = nil;
-    aux = nil;
 }
 
 - (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
@@ -271,13 +267,12 @@
     [visual setVisualTypeForScreen:screen];
     
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
-    NSColor* black = [NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1];
+    XCBColor black = XCBMakeColor(0,0,0,1);
     [drawer drawText:windowTitle withColor:black];
     
     drawer = nil;
     screen = nil;
     visual = nil;
-    black = nil;
 }
 
 - (xcb_arc_t*) arcs
@@ -290,11 +285,6 @@
     hideWindowButton = nil;
     minimizeWindowButton = nil;
     maximizeWindowButton = nil;
-    hideButtonColor = nil;
-    minimizeButtonColor = nil;
-    maximizeButtonColor = nil;
-    titleBarUpColor = nil;
-    titleBarDownColor = nil;
     ewmhService = nil;
 }
 
