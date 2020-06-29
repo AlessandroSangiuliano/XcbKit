@@ -222,7 +222,7 @@
 
 - (void) makePreviewImage
 {
-    XCBSize size = [window windowRect].size;
+    XCBSize size = [window pixmapSize];
 
     cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
     /*if ([[window parentWindow] isAbove] == NO)
@@ -249,52 +249,36 @@
      cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
      cairo_paint(cr);*/
     
+    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Preview.png");
+    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, size.width, size.height);
+    cairo_t* aux = cairo_create(similar);
     
-    NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
-    NSLog(@"Image: %f, %f", [image size].width, [image size].height);
+    double scalingFactorW = 50.0 /(double) cairo_image_surface_get_width(imageSurface);
+    double scalingFactorH = 50.0 /(double) cairo_image_surface_get_height(imageSurface);
     
-    double scalingFactorW = 50 / [image size].width;
-    double scalingFactorH = 50 / [image size].height;
+    cairo_scale(aux, scalingFactorW, scalingFactorH);
+    cairo_set_source_surface(aux, imageSurface, 0, 0);
+    cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(aux);
     
-    double scaledWidth = [image size].width * scalingFactorW;
-    double scaledHeight = [image size].width * scalingFactorH;
+    cairo_set_source_surface(cr, similar, 0, 0);
+    cairo_paint(cr);
+
+    //cairo_surface_write_to_png(similar, "/tmp/Scaled.png");
     
-    NSSize targetSize = NSMakeSize(50, 50);
-    NSPoint origin = NSMakePoint(0, 0);
-    NSRect rect;
-    rect.origin = origin;
-    rect.size.width = scaledWidth;
-    rect.size.height = scaledHeight;
-    
-    NSImage *scaledImage = [[NSImage alloc] initWithSize:targetSize];
-    [scaledImage lockFocus];
-    [image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [scaledImage unlockFocus];
-    
-    NSLog(@"Image scaled to %f, %f", [scaledImage size].height, [scaledImage size].width);
-    
-    
-    NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];
-    NSData* data = [imgRep representationUsingType:NSPNGFileType properties:nil];
-    [data writeToFile:@"/tmp/Scaled.png" atomically:NO];
-    
-    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Scaled.png");
-    cairo_set_source_surface(cr, imageSurface, 0, 0);
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError* error;
-    [fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
+    //[fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
     [fileManager removeItemAtPath:@"/tmp/Preview.png" error:&error];
     
     cairo_paint(cr);
     
     cairo_surface_destroy(cairoSurface);
     cairo_surface_destroy(imageSurface);
+    cairo_surface_destroy(similar);
     cairo_destroy(cr);
+    cairo_destroy(aux);
     
-    image = nil;
-    scaledImage = nil;
-    data = nil;
-    imgRep = nil;
     error = nil;
     fileManager = nil;
 }
