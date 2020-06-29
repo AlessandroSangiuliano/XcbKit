@@ -73,7 +73,6 @@
 		FA1A725C2274244F00C4E65B /* XCBConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCBConnection.m; sourceTree = "<group>"; };
 		FA2D9F8722738D1100CEBEE0 /* XCBKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XCBKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA2D9F8A22738D1100CEBEE0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		FA2D9F8D22738D1100CEBEE0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		FA2D9F8F22738D1100CEBEE0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FA2D9F9222738D1100CEBEE0 /* XCBKit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "XCBKit-Info.plist"; sourceTree = "<group>"; };
 		FA2D9F9422738D1100CEBEE0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -180,7 +179,6 @@
 		FA2D9F8C22738D1100CEBEE0 /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FA2D9F8D22738D1100CEBEE0 /* AppKit.framework */,
 				FA2D9F8F22738D1100CEBEE0 /* Foundation.framework */,
 			);
 			name = "Other Frameworks";
@@ -595,6 +593,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/alex/.Trash,
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "XCBKit/XCBKit-Prefix.pch";
@@ -610,6 +612,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/alex/.Trash,
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "XCBKit/XCBKit-Prefix.pch";
