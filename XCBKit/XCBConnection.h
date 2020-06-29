@@ -82,6 +82,7 @@
 - (void) handleExpose: (xcb_expose_event_t*)anEvent;
 - (void) handleCirculateRequest: (xcb_circulate_request_event_t*)anEvent;
 - (void) handleConfigureWindowRequest: (xcb_configure_request_event_t*)anEvent;
+- (void) handleConfigureNotify: (xcb_configure_notify_event_t*)anEvent;
 - (void) handleReparentNotify: (xcb_reparent_notify_event_t*)anEvent;
 - (void) handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
 - (void) handleClientMessage: (xcb_client_message_event_t*)anEvent;

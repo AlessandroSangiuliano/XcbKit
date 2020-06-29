@@ -260,6 +260,11 @@
                   windowRect.size.width,
                   windowRect.size.height);
 
+    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
+
+    [drawer drawContent];
     screen = nil;
 }
 

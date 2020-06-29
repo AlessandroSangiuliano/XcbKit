@@ -398,6 +398,10 @@ ICCCMService* icccmService;
 	[window setAttributes:attributes];
 	NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
 	[window setIsMapped:YES];
+
+	if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]])
+	    [window createPixmap];
+
     window = nil;
 }
 
@@ -556,6 +560,23 @@ ICCCMService* icccmService;
 	xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
 
     window = nil;
+}
+
+- (void) handleConfigureNotify:(xcb_configure_notify_event_t*)anEvent
+{
+    XCBWindow *window = [self windowForXCBId:anEvent->window];
+
+    XCBFrame* frame;
+    XCBWindow* clientWindow;
+
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame*)window;
+        clientWindow = [frame childWindowForKey:ClientWindow];
+    }
+
+    window = nil;
+    clientWindow = nil;
 }
 
 - (void) handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
@@ -722,13 +743,14 @@ ICCCMService* icccmService;
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
 
-        if ([frame isAbove])
-            [[frame childWindowForKey:ClientWindow] updatePixmap];
+        /*if ([frame isAbove])
+            [[frame childWindowForKey:ClientWindow] updatePixmap];*/
 
         frame = nil;
     }
 
-    if ([window isKindOfClass:[XCBTitleBar class]])
+    //TODO: FOR NOW JUST DISABLE THIS CODE AND DRAW EVER THE PIXMAP WHEN ICONIFY IN CAIRO DRAWER
+    /*if ([window isKindOfClass:[XCBTitleBar class]])
     {
         XCBTitleBar* titleBar = (XCBTitleBar*)window;
         frame = (XCBFrame*)[titleBar parentWindow];
@@ -738,7 +760,7 @@ ICCCMService* icccmService;
 
         frame = nil;
         titleBar = nil;
-    }
+    }*/
 
     [window ungrabPointer];
     window = nil;
@@ -939,13 +961,13 @@ ICCCMService* icccmService;
 		clientWindow = [frame childWindowForKey:ClientWindow];
 	}
 
-	if (anEvent->state == XCB_VISIBILITY_UNOBSCURED &&
+	/*if (anEvent->state == XCB_VISIBILITY_UNOBSCURED &&
         anEvent->window == [frame window] &&
         [frame isAbove])
 	{
         if ([clientWindow pixmap] == 0)
             [clientWindow createPixmap];
-	}
+	}*/
 
 	window = nil;
 	clientWindow = nil;
@@ -980,6 +1002,7 @@ ICCCMService* icccmService;
         }*/
 
         frame = nil;
+
     }
 
     window = nil;

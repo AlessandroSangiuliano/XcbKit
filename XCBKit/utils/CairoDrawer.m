@@ -229,11 +229,12 @@
 - (void) makePreviewImage
 {
     XCBSize size = [window windowRect].size;
-    
-    if ([[window parentWindow] isAbove] == NO)
+
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    /*if ([[window parentWindow] isAbove] == NO)
         cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
     else
-        cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);*/
     
     cr = cairo_create(cairoSurface);
     
