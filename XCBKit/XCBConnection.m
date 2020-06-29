@@ -399,9 +399,9 @@ ICCCMService* icccmService;
 	NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
 	[window setIsMapped:YES];
 
-	if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]] && [[window parentWindow]  isKindOfClass:[XCBFrame class]]);
-	    //[NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];
-	    [window createPixmap];
+	if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]] && [[window parentWindow]  isKindOfClass:[XCBFrame class]])
+	    [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];
+	    //[window createPixmap];
 
 
     window = nil;

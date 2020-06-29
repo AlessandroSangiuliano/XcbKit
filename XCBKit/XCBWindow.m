@@ -261,17 +261,17 @@
                   windowRect.size.width,
                   windowRect.size.height);
 
-    /*XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
 
-    [drawer drawContent];*/
+    [drawer drawContent];
     screen = nil;
 }
 
 - (void) createPixmapDelayed
 {
-    [NSThread sleepForTimeInterval:3];
+    [NSThread sleepForTimeInterval:1];
     [self createPixmap];
 }
 
