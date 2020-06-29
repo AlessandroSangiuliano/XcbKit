@@ -48,6 +48,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
 @property (nonatomic) BOOL isAbove;
+@property (nonatomic) XCBSize pixmapSize;
 
 /*** ALLOWED ACTIONS ***/
 

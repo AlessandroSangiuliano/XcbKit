@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
 #import <cairo/cairo-xcb.h>
 #import <cairo/cairo.h>
 #import <XCBConnection.h>
 #import "XCBWindow.h"
 #import "XCBVisual.h"
+#import "XCBShape.h"
 
 @interface CairoDrawer : NSObject
 
@@ -27,10 +27,10 @@
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow visual:(XCBVisual*) aVisual;
-- (void) drawTitleBarButtonWithColor:(NSColor*) buttonColor withStopColor:(NSColor*) stopColor;
-- (void) drawTitleBarWithColor:(NSColor*) titleColor andStopColor:(NSColor*) stopColor;
-- (void) drawWindowWithColor:(NSColor*)aColor andStopColor:(NSColor*)stopColor;
-- (void) drawText:(NSString*) aText withColor:(NSColor*) aColor;
+- (void) drawTitleBarButtonWithColor:(XCBColor) buttonColor withStopColor:(XCBColor) stopColor;
+- (void) drawTitleBarWithColor:(XCBColor) titleColor andStopColor:(XCBColor) stopColor;
+- (void) drawWindowWithColor:(XCBColor)aColor andStopColor:(XCBColor)stopColor;
+- (void) drawText:(NSString*) aText withColor:(XCBColor) aColor;
 - (void) makePreviewImage;
 - (void) saveContext;
 - (void) restoreContext;

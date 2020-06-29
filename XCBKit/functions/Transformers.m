@@ -58,8 +58,8 @@ XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* con
     [titleBar setWindowMask:[aWindow windowMask]];
     [titleBar setIsMapped:[aWindow isMapped]];
     [titleBar setConnection:connection];
-    [titleBar setTitleBarUpColor:[NSColor colorWithCalibratedRed:0.720 green:0.720 blue:0.720 alpha:1]];
-    [titleBar setTitleBarDownColor:[NSColor colorWithCalibratedRed: 0.898 green: 0.898 blue: 0.898 alpha: 1]];
+    [titleBar setTitleBarUpColor:XCBMakeColor(0.720, 0.720, 0.720, 1)];
+    [titleBar setTitleBarDownColor:XCBMakeColor(0.898, 0.898, 0.898, 1)];
     
     return titleBar;
     
@@ -87,8 +87,8 @@ void CsMapXCBWindowToXCBTitleBar(XCBWindow* sourceWindow, XCBTitleBar* titleBar)
     [titleBar setOriginalRect:[sourceWindow originalRect]];
     [titleBar setWindowMask:[sourceWindow windowMask]];
     [titleBar setIsMapped:[sourceWindow isMapped]];
-    [titleBar setTitleBarUpColor:[NSColor colorWithCalibratedRed:0.720 green:0.720 blue:0.720 alpha:1]];
-    [titleBar setTitleBarDownColor:[NSColor colorWithCalibratedRed: 0.898 green: 0.898 blue: 0.898 alpha: 1]];
+    [titleBar setTitleBarUpColor:XCBMakeColor(0.720, 0.720, 0.720, 1)];
+    [titleBar setTitleBarDownColor:XCBMakeColor(0.898, 0.898, 0.898, 1)];
 }
 
 XCBWindow * FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnection* connection)

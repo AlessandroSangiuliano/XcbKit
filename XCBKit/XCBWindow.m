@@ -45,6 +45,7 @@
 @synthesize canShade;
 @synthesize canStick;
 @synthesize isAbove;
+@synthesize pixmapSize;
 
 - (id) initWithXCBWindow:(xcb_window_t)aWindow
            andConnection:(XCBConnection *)aConnection
@@ -243,6 +244,8 @@
                       window,
                       windowRect.size.width,
                       windowRect.size.height);
+    
+    pixmapSize = XCBMakeSize(windowRect.size.width, windowRect.size.height);
 
     xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(windowRect);
 
@@ -271,7 +274,7 @@
 
 - (void) createPixmapDelayed
 {
-    [NSThread sleepForTimeInterval:3];
+    [NSThread sleepForTimeInterval:1];
     [self createPixmap];
 }
 
@@ -298,6 +301,8 @@
                   0,
                   windowRect.size.width,
                   windowRect.size.height);
+    
+    pixmapSize = XCBMakeSize(windowRect.size.width, windowRect.size.height);
 
     /** FIXME: REMEMBER TO DELETE ALL THIS */
 
@@ -572,7 +577,7 @@
                                withFormat:32
                            withDataLength:2
                                  withData:state];
-
+    
     titleBar = nil;
     clientWindow = nil;
     frame = nil;

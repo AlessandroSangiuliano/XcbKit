@@ -87,8 +87,8 @@
     XCB_EVENT_MASK_ENTER_WINDOW   | XCB_EVENT_MASK_LEAVE_WINDOW   | XCB_EVENT_MASK_KEY_PRESS;
     
     XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
-    [request setWidth:300];
-    [request setHeight:150];
+    [request setWidth:500];
+    [request setHeight:300];
     [request setVisual:visual];
     [request setXPosition:1];
     [request setYPosition:1];
@@ -105,8 +105,8 @@
     CairoDrawer* drawer = [[CairoDrawer alloc] initWithConnection:connection window:window visual:visual];
     
     request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
-    [request setWidth:300];
-    [request setHeight:150];
+    [request setWidth:50];
+    [request setHeight:50];
     [request setVisual:visual];
     [request setXPosition:100];
     [request setYPosition:100];
@@ -126,7 +126,6 @@
     [connection mapWindow:window2];
     [connection flush];
     
-    //[drawer takeScreenShot];
     
     xcb_generic_event_t *e;
     
@@ -137,10 +136,9 @@
             case XCB_EXPOSE:
             {
                 NSLog(@"Expose");
-                [drawer drawText:@"AISSALARAISS" withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
+                [drawer drawText:@"AISSALARAISS" withColor:XCBMakeColor(0, 0, 0, 1)];
+                [window createPixmap];
                 [drawer makePreviewImage];
-                [drawer setWindow:window2];
-                [drawer setPreviewImage];
                 [connection flush];
                 break;
             }
@@ -150,7 +148,11 @@
                 break;
                 
             case XCB_BUTTON_PRESS:
-                [connection handleButtonPress:(xcb_button_press_event_t*)e];
+                //[connection handleButtonPress:(xcb_button_press_event_t*)e];
+                [drawer setWindow:window2];
+                [drawer setPreviewImage];
+                [connection mapWindow:window2];
+                [connection flush];
                 break;
                 
             case XCB_MAP_NOTIFY:
@@ -233,7 +235,7 @@
             case XCB_EXPOSE:
             {
                 NSLog(@"Expose");
-                [drawer drawText:@"AISSALARAISS" withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
+                [drawer drawText:@"AISSALARAISS" withColor:XCBMakeColor(0, 0, 0, 1)];
                 [connection flush];
                 break;
             }
@@ -332,7 +334,7 @@
                 NSLog(@"Expose");
                 if (lol == 0)
                 {
-                    [drawer drawText:@"AISSALARAISS" withColor:[NSColor colorWithCalibratedRed:0.0 green:0.0 blue:0.0 alpha:1]];
+                    [drawer drawText:@"AISSALARAISS" withColor:XCBMakeColor(0, 0, 0, 1)];
                     lol++;
                 }
                 [connection flush];

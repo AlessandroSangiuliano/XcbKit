@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
 #import "XCBWindow.h"
 #import "XCBFrame.h"
 #import "services/EWMHService.h"
 #import "enums/ETitleBarColor.h"
+#import "utils/XCBShape.h"
 
 
 #ifndef TITLE_MASK
@@ -29,15 +29,15 @@ XCB_EVENT_MASK_KEY_PRESS
     NSString *windowTitle;
 }
 
-@property (strong, nonatomic) NSColor *hideButtonColor;
-@property (strong, nonatomic) NSColor *minimizeButtonColor;
-@property (strong, nonatomic) NSColor *maximizeButtonColor;
+@property (nonatomic) XCBColor hideButtonColor;
+@property (nonatomic) XCBColor minimizeButtonColor;
+@property (nonatomic) XCBColor maximizeButtonColor;
 @property (strong, nonatomic) XCBWindow *hideWindowButton;
 @property (strong, nonatomic) XCBWindow *minimizeWindowButton;
 @property (strong, nonatomic) XCBWindow *maximizeWindowButton;
 @property (nonatomic) xcb_arc_t arc;
-@property (strong, nonatomic) NSColor *titleBarUpColor;
-@property (strong, nonatomic) NSColor *titleBarDownColor;
+@property (nonatomic) XCBColor titleBarUpColor;
+@property (nonatomic) XCBColor titleBarDownColor;
 @property (strong, nonatomic) EWMHService *ewmhService;
 
 - (id) initWithFrame:(XCBFrame*) aFrame withConnection:(XCBConnection*) aConnection;

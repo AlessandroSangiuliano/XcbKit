@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "../services/XCBAtomService.h"
+#import "../utils/XCBShape.h"
 #import <xcb/xcb_atom.h>
 #import "XCBWindow.h"
 #import "XCBFrame.h"
