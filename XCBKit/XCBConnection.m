@@ -400,7 +400,12 @@ ICCCMService* icccmService;
 	[window setIsMapped:YES];
 
 	if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]])
-	    [window createPixmap];
+    {
+        //[NSTimer timerWithTimeInterval:3.0 target:window selector:@selector(createPixmap) userInfo:nil repeats:NO];
+        [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];
+	    //[window createPixmap];
+        NSLog(@"Piximappy created");
+    }
 
     window = nil;
 }

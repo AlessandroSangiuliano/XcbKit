@@ -268,6 +268,12 @@
     screen = nil;
 }
 
+- (void) createPixmapDelayed
+{
+    [NSThread sleepForTimeInterval:3];
+    [self createPixmap];
+}
+
 - (void) updatePixmap
 {
     if (pixmap == 0)
@@ -816,7 +822,7 @@
         return NO;
 
     pointerGrabbed = YES;
-    NSLog(@"Pointer grabbed");
+    //NSLog(@"Pointer grabbed");
     return YES;
 
 }
@@ -827,7 +833,7 @@
     {
         xcb_ungrab_pointer([connection connection], XCB_CURRENT_TIME);
         pointerGrabbed = NO;
-        NSLog(@"Pointer ungrabbed");
+        //NSLog(@"Pointer ungrabbed");
     }
 }
 
