@@ -1,6 +1,6 @@
 XcbKit is a Kit (SDK) for window managers developed in Objective-C.
 
-Version: 0.0.8
+Version: 0.0.9
 
 ----------------------------------------------------------------------------------
 
@@ -38,6 +38,8 @@ Actual status:
 - Support of WM_NORMAL_HINTS
 
 - Support for _NET_WM_ALLOWED_ACTIONS
+
+- GNUstep port completed
 
 
 There are a lot of things to add, for example:

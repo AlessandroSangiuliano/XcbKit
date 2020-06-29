@@ -7,7 +7,12 @@
 //
 
 #import "CairoDrawer.h"
-#import "XCBScreen.h" 
+#import "XCBScreen.h"
+#import <AppKit/AppKit.h>
+
+#ifndef M_PI
+#define M_PI        3.14159265358979323846264338327950288
+#endif
 
 @implementation CairoDrawer
 
@@ -101,8 +106,8 @@
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
     
+    black = nil;
     
-
 }
 
 - (void) drawTitleBarWithColor:(NSColor *)titleColor andStopColor :(NSColor *)stopColor
@@ -119,7 +124,7 @@
     
     CGFloat stopGradientOffset = 0.99;
     CGFloat colorGradientOffset = 0.2;
-
+    
     cairo_pattern_t *pat = cairo_pattern_create_linear(startXPosition, startYPosition, endXPosition, endYPosition);
     
     cairo_pattern_add_color_stop_rgb(pat, stopGradientOffset, [stopColor redComponent], [stopColor greenComponent], [stopColor blueComponent]);
@@ -138,7 +143,7 @@
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-
+    
 }
 
 - (void) drawWindowWithColor:(NSColor*)aColor andStopColor:(NSColor*)stopColor
@@ -174,13 +179,15 @@
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-
+    
 }
 
 - (void) drawContent
 {
     cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
+
+    cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
     cairo_surface_flush(cairoSurface);
     cairo_destroy(cr);
@@ -199,7 +206,7 @@
     
     cairo_set_source_rgb (cr, [aColor redComponent], [aColor greenComponent], [aColor blueComponent]);
     
-    NSFont* font = [NSFont fontWithName:@"Microsoft Sans Serif" size:11];
+    NSFont* font = [NSFont systemFontOfSize:11]; //[NSFont fontWithName:@"Microsoft Sans Serif" size:11];
     NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
     
     NSSize size = [aText sizeWithAttributes:attributes]; //to get the size of the stirng for placing it in the middle of the title bar.
@@ -222,7 +229,13 @@
 - (void) makePreviewImage
 {
     XCBSize size = [window windowRect].size;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    /*if ([[window parentWindow] isAbove] == NO)
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    else
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);*/
+    
     cr = cairo_create(cairoSurface);
     
     cairo_surface_write_to_png(cairoSurface, "/tmp/Preview.png");
@@ -238,9 +251,9 @@
     cr = cairo_create(cairoSurface);
     
     /* CHECK IF THE COMPOSITORE IS ACTIVE, IF TRUE I CAN SET THE TRANSPARENCY
-    cairo_set_source_rgba(cr, 1, 1, 1, 0.0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);*/
+     cairo_set_source_rgba(cr, 1, 1, 1, 0.0);
+     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+     cairo_paint(cr);*/
     
     
     NSImage* image = [[NSImage alloc] initWithContentsOfFile:@"/tmp/Preview.png"];
@@ -266,13 +279,17 @@
     
     NSLog(@"Image scaled to %f, %f", [scaledImage size].height, [scaledImage size].width);
     
-
+    
     NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithData:[scaledImage TIFFRepresentation]];
     NSData* data = [imgRep representationUsingType:NSPNGFileType properties:nil];
     [data writeToFile:@"/tmp/Scaled.png" atomically:NO];
     
     cairo_surface_t* imageSurface = cairo_image_surface_create_from_png("/tmp/Scaled.png");
     cairo_set_source_surface(cr, imageSurface, 0, 0);
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError* error;
+    [fileManager removeItemAtPath:@"/tmp/Scaled.png" error:&error];
+    [fileManager removeItemAtPath:@"/tmp/Preview.png" error:&error];
     
     cairo_paint(cr);
     
@@ -284,6 +301,8 @@
     scaledImage = nil;
     data = nil;
     imgRep = nil;
+    error = nil;
+    fileManager = nil;
 }
 
 - (void) saveContext

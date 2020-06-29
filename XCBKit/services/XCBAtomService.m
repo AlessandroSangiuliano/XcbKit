@@ -61,13 +61,15 @@
     [cachedAtoms setObject:atomValue forKey:atomName];
     
     free(reply);
-    return [atomValue unsignedIntValue];
+    atomValue = nil;
+    
+    return atom;
 }
 
 - (void) cacheAtoms:(NSArray *)atoms
 {
     NSUInteger size = [atoms count];
-   
+    
     for (NSUInteger i = 0; i < size; i++)
     {
         NSString *atomName = [atoms objectAtIndex:i];

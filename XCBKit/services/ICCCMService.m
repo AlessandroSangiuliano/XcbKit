@@ -76,7 +76,7 @@
     for(int i = 0; i < size; i++)
     {
         if (windowProtocols[i] == atom)
-        hasProtocol = YES;
+            hasProtocol = YES;
     }
     
     return hasProtocol;

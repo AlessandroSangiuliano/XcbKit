@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XCBWindow.h"
-#import "XCBVisual.h"
+#import "../XCBWindow.h"
+#import "../XCBVisual.h"
 
 typedef NS_ENUM(NSInteger, XCBWindowType)
 {

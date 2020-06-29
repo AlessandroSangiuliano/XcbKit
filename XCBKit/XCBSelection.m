@@ -7,8 +7,8 @@
 //
 
 #import "XCBSelection.h"
-#import "EWMHService.h"
-#import "XCBAtomService.h"
+#import "services/EWMHService.h"
+#import "services/XCBAtomService.h"
 
 @implementation XCBSelection
 
@@ -114,8 +114,8 @@
 
 
 /************
-* ACCESSORS *
-************/
+ * ACCESSORS *
+ ************/
 
 - (void) setAtom:(xcb_atom_t)anAtom
 {

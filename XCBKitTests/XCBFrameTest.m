@@ -34,35 +34,35 @@
     
     uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_BUTTON_MOTION};
-
+    
     
     XCBWindow *frameWindow = [connection createWindowWithDepth:[screen screen]->root_depth
-                     withParentWindow:[screen rootWindow]
-                        withXPosition:coordinates.x
-                        withYPosition:coordinates.y
-                            withWidth:frameSize.width
-                           withHeight:frameSize.height
-                     withBorrderWidth:10
-                         withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                         withVisualId:visual
-                        withValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-                        withValueList:values];
+                                              withParentWindow:[screen rootWindow]
+                                                 withXPosition:coordinates.x
+                                                 withYPosition:coordinates.y
+                                                     withWidth:frameSize.width
+                                                    withHeight:frameSize.height
+                                              withBorrderWidth:10
+                                                  withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                  withVisualId:visual
+                                                 withValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+                                                 withValueList:values];
     
     /*XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:clientWindow
-                                              withConnection:connection
-                                               withXcbWindow:[frameWindow window]];*/
+     withConnection:connection
+     withXcbWindow:[frameWindow window]];*/
     
     /*XCBRect *frameRect = [[XCBRect alloc] initWithPosition:coordinates andSize: frameSize];
-    [frame setWindowRect:frameRect];*/
+     [frame setWindowRect:frameRect];*/
     
     XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow, connection);
-
+    
     //TODO: FUNZIONE CHE MAPPA UNA XCBWINDOW TO UN XCBFRAME
-
+    
     /*[frame setParentWindow:[frameWindow parentWindow]];
-    [frame setAboveWindow:[frameWindow aboveWindow]];
-    [frame setIsMapped:[frameWindow isMapped]];
-    [frame setAttributes:[frameWindow attributes]];*/
+     [frame setAboveWindow:[frameWindow aboveWindow]];
+     [frame setIsMapped:[frameWindow isMapped]];
+     [frame setAttributes:[frameWindow attributes]];*/
     
     frameWindow = nil;
     
@@ -112,7 +112,7 @@
             case XCB_MAP_NOTIFY:
                 NSLog(@"MAP NOTIFY");
                 break;
-
+                
                 
             default:
                 break;
@@ -169,7 +169,7 @@
                       mask,
                       value);
     
-  
+    
     //win = screen->root;
     foreground = xcb_generate_id (c);
     mask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES;
@@ -177,7 +177,7 @@
     value[1] = 0;
     
     xcb_create_gc (c, foreground, win, mask, value);
-
+    
     
     xcb_map_window(c, win);
     
@@ -189,18 +189,18 @@
         switch (e->response_type & ~0x80) {
             case XCB_EXPOSE:
             {
-     
+                
                 xcb_poly_arc (c, win, foreground, 2, arcs);
                 xcb_flush (c);
                 
                 break;
             }
             default: {
-     
+                
                 break;
             }
         }
-     
+        
         free (e);
     }
     
@@ -214,7 +214,7 @@
     XCBScreen *scr = [[connection screens] objectAtIndex:0];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
     [visual setVisualTypeForScreen:scr];
-
+    
     uint32_t values[2];
     values[0] = [scr screen]->white_pixel;
     values[1] = XCB_EVENT_MASK_EXPOSURE;
@@ -224,7 +224,7 @@
     
     
     cairo_surface_t *cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], 300, 300);
-
+    
     cairo_t* cr = cairo_create(cairoSurface);
     
     xcb_generic_event_t *e;
@@ -250,7 +250,7 @@
     }
     
     pause();
-
+    
 }
 
 - (void) testHowCairoDrawsGradients
@@ -271,7 +271,7 @@
     cairo_surface_t *cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], 300, 300);
     
     cairo_t* cr = cairo_create(cairoSurface);
-
+    
     
     
     xcb_generic_event_t *e;
@@ -291,17 +291,17 @@
                 cairo_set_line_width(cr, 12);
                 
                 /*r1 = cairo_pattern_create_radial(128, 128, 10, 128, 128, 20);
-                cairo_pattern_add_color_stop_rgba(r1, 0, 1, 1, 1, 1);
-                cairo_pattern_add_color_stop_rgba(r1, 1, 0.6, 0.6, 0.6, 1);
-                cairo_set_source(cr, r1);
-                cairo_fill(cr);*/
+                 cairo_pattern_add_color_stop_rgba(r1, 0, 1, 1, 1, 1);
+                 cairo_pattern_add_color_stop_rgba(r1, 1, 0.6, 0.6, 0.6, 1);
+                 cairo_set_source(cr, r1);
+                 cairo_fill(cr);*/
                 
                 /*cairo_pattern_t *r2;
-                
-                r2 = cairo_pattern_create_radial(128, 128, 10, 128, 128, 20);
-                cairo_pattern_add_color_stop_rgba(r2, 0, 0.8, 0.42, 0.92, 0.3);
-                cairo_pattern_add_color_stop_rgb(r2, 0.8, 0.7, 0.42, 0.920);
-                cairo_set_source(cr, r2);*/
+                 
+                 r2 = cairo_pattern_create_radial(128, 128, 10, 128, 128, 20);
+                 cairo_pattern_add_color_stop_rgba(r2, 0, 0.8, 0.42, 0.92, 0.3);
+                 cairo_pattern_add_color_stop_rgb(r2, 0.8, 0.7, 0.42, 0.920);
+                 cairo_set_source(cr, r2);*/
                 cairo_pattern_t *pat3 = cairo_pattern_create_linear(118, 118, 138, 138);
                 
                 cairo_pattern_add_color_stop_rgb(pat3, 0.9, 1, 1, 1);
@@ -322,7 +322,7 @@
         }
         free(e);
     }
-
+    
     pause();
     
 }
@@ -332,17 +332,17 @@
     XCBScreen *scr = [[aConnection screens] objectAtIndex:0];
     
     XCBWindow *window = [aConnection createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                         withParentWindow:[scr rootWindow]
-                                            withXPosition:1
-                                            withYPosition:1
-                                                withWidth:300
-                                               withHeight:300
-                                         withBorrderWidth:10
-                                             withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                             withVisualId:aVisual
-                                            withValueMask:aMask
-                                            withValueList:someValues];
-
+                                          withParentWindow:[scr rootWindow]
+                                             withXPosition:1
+                                             withYPosition:1
+                                                 withWidth:300
+                                                withHeight:300
+                                          withBorrderWidth:10
+                                              withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                              withVisualId:aVisual
+                                             withValueMask:aMask
+                                             withValueList:someValues];
+    
     return window;
 }
 

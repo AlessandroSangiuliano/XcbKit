@@ -62,7 +62,7 @@ XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* con
     [titleBar setTitleBarDownColor:[NSColor colorWithCalibratedRed: 0.898 green: 0.898 blue: 0.898 alpha: 1]];
     
     return titleBar;
-
+    
 }
 
 void CsMapXCBWindoToXCBFrame(XCBWindow* sourceWindow, XCBFrame *destFrame)
