@@ -231,6 +231,7 @@
 {
     pixmap = xcb_generate_id([connection connection]);
     XCBScreen* screen = [[connection screens] objectAtIndex:0];
+    //sleep(1);
 
     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
 	uint32_t values[] = {[screen screen]->white_pixel, [screen screen]->white_pixel, 0};
@@ -260,11 +261,11 @@
                   windowRect.size.width,
                   windowRect.size.height);
 
-    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    /*XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
 
-    [drawer drawContent];
+    [drawer drawContent];*/
     screen = nil;
 }
 
@@ -300,12 +301,12 @@
 
     /** FIXME: REMEMBER TO DELETE ALL THIS */
 
-    XCBScreen* screen = [[connection screens] objectAtIndex:0];
+    /*XCBScreen* screen = [[connection screens] objectAtIndex:0];
     XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
 
-    [drawer drawContent];
+    [drawer drawContent];*/
 }
 
 - (void) destroyPixmap
