@@ -7,9 +7,9 @@
 //
 
 #import "EWMHService.h"
-#import <xcb.h>
-#import <xcb_atom.h>
-#import <Transformers.h>
+#import <xcb/xcb.h>
+#import <xcb/xcb_atom.h>
+#import "../functions/Transformers.h"
 
 @implementation EWMHService
 
@@ -349,7 +349,7 @@
         EWMHVisibleIconName,
         UTF8_STRING,
         MANAGER
-
+        
 	};
     
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
@@ -431,7 +431,7 @@
     NSArray *rootAtoms = [NSArray arrayWithObjects:rootProperties count:sizeof(rootProperties)/sizeof(NSString*)];
     
     xcb_atom_t *atomsTransformed = FnFromNSArrayAtomsToXcbAtomTArray(rootAtoms, atomService);
-
+    
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         [rootWindow window],
@@ -469,7 +469,7 @@
                         8,
                         6,
                         "uroswm");
-
+    
     
     int pid = getpid();
     
@@ -481,9 +481,11 @@
                         32,
                         1,
                         &pid);
-
+    
     //TODO: wm-specs says that if the _NET_WM_PID is set the ICCCM WM_CLIENT_MACHINE atom must be set.
-
+    
+    rootAtoms = nil;
+    
 }
 
 - (void) changePropertiesForWindow:(XCBWindow *)aWindow

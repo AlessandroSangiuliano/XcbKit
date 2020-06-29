@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "XCBScreen.h"
 #import "XCBVisual.h"
-#import "XCBCreateWindowTypeRequest.h"
-#import "XCBWindowTypeResponse.h"
-#import "EMessage.h"
+#import "utils/XCBCreateWindowTypeRequest.h"
+#import "utils/XCBWindowTypeResponse.h"
+#import "enums/EMessage.h"
 #include <xcb/xcb.h>
 
 @class XCBWindow;
@@ -82,12 +82,14 @@
 - (void) handleExpose: (xcb_expose_event_t*)anEvent;
 - (void) handleCirculateRequest: (xcb_circulate_request_event_t*)anEvent;
 - (void) handleConfigureWindowRequest: (xcb_configure_request_event_t*)anEvent;
+- (void) handleConfigureNotify: (xcb_configure_notify_event_t*)anEvent;
 - (void) handleReparentNotify: (xcb_reparent_notify_event_t*)anEvent;
 - (void) handlePropertyNotify: (xcb_property_notify_event_t*)anEvent;
 - (void) handleClientMessage: (xcb_client_message_event_t*)anEvent;
 - (void) handleDestroyNotify: (xcb_destroy_notify_event_t*)anEvent;
 - (void) handleFocusOut: (xcb_focus_out_event_t*)anEvent;
 - (void) handleFocusIn: (xcb_focus_in_event_t*)anEvent;
+- (void) handleVisibilityEvent: (xcb_visibility_notify_event_t*)anEvent;
 
 /*** SENDS EVENTS ***/
 

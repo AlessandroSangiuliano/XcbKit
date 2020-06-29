@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#include "xcb/xcb.h"
+#include <xcb/xcb.h>
 #import "XCBScreen.h"
 
 @interface XCBVisual : NSObject

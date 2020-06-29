@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XCBConnection.h"
-#import <xcb.h>
+#import <xcb/xcb.h>
 
 @class XCBConnection;
 // Singleton

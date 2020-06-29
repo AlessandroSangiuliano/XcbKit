@@ -2,3 +2,13 @@
 XCBKit\.xcodeproj/project\.xcworkspace/xcuserdata/alex\.xcuserdatad/
 
 XCBKit\.xcodeproj/xcuserdata/alex\.xcuserdatad/xcdebugger/
+
+XCBKit/.idea/
+
+XCBKit/derived_src/
+
+XCBKit/obj/
+
+XCBKit/XCBKit.framework/
+
+XCBKit/cmake-build-debug/CMakeFiles/clion-log.txt
