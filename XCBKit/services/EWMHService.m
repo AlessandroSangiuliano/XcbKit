@@ -536,7 +536,7 @@
         return NULL;
     
     void* value = xcb_get_property_value(reply);
-    free(reply);
+    free(reply); //FIXME: VALGRIND NOTICED A PROBLEM WITH THIS ROUND OF GET THE VALUE AND FREE THE REPLY
     return value;
 }
 

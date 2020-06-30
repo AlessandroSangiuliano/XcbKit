@@ -187,6 +187,7 @@
     cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
     cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }
 
@@ -216,6 +217,7 @@
     cairo_show_text(cr, [aText UTF8String]);
     
     cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }
 

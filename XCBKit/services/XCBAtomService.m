@@ -50,7 +50,9 @@
     if (atomValue != nil)
     {
         NSLog(@"Atom previously cached!");
-        return [atomValue unsignedIntValue];
+        xcb_atom_t value = [atomValue unsignedIntValue];
+        atomValue = nil;
+        return value;
     }
     
     const char *str = [atomName UTF8String];
@@ -74,6 +76,7 @@
     {
         NSString *atomName = [atoms objectAtIndex:i];
         [self cacheAtom:atomName];
+        atomName = nil;
     }
     
 }

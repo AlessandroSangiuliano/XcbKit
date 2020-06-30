@@ -825,10 +825,15 @@
                                                                               XCB_CURRENT_TIME), NULL);
 
     if (!reply || reply->status != XCB_GRAB_STATUS_SUCCESS)
+    {
+        free(reply);
         return NO;
+    }
 
     pointerGrabbed = YES;
     //NSLog(@"Pointer grabbed");
+
+    free(reply);
     return YES;
 
 }

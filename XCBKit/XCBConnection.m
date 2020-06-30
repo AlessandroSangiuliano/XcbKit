@@ -54,7 +54,7 @@ ICCCMService* icccmService;
 
 	screens = [NSMutableArray new];
 
-    [NSRunLoop currentRunLoop];
+    //[NSRunLoop currentRunLoop];
 
     connection = xcb_connect(localDisplayName, NULL);
 
