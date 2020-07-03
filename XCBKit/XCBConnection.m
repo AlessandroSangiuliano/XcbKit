@@ -602,7 +602,7 @@ ICCCMService* icccmService;
 
     if (resizeState)
     {
-        NSLog(@"Resizing");
+        //NSLog(@"Resizing");
         XCBFrame* frame;
 
 
@@ -995,7 +995,7 @@ ICCCMService* icccmService;
     if ([window isKindOfClass:[XCBFrame class]])
     {
         XCBFrame* frame = (XCBFrame*)window;
-        NSLog(@"AISSALARAISS");
+        //NSLog(@"AISSALARAISS");
 
         /*if ([frame isMinimized])
         {
