@@ -121,10 +121,11 @@
 {
     EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
-    xcb_atom_t* allowed_actions = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
-                                              propertyType:XCB_ATOM_ATOM
-                                                 forWindow:self
-                                                    delete:NO];
+    void* reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+                              propertyType:XCB_ATOM_ATOM
+                                 forWindow:self
+                                    delete:NO];
+    xcb_atom_t* allowed_actions = xcb_get_property_value(reply);
 
     int allowedActionSize = 0;
 
@@ -225,7 +226,7 @@
 
     ewmhService = nil;
     atomService = nil;
-
+    free(reply);
 }
 
 - (void) createPixmap

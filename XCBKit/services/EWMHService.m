@@ -530,14 +530,21 @@
                                                              &error);
     
     if (error)
+    {
+        free(error);
         return NULL;
+    }
     
     if (reply->length == 0 && reply->format == 0 && reply->type == 0)
+    {
+        free(error);
         return NULL;
+    }
     
-    void* value = xcb_get_property_value(reply);
-    free(reply); //FIXME: VALGRIND NOTICED A PROBLEM WITH THIS ROUND OF GET THE VALUE AND FREE THE REPLY
-    return value;
+    
+    //void* value = xcb_get_property_value(reply);
+    free(error); //FIXME: VALGRIND NOTICED A PROBLEM WITH THIS ROUND OF GET THE VALUE AND FREE THE REPLY
+    return reply;
 }
 
 

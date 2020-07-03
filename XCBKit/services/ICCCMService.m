@@ -66,10 +66,12 @@
     
     xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:protocol];
     
-    xcb_atom_t* windowProtocols = (xcb_atom_t*)[self getProperty:WMProtocols
-                                                    propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                                                       forWindow:window
-                                                          delete:NO];
+    void* reply = [self getProperty:WMProtocols
+                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                          forWindow:window
+                             delete:NO];
+
+    xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
     
     int size = sizeof(windowProtocols)/ sizeof(windowProtocols);
     
@@ -79,6 +81,8 @@
             hasProtocol = YES;
     }
     
+    free(windowProtocols);
+    free(reply);
     return hasProtocol;
 }
 

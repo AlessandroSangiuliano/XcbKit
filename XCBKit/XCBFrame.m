@@ -132,12 +132,14 @@
     [self addChildWindow:titleBar withKey:TitleBar];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
 
-    char* value = [ewmhService getProperty:[ewmhService EWMHWMName]
+    void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
                               propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
                                  forWindow:clientWindow
                                     delete:NO];
 
+    char* value = xcb_get_property_value(reply);
     NSString *windowTitle = [NSString stringWithUTF8String:value];
 
     //free(value);
@@ -174,6 +176,8 @@
     clientWindow = nil;
     ewmhService = nil;
     windowTitle = nil;
+    
+    free(reply);
 }
 
 - (void) resize:(xcb_motion_notify_event_t *)anEvent
