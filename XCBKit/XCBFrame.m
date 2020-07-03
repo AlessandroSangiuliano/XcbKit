@@ -132,7 +132,6 @@
     [self addChildWindow:titleBar withKey:TitleBar];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    
 
     void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
                               propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
