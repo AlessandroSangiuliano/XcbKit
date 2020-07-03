@@ -81,7 +81,7 @@
             hasProtocol = YES;
     }
     
-    free(windowProtocols);
+    windowProtocols = NULL;
     free(reply);
     return hasProtocol;
 }

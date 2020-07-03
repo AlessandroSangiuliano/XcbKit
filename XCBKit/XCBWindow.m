@@ -120,12 +120,14 @@
 - (void) checkNetWMAllowedActions
 {
     EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    xcb_atom_t* allowed_actions = NULL;
 
     void* reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
                               propertyType:XCB_ATOM_ATOM
                                  forWindow:self
                                     delete:NO];
-    xcb_atom_t* allowed_actions = xcb_get_property_value(reply);
+    if (reply)
+        allowed_actions = xcb_get_property_value(reply);
 
     int allowedActionSize = 0;
 
