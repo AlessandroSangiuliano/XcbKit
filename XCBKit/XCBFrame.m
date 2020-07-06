@@ -15,7 +15,6 @@
 #import "utils/XCBWindowTypeResponse.h"
 #import "services/ICCCMService.h"
 
-
 @implementation XCBFrame
 
 @synthesize connection;
@@ -35,15 +34,35 @@
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
 {
+    /*** checks normal hints for client window **/
+    ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
+    minHeightHint = sizeHints->min_height;
+    minWidthHint = sizeHints->min_width;
+
+    if (minWidthHint > [aClientWindow windowRect].size.width)
+    {
+        uint32_t values[] = {minWidthHint};
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize(minWidthHint, [aClientWindow windowRect].size.height));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_WIDTH, values);
+    }
+
+    if (minHeightHint > [aClientWindow windowRect].size.height)
+    {
+        uint32_t values[] = {minHeightHint};
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([aClientWindow windowRect].size.width, minHeightHint));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_HEIGHT, values);
+    }
+
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
     [self setOriginalRect:[aClientWindow windowRect]];
 
-    /*** checks normal hints for client window **/
-    ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
-    xcb_size_hints_t* sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
-    minHeightHint = sizeHints->min_height;
-    minWidthHint = sizeHints->min_width;
+    NSLog(@"Flag: %d", sizeHints->flags);
 
     uint16_t width =  [aClientWindow windowRect].size.width + 1;
     uint16_t height =  [aClientWindow windowRect].size.height + 22;
@@ -111,8 +130,9 @@
 - (XCBWindow*) childWindowForKey:(childrenMask)key
 {
     NSNumber* keyNumber = [NSNumber numberWithInteger:key];
-    return [children objectForKey:keyNumber];
+    XCBWindow* child = [children objectForKey:keyNumber];
     keyNumber = nil;
+    return child;
 }
 
 -(void)removeChild:(childrenMask)frameChild

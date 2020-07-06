@@ -436,11 +436,9 @@ ICCCMService* icccmService;
     BOOL isManaged = NO;
 	XCBWindow *window = [self windowForXCBId:anEvent->window];
 
+	NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
 
-    NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
-
-
-    if (window != nil)
+	if (window != nil)
     {
         NSLog(@"Window %u already managed by the window manager.", [window window]);
         isManaged = YES;

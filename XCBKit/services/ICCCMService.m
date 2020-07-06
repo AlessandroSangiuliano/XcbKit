@@ -91,7 +91,7 @@
     xcb_connection_t *connection = [[aWindow connection] connection];
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(connection, [aWindow window]);
     
-    xcb_size_hints_t* sizeHints = malloc(sizeof(xcb_size_hints_t));
+    xcb_size_hints_t *sizeHints = malloc(sizeof(xcb_size_hints_t));
     
     xcb_icccm_get_wm_normal_hints_reply(connection, cookie, sizeHints, NULL);
     

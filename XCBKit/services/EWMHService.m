@@ -543,7 +543,7 @@
     
     
     //void* value = xcb_get_property_value(reply);
-    free(error); //FIXME: VALGRIND NOTICED A PROBLEM WITH THIS ROUND OF GET THE VALUE AND FREE THE REPLY
+    free(error);
     return reply;
 }
 

@@ -10,6 +10,9 @@
 #import "XCBWindow.h"
 #import "XCBConnection.h"
 
+#define WM_MIN_WINDOW_HEIGHT 431
+#define WM_MIN_WINDOW_WIDTH 496
+
 typedef NS_ENUM(NSInteger, childrenMask)
 {
     TitleBar = 0,
@@ -27,8 +30,8 @@ typedef NS_ENUM(NSInteger, childrenMask)
 @property (nonatomic) BOOL leftBorderClicked;
 @property (nonatomic) BOOL topBorderClicked;
 @property (nonatomic) XCBPoint offset;
-@property (nonatomic) int minWidthHint;
-@property (nonatomic) int minHeightHint;
+@property (nonatomic) int32_t minWidthHint;
+@property (nonatomic) int32_t minHeightHint;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection withXcbWindow:(xcb_window_t) xcbWindow;
