@@ -514,7 +514,7 @@
             forWindow:(XCBWindow *)aWindow
                delete:(BOOL)deleteProperty
 {
-    xcb_atom_t property = [[[atomService cachedAtoms] objectForKey:aPropertyName] unsignedIntValue];
+    xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:aPropertyName];
     
     xcb_get_property_cookie_t cookie = xcb_get_property([connection connection],
                                                         deleteProperty,

@@ -472,15 +472,14 @@ ICCCMService *icccmService;
             }
         }
 
-        void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowTypeMenu]
+        void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
                                            propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                               forWindow:window
                                                  delete:NO];
 
         xcb_atom_t *atom = (xcb_atom_t*)xcb_get_property_value(windowTypeReply);
 
-        xcb_atom_t gigio = [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeMenu]];
-        if (*atom == gigio)
+        if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeNormal]])
             NSLog(@"Pene");
 
         XCBRect rect = [self geometryForWindow:window];
@@ -489,6 +488,8 @@ ICCCMService *icccmService;
         [self registerWindow:window];
         [window setFirstRun:YES];
         free(reply);
+        free(windowTypeReply);
+        atom = NULL;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
