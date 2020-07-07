@@ -457,7 +457,7 @@
 
     [frame setIsMaximized:NO];
 
-    EWMHService* ewmhService = [connection ewmhService];
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService* atomService = [ewmhService atomService];
 
     xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
@@ -564,18 +564,19 @@
 
     [frame setIsMaximized:YES];
 
-    EWMHService* ewmhSerive = [connection ewmhService];
-    XCBAtomService* atomService = [ewmhSerive atomService];
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    XCBAtomService* atomService = [ewmhService atomService];
 
-    xcb_atom_t state[2] =
+    xcb_atom_t state[3] =
     {
-        [atomService atomFromCachedAtomsWithKey:[ewmhSerive EWMHWMStateMaximizedVert]],
-        [atomService atomFromCachedAtomsWithKey:[ewmhSerive EWMHWMStateMaximizedHorz]]
+        [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateMaximizedVert]],
+        [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateMaximizedHorz]],
+        [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateFullscreen]]
     };
 
-    [ewmhSerive changePropertiesForWindow:frame
+    [ewmhService changePropertiesForWindow:frame
                                  withMode:XCB_PROP_MODE_REPLACE
-                             withProperty:[ewmhSerive EWMHWMState]
+                             withProperty:[ewmhService EWMHWMState]
                                  withType:XCB_ATOM_ATOM
                                withFormat:32
                            withDataLength:2
@@ -585,7 +586,7 @@
     clientWindow = nil;
     frame = nil;
     atomService = nil;
-    ewmhSerive = nil;
+    ewmhService = nil;
 
     return;
 }
@@ -661,7 +662,7 @@
         [titleBar setOldRect:[titleBar windowRect]];
     }
 
-    EWMHService* ewmhService = [connection ewmhService];
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService* atomService = [ewmhService atomService];
     [atomService cacheAtom:@"WM_STATE"];
 
@@ -699,7 +700,7 @@
     windowRect = oldRect;
     XCBFrame* frame;
 
-    EWMHService* ewmhService = [connection ewmhService];
+    EWMHService* ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService* atomService = [ewmhService atomService];
 
     xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};

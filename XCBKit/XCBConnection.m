@@ -20,7 +20,6 @@
 @implementation XCBConnection
 
 @synthesize dragState;
-@synthesize ewmhService;
 @synthesize damagedRegions;
 @synthesize xfixesInitialized;
 @synthesize resizeState;
@@ -99,12 +98,13 @@ ICCCMService *icccmService;
 
     NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
 
-    ewmhService = [EWMHService sharedInstanceWithConnection:self];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
 
     XCBConn = self;
     resizeState = NO;
+    ewmhService = nil;
     [self flush];
     return self;
 }
@@ -430,7 +430,7 @@ ICCCMService *icccmService;
 
 - (void)handleMapRequest:(xcb_map_request_event_t *)anEvent
 {
-
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     BOOL isManaged = NO;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
@@ -449,6 +449,7 @@ ICCCMService *icccmService;
 
         window = nil;
 
+        ewmhService = nil;
         return;
     }
 
@@ -468,19 +469,27 @@ ICCCMService *icccmService;
 
                 window = nil;
                 free(reply);
+                ewmhService = nil;
                 return;
             }
         }
 
+        NSString *lel = [ewmhService EWMHWMWindowType];
+        NSLog(@"XD %@", lel);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
-                                           propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                           propertyType:XCB_ATOM_ATOM
                                               forWindow:window
                                                  delete:NO];
 
-        xcb_atom_t *atom = (xcb_atom_t*)xcb_get_property_value(windowTypeReply);
+        if (windowTypeReply)
+        {
+            xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
 
-        if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeNormal]])
-            NSLog(@"Pene");
+            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeNormal]])
+                NSLog(@"I got the property!");
+
+            atom = NULL;
+        }
 
         XCBRect rect = [self geometryForWindow:window];
         [window setWindowRect:rect];
@@ -489,7 +498,7 @@ ICCCMService *icccmService;
         [window setFirstRun:YES];
         free(reply);
         free(windowTypeReply);
-        atom = NULL;
+        ewmhService = nil;
     }
 
     XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
@@ -1259,6 +1268,7 @@ ICCCMService *icccmService;
 - (void)registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
 {
     XCBScreen *screen = [screens objectAtIndex:0];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
     uint32_t values[1];
     values[0] = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
@@ -1282,6 +1292,7 @@ ICCCMService *icccmService;
              }*/
             rootWindow = nil;
             screen = nil;
+            ewmhService = nil;
             return;
         }
 
@@ -1289,6 +1300,7 @@ ICCCMService *icccmService;
 
         rootWindow = nil;
         screen = nil;
+        ewmhService = nil;
         return;
     }
 
@@ -1316,6 +1328,7 @@ ICCCMService *icccmService;
             screen = nil;
             selector = nil;
             atomName = nil;
+            ewmhService = nil;
             return;
         }
     }
@@ -1326,6 +1339,7 @@ ICCCMService *icccmService;
     rootWindow = nil;
     selector = nil;
     atomName = nil;
+    ewmhService = nil;
 }
 
 - (XCBWindow *)rootWindowForScreenNumber:(int)number
@@ -1349,7 +1363,6 @@ ICCCMService *icccmService;
     [windowsMap removeAllObjects];
     windowsMap = nil;
     displayName = nil;
-    ewmhService = nil;
     damagedRegions = nil;
     xcb_disconnect(connection);
 }
