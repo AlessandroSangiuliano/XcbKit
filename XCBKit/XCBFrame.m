@@ -62,8 +62,6 @@
     [self setWindowRect:[aClientWindow windowRect]];
     [self setOriginalRect:[aClientWindow windowRect]];
 
-    NSLog(@"Flag: %d", sizeHints->flags);
-
     uint16_t width =  [aClientWindow windowRect].size.width + 1;
     uint16_t height =  [aClientWindow windowRect].size.height + 22;
 
@@ -154,15 +152,17 @@
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
     void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
-                              propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
+                              propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                  forWindow:clientWindow
                                     delete:NO];
 
-    char* value = xcb_get_property_value(reply);
-    NSString *windowTitle = [NSString stringWithUTF8String:value];
-
-    //free(value);
-    value = NULL;
+    NSString* windowTitle;
+    if (reply)
+    {
+        char *value = xcb_get_property_value(reply);
+        windowTitle = [NSString stringWithUTF8String:value];
+        value = NULL;
+    }
 
     // for now if it is nil just set an empty string
 

@@ -108,8 +108,9 @@
                                 cookie,
                                 property,
                                 NULL);
-    
-    NSString *name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
+    NSString* name;
+    if (property->name != NULL)
+        name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
     
     free(property);
     return name;

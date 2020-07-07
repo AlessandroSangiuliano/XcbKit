@@ -462,13 +462,14 @@ ICCCMService* icccmService;
 
         xcb_get_window_attributes_reply_t* reply = [self getAttributesForWindow:window];
 
-        if (reply->override_redirect == YES)
-        {
-            NSLog(@"Override redirect detected"); //useless log
+        if (reply != NULL)
+            if (reply->override_redirect == YES)
+            {
+                NSLog(@"Override redirect detected"); //useless log
 
-            window = nil;
-            return;
-        }
+                window = nil;
+                return;
+            }
 
 
         XCBRect rect = [self geometryForWindow:window];
