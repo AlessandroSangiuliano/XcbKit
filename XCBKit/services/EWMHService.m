@@ -531,6 +531,7 @@
     
     if (error)
     {
+        NSLog(@"Error: %d for window: %u", error->error_code, [aWindow window]);
         free(error);
         return NULL;
     }

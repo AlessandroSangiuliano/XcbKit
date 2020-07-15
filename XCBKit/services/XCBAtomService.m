@@ -91,6 +91,21 @@
     return [cachedAtoms objectForKey:atomName];
 }
 
+- (NSString*) atomNameFromAtom:(xcb_atom_t)anAtom
+{
+    xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name([connection connection], anAtom);
+    xcb_get_atom_name_reply_t *reply = xcb_get_atom_name_reply([connection connection], cookie, NULL);
+    int length = xcb_get_atom_name_name_length(reply);
+
+    if (length == 0)
+        return @"No atom name!";
+
+    char* n = xcb_get_atom_name_name(reply);
+
+    free(reply);
+    return [NSString stringWithCString:n];
+}
+
 - (void) dealloc
 {
     connection = nil;

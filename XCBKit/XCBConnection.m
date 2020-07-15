@@ -475,7 +475,7 @@ ICCCMService *icccmService;
         }
 
         NSString *lel = [ewmhService EWMHWMWindowType];
-        NSLog(@"XD %@", lel);
+        NSLog(@"XD %@ and window: %u", lel, [window window]);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
                                            propertyType:XCB_ATOM_ATOM
                                               forWindow:window
@@ -484,6 +484,11 @@ ICCCMService *icccmService;
         if (windowTypeReply)
         {
             xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
+
+            XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
+            NSString *name = [atomService atomNameFromAtom:*atom]; //FIXME: remember to nullify this or remove if ncessary. is just a log.
+
+            NSLog(@"Name: %@", name);
 
             if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeNormal]])
                 NSLog(@"I got the property!");
@@ -829,6 +834,7 @@ ICCCMService *icccmService;
         screen = nil;
         visual = nil;
         atomService = nil;
+        anEvent->
         return;
     }
 

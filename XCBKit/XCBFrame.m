@@ -172,7 +172,6 @@
 
         windowTitle = [icccmService getWmNameForWindow:clientWindow];
 
-
         if (windowTitle == nil)
             windowTitle = @"";
 
