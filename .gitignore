@@ -12,3 +12,7 @@ XCBKit/obj/
 XCBKit/XCBKit.framework/
 
 XCBKit/cmake-build-debug/CMakeFiles/clion-log.txt
+
+XCBKit/.clang_complete
+
+XCBKit/core

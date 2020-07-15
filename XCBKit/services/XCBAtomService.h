@@ -27,6 +27,7 @@
 - (void) cacheAtoms:(NSArray*) atoms;
 - (xcb_atom_t) atomFromCachedAtomsWithKey:(NSString*) atomName;
 - (NSNumber*) atomNumberFromCachedAtomsWithKey:(NSString*) atomName;
+- (NSString*) atomNameFromAtom:(xcb_atom_t)anAtom;
 
 - (void) dealloc;
 

@@ -73,14 +73,19 @@
                              withDataLength:1
                                    withData:atom]; //questo è il valore della proerty è come un key-value...
     
-    xcb_atom_t* expected = (xcb_atom_t*)[icccmService getProperty:[icccmService WMProtocols]
-                                                     propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                                                        forWindow:window
-                                                           delete:NO];
+    void* reply2 = [icccmService getProperty:[icccmService WMProtocols]
+                               propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                  forWindow:window
+                                     delete:NO];
+    
+    xcb_atom_t* expected = xcb_get_property_value(reply2);
     
     NSLog(@"Atom id %u", expected[0]);
     
     STAssertEquals(atom[0], expected[0], @"Must be equal");
+    
+    free(expected);
+    free(reply2);
     
 }
 

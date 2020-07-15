@@ -30,7 +30,6 @@
 }
 
 @property (nonatomic) BOOL dragState;
-@property (strong, nonatomic) EWMHService* ewmhService;
 @property (strong, nonatomic) XCBRegion* damagedRegions;
 @property (nonatomic) BOOL xfixesInitialized;
 @property (nonatomic) BOOL resizeState;

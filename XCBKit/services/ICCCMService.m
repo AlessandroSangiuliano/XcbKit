@@ -66,10 +66,12 @@
     
     xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:protocol];
     
-    xcb_atom_t* windowProtocols = (xcb_atom_t*)[self getProperty:WMProtocols
-                                                    propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                                                       forWindow:window
-                                                          delete:NO];
+    void* reply = [self getProperty:WMProtocols
+                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                          forWindow:window
+                             delete:NO];
+
+    xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
     
     int size = sizeof(windowProtocols)/ sizeof(windowProtocols);
     
@@ -79,6 +81,8 @@
             hasProtocol = YES;
     }
     
+    windowProtocols = NULL;
+    free(reply);
     return hasProtocol;
 }
 
@@ -87,7 +91,7 @@
     xcb_connection_t *connection = [[aWindow connection] connection];
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_normal_hints(connection, [aWindow window]);
     
-    xcb_size_hints_t* sizeHints = malloc(sizeof(xcb_size_hints_t));
+    xcb_size_hints_t *sizeHints = malloc(sizeof(xcb_size_hints_t));
     
     xcb_icccm_get_wm_normal_hints_reply(connection, cookie, sizeHints, NULL);
     
@@ -104,8 +108,9 @@
                                 cookie,
                                 property,
                                 NULL);
-    
-    NSString *name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
+    NSString* name;
+    if (property->name != NULL)
+        name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
     
     free(property);
     return name;

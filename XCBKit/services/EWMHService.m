@@ -514,7 +514,7 @@
             forWindow:(XCBWindow *)aWindow
                delete:(BOOL)deleteProperty
 {
-    xcb_atom_t property = [[[atomService cachedAtoms] objectForKey:aPropertyName] unsignedIntValue];
+    xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:aPropertyName];
     
     xcb_get_property_cookie_t cookie = xcb_get_property([connection connection],
                                                         deleteProperty,
@@ -530,14 +530,22 @@
                                                              &error);
     
     if (error)
+    {
+        NSLog(@"Error: %d for window: %u", error->error_code, [aWindow window]);
+        free(error);
         return NULL;
+    }
     
     if (reply->length == 0 && reply->format == 0 && reply->type == 0)
+    {
+        free(error);
         return NULL;
+    }
     
-    void* value = xcb_get_property_value(reply);
-    free(reply);
-    return value;
+    
+    //void* value = xcb_get_property_value(reply);
+    free(error);
+    return reply;
 }
 
 

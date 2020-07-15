@@ -15,7 +15,6 @@
 #import "utils/XCBWindowTypeResponse.h"
 #import "services/ICCCMService.h"
 
-
 @implementation XCBFrame
 
 @synthesize connection;
@@ -35,15 +34,33 @@
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
 {
+    /*** checks normal hints for client window **/
+    ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
+    minHeightHint = sizeHints->min_height;
+    minWidthHint = sizeHints->min_width;
+
+    if (minWidthHint > [aClientWindow windowRect].size.width)
+    {
+        uint32_t values[] = {minWidthHint};
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize(minWidthHint, [aClientWindow windowRect].size.height));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_WIDTH, values);
+    }
+
+    if (minHeightHint > [aClientWindow windowRect].size.height)
+    {
+        uint32_t values[] = {minHeightHint};
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([aClientWindow windowRect].size.width, minHeightHint));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_HEIGHT, values);
+    }
+
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
     [self setOriginalRect:[aClientWindow windowRect]];
-
-    /*** checks normal hints for client window **/
-    ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
-    xcb_size_hints_t* sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
-    minHeightHint = sizeHints->min_height;
-    minWidthHint = sizeHints->min_width;
 
     uint16_t width =  [aClientWindow windowRect].size.width + 1;
     uint16_t height =  [aClientWindow windowRect].size.height + 22;
@@ -111,8 +128,9 @@
 - (XCBWindow*) childWindowForKey:(childrenMask)key
 {
     NSNumber* keyNumber = [NSNumber numberWithInteger:key];
-    return [children objectForKey:keyNumber];
+    XCBWindow* child = [children objectForKey:keyNumber];
     keyNumber = nil;
+    return child;
 }
 
 -(void)removeChild:(childrenMask)frameChild
@@ -133,15 +151,18 @@
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
-    char* value = [ewmhService getProperty:[ewmhService EWMHWMName]
-                              propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
+    void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
+                              propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                  forWindow:clientWindow
                                     delete:NO];
 
-    NSString *windowTitle = [NSString stringWithUTF8String:value];
-
-    //free(value);
-    value = NULL;
+    NSString* windowTitle;
+    if (reply)
+    {
+        char *value = xcb_get_property_value(reply);
+        windowTitle = [NSString stringWithUTF8String:value];
+        value = NULL;
+    }
 
     // for now if it is nil just set an empty string
 
@@ -150,7 +171,6 @@
         ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
 
         windowTitle = [icccmService getWmNameForWindow:clientWindow];
-
 
         if (windowTitle == nil)
             windowTitle = @"";
@@ -174,6 +194,8 @@
     clientWindow = nil;
     ewmhService = nil;
     windowTitle = nil;
+    
+    free(reply);
 }
 
 - (void) resize:(xcb_motion_notify_event_t *)anEvent

@@ -187,6 +187,7 @@
     cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
     cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }
 
@@ -204,7 +205,8 @@
     cairo_set_source_rgb (cr, aColor.redComponent, aColor.greenComponent, aColor.blueComponent);
     
     cairo_text_extents_t  extents;
-    cairo_text_extents(cr, [aText UTF8String], &extents);
+    const char* utfString = [aText UTF8String];
+    cairo_text_extents(cr, utfString, &extents);
 
     CGFloat halfLength = extents.width / 2;
     
@@ -213,9 +215,10 @@
     
     cairo_move_to(cr, textPositionX - halfLength, textPositionY);
     
-    cairo_show_text(cr, [aText UTF8String]);
+    cairo_show_text(cr, utfString);
     
     cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }
 
