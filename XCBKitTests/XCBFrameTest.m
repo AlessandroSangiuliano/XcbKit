@@ -55,7 +55,7 @@
     /*XCBRect *frameRect = [[XCBRect alloc] initWithPosition:coordinates andSize: frameSize];
      [frame setWindowRect:frameRect];*/
     
-    XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow, connection);
+    XCBFrame *frame = FnFromXCBWindowToXCBFrame(frameWindow, connection, clientWindow);
     
     //TODO: FUNZIONE CHE MAPPA UNA XCBWINDOW TO UN XCBFRAME
     
