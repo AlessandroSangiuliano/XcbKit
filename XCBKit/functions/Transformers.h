@@ -21,7 +21,7 @@ xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *a
 
 /***Transforms a window in a frame ***/
 
-XCBFrame* FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection);
+XCBFrame* FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection, XCBWindow *clientWindow);
 
 /*** Transforms a window to a title bar ***/
 

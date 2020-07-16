@@ -93,10 +93,6 @@
     canChangeDesktop = NO;
     canClose = NO;
 
-    /*** checks _net_wm_allowed_action for client window ***/
-
-    [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:self withObject:nil];
-
     return self;
 }
 
@@ -550,7 +546,7 @@
     [clientWindow setOldRect:[clientWindow windowRect]];
 
     valueList[0] = 0;
-    valueList[1] = 23;
+    valueList[1] = 21;
     valueList[2] = width - 2;
     valueList[3] = height - 2;
 
@@ -559,7 +555,7 @@
     /*** set the new position and dimensions of the client window ***/
 
     newSize = XCBMakeSize(width - 2, height - 2);
-    newPoint = XCBMakePoint(0, 23);
+    newPoint = XCBMakePoint(0, 21);
     newRect = XCBMakeRect(newPoint, newSize);
 
     [clientWindow setWindowRect:newRect];

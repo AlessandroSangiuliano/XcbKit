@@ -34,7 +34,10 @@
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
 {
+    self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
+    
     /*** checks normal hints for client window **/
+    
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
     minHeightHint = sizeHints->min_height;
@@ -58,63 +61,20 @@
         xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_HEIGHT, values);
     }
 
-    self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
     [self setWindowRect:[aClientWindow windowRect]];
     [self setOriginalRect:[aClientWindow windowRect]];
 
-    uint16_t width =  [aClientWindow windowRect].size.width + 1;
-    uint16_t height =  [aClientWindow windowRect].size.height + 22;
-
     connection = aConnection;
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
-
-    uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS |
-        XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS |
-        XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-        XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
-        XCB_EVENT_MASK_VISIBILITY_CHANGE};
-
-
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-
-    XCBWindowTypeResponse* response;
-
-    if (xcbWindow == 0)
-    {
-        XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
-        [request setDepth:[screen screen]->root_depth];
-        [request setParentWindow:[screen rootWindow]];
-        [request setXPosition:[aClientWindow windowRect].position.x];
-        [request setXPosition:[aClientWindow windowRect].position.y];
-        [request setWidth:width];
-        [request setHeight:height];
-        [request setBorderWidth:3];
-        [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
-        [request setVisual:visual];
-        [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
-        [request setValueList:values];
-
-        response = [connection createWindowForRequest:request registerWindow:NO];
-
-        CsMapXCBWindoToXCBFrame([response frame], self);
-
-        children = [[NSMutableDictionary alloc] init];
-        NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
-        [children setObject:aClientWindow forKey: key];
-        [connection registerWindow:self];
-
-        response = nil;
-        request = nil;
-        key= nil;
-    }
+    children = [[NSMutableDictionary alloc] init];
+    NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
+    [children setObject:aClientWindow forKey: key];
+    [connection registerWindow:self];
 
     [super setIsAbove:YES];
     [connection mapWindow:self];
     free(sizeHints);
     icccmService = nil;
-    visual = nil;
-    screen = nil;
+    key= nil;
     return self;
 }
 

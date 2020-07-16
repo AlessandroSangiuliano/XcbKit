@@ -215,7 +215,7 @@ ICCCMService *icccmService;
 
     if ([aRequest windowType] == XCBFrameRequest)
     {
-        frame = FnFromXCBWindowToXCBFrame(window, self);
+        frame = FnFromXCBWindowToXCBFrame(window, self, [aRequest clientWindow]);
 
         if (reg)
         {
@@ -434,7 +434,7 @@ ICCCMService *icccmService;
     BOOL isManaged = NO;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
-    NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), [window window]);
+    NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), anEvent->window);
 
     if (window != nil)
     {
@@ -456,6 +456,10 @@ ICCCMService *icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+        
+        /* check allowed actions */
+        
+        [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
         /* check the ovveride redirect flag, if yes the WM must not handle the window */
 
@@ -506,8 +510,29 @@ ICCCMService *icccmService;
         ewmhService = nil;
     }
 
-    XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:window withConnection:self];
+    XCBScreen *screen = [[self screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    [visual setVisualTypeForScreen:screen];
 
+    uint32_t values[2] = {[screen screen]->white_pixel, FRAMEMASK};
+    
+    XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
+    [request setDepth:[screen screen]->root_depth];
+    [request setParentWindow:[screen rootWindow]];
+    [request setXPosition:[window windowRect].position.x];
+    [request setYPosition:[window windowRect].position.y];
+    [request setWidth:[window windowRect].size.width + 1];
+    [request setHeight:[window windowRect].size.height + 22];
+    [request setBorderWidth:3];
+    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+    [request setVisual:visual];
+    [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
+    [request setValueList:values];
+    [request setClientWindow:window];
+    
+    XCBWindowTypeResponse *response = [self createWindowForRequest:request registerWindow:YES];
+    
+    XCBFrame *frame = [response frame];
     const xcb_atom_t atomProtocols[1] = {
             [[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
     [icccmService changePropertiesForWindow:frame
@@ -525,6 +550,8 @@ ICCCMService *icccmService;
 
     window = nil;
     frame = nil;
+    request = nil;
+    response = nil;
 }
 
 - (void)handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -834,7 +861,6 @@ ICCCMService *icccmService;
         screen = nil;
         visual = nil;
         atomService = nil;
-        anEvent->
         return;
     }
 
