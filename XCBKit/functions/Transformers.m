@@ -11,20 +11,20 @@
 
 @implementation Transformers
 
-xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *atomService)
+void FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, xcb_atom_t destination[], XCBAtomService *atomService)
 {
     NSUInteger size = [array count];
-    xcb_atom_t *transformed = calloc(size, sizeof(xcb_atom_t));
     
     NSDictionary *cachedAtoms = [atomService cachedAtoms];
     
     for (NSUInteger i = 0; i < size; i++)
     {
         NSString *key = [array objectAtIndex:i];
-        transformed[i] = [[cachedAtoms objectForKey:key] unsignedIntValue];
+        destination[i] = [[cachedAtoms objectForKey:key] unsignedIntValue];
+        key = nil;
     }
     
-    return transformed;
+    cachedAtoms = nil;
 }
 
 XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection, XCBWindow *clientWindow)

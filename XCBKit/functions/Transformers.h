@@ -17,7 +17,7 @@
 
 @interface Transformers : NSObject
 
-xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *atomService);
+void FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, xcb_atom_t destinaton[], XCBAtomService *atomService);
 
 /***Transforms a window in a frame ***/
 
