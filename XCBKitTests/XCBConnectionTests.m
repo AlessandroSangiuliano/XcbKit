@@ -364,6 +364,7 @@
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
     [connection registerAsWindowManager:YES screenId:1 selectionWindow:selectionManagerWindow];
+    [ewmhService putPropertiesForRootWindow:[screen rootWindow] andWmWindow:selectionManagerWindow];
     
     xcb_atom_t type = [[[[ewmhService atomService] cachedAtoms] objectForKey:[ewmhService UTF8_STRING]] unsignedIntValue];
     
@@ -378,7 +379,7 @@
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:clientWindow visual:visual];
     
     //[connection mapWindow:clientWindow];
-    //[connection flush];
+    [connection flush];
     
     [self eventLoopWithConnection:connection andDrawer:drawer andClientWindow:clientWindow];
     
