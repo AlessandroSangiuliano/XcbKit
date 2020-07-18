@@ -44,7 +44,8 @@
     
     NSArray *array = [NSArray arrayWithObjects:strings count:sizeof(strings) / sizeof(NSString*)];
     
-    xcb_atom_t *transformed = FnFromNSArrayAtomsToXcbAtomTArray(array, atomService);
+    xcb_atom_t transformed[2];
+    FnFromNSArrayAtomsToXcbAtomTArray(array, transformed, atomService);
     
     STAssertEquals(sizeof(transformed)/sizeof(xcb_atom_t), 2ul, @"Expected: 2");
 }

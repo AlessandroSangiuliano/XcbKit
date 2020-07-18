@@ -430,7 +430,8 @@
     
     NSArray *rootAtoms = [NSArray arrayWithObjects:rootProperties count:sizeof(rootProperties)/sizeof(NSString*)];
     
-    xcb_atom_t *atomsTransformed = FnFromNSArrayAtomsToXcbAtomTArray(rootAtoms, atomService);
+    xcb_atom_t atomsTransformed[[rootAtoms count]];
+    FnFromNSArrayAtomsToXcbAtomTArray(rootAtoms, atomsTransformed, atomService);
     
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
@@ -438,8 +439,8 @@
                         [[[atomService cachedAtoms] objectForKey:EWMHSupported] unsignedIntValue],
                         XCB_ATOM_ATOM,
                         32,
-                        sizeof(atomsTransformed)/sizeof(xcb_atom_t),
-                        atomsTransformed);
+                        (uint32_t)[rootAtoms count],
+                        &atomsTransformed);
     
     xcb_window_t wmXcbWindow = [wmWindow window];
     
