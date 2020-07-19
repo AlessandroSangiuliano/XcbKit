@@ -349,8 +349,7 @@
         EWMHVisibleIconName,
         UTF8_STRING,
         MANAGER
-        
-	};
+    };
     
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
     atomService = [XCBAtomService sharedInstanceWithConnection:connection];

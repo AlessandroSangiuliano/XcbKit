@@ -10,8 +10,8 @@
 #import <cairo/cairo-xcb.h>
 #import <cairo/cairo.h>
 #import <XCBConnection.h>
-#import "XCBWindow.h"
-#import "XCBVisual.h"
+#import "../XCBWindow.h"
+#import "../XCBVisual.h"
 #import "XCBShape.h"
 
 @interface CairoDrawer : NSObject
