@@ -229,7 +229,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
     EWMHVisibleIconName,
     UTF8_STRING,
     MANAGER
-
+    
 };
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
@@ -249,7 +249,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 - (void *) getProperty:(NSString*) aPropertyName
           propertyType:(xcb_atom_t) propertyType
              forWindow:(XCBWindow*)aWindow
-              delete:(BOOL)deleteProperty ;
+                delete:(BOOL)deleteProperty ;
 
 - (void) dealloc;
 
