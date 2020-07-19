@@ -257,10 +257,9 @@
     EWMHStrutPartial = @"_NET_WM_STRUT_PARTIAL";
     EWMHVisibleIconName = @"_NET_WM_VISIBLE_ICON_NAME";
     
-    
     //Array iitialization
     NSString* atomStrings[] = {
-		EWMHSupported,
+        EWMHSupported,
 		EWMHClientList,
 		EWMHClientListStacking,
 		EWMHNumberOfDesktops,
