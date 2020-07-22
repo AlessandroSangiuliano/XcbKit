@@ -436,17 +436,24 @@ ICCCMService *icccmService;
 
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), anEvent->window);
 
+    /** if already managed map it **/
+
     if (window != nil)
     {
         NSLog(@"Window %u already managed by the window manager.", [window window]);
         isManaged = YES;
+        [self mapWindow:window];
+        window = nil;
+        ewmhService = nil;
+        return;
     }
 
-    // if already decorated for now just return, in future avoid to decorate but DO the other requests like redraw.
+    // if already decorated and managed, map it.
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
 
+        [self mapWindow:window];
         window = nil;
 
         ewmhService = nil;
@@ -470,7 +477,6 @@ ICCCMService *icccmService;
             if (reply->override_redirect == YES)
             {
                 NSLog(@"Override redirect detected"); //useless log
-
                 window = nil;
                 free(reply);
                 ewmhService = nil;
@@ -490,14 +496,35 @@ ICCCMService *icccmService;
             xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
 
             XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
-            NSString *name = [atomService atomNameFromAtom:*atom]; //FIXME: remember to nullify this or remove if ncessary. is just a log.
-
+            NSString *name = [atomService atomNameFromAtom:*atom];
             NSLog(@"Name: %@", name);
 
-            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeNormal]])
-                NSLog(@"I got the property!");
+            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
+            {
+                NSLog(@"Dock window %u to be registered", [window window]);
+                [self registerWindow:window];
+                [self mapWindow:window];
+                window = nil;
+                ewmhService = nil;
+                name = nil;
+                free(windowTypeReply);
+                return;
+            }
+
+            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeMenu]])
+            {
+                NSLog(@"Menu window %u to be registered", [window window]);
+                [self registerWindow:window];
+                [self mapWindow:window];
+                window = nil;
+                ewmhService = nil;
+                name = nil;
+                free(windowTypeReply);
+                return;
+            }
 
             atom = NULL;
+            name = nil;
         }
 
         XCBRect rect = [self geometryForWindow:window];
@@ -533,8 +560,8 @@ ICCCMService *icccmService;
     XCBWindowTypeResponse *response = [self createWindowForRequest:request registerWindow:YES];
     
     XCBFrame *frame = [response frame];
-    const xcb_atom_t atomProtocols[1] = {
-            [[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
+    const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
+
     [icccmService changePropertiesForWindow:frame
                                    withMode:XCB_PROP_MODE_REPLACE
                                withProperty:[icccmService WMProtocols]

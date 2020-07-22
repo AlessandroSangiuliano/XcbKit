@@ -65,17 +65,12 @@
     BOOL hasProtocol = NO;
     
     xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:protocol];
-    
-    void* reply = [self getProperty:WMProtocols
-                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                          forWindow:window
-                             delete:NO];
+
+    xcb_get_property_reply_t* reply = [self getProperty:WMProtocols propertyType:XCB_GET_PROPERTY_TYPE_ANY forWindow:window delete:NO];
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
-    
-    int size = sizeof(windowProtocols)/ sizeof(windowProtocols);
-    
-    for(int i = 0; i < size; i++)
+
+    for(int i = 0; i < reply->length; i++)
     {
         if (windowProtocols[i] == atom)
             hasProtocol = YES;

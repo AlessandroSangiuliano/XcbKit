@@ -103,7 +103,7 @@
     char* n = xcb_get_atom_name_name(reply);
 
     free(reply);
-    return [NSString stringWithCString:n];
+    return [NSString stringWithUTF8String:n];
 }
 
 - (void) dealloc
