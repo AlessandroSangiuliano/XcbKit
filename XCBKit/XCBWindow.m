@@ -118,7 +118,7 @@
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     xcb_atom_t *allowed_actions = NULL;
 
-    void *reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+    xcb_get_property_reply_t *reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
                               propertyType:XCB_ATOM_ATOM
                                  forWindow:self
                                     delete:NO];
@@ -127,7 +127,7 @@
 
     int allowedActionSize = 0;
 
-    (allowed_actions != NULL) ? (allowedActionSize = sizeof(allowed_actions) / sizeof(allowed_actions[0]))
+    (allowed_actions != NULL) ? (allowedActionSize = reply->length)
                               : (allowedActionSize = 0);
 
     if (allowedActionSize > 0)
