@@ -17,15 +17,14 @@
 
 @implementation XCBFrame
 
+@synthesize minWidthHint;
+@synthesize minHeightHint;
 @synthesize connection;
 @synthesize rightBorderClicked;
 @synthesize bottomBorderClicked;
 @synthesize offset;
 @synthesize leftBorderClicked;
 @synthesize topBorderClicked;
-@synthesize minWidthHint;
-@synthesize minHeightHint;
-
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection
 {
@@ -35,13 +34,14 @@
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
 {
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
-    
     /*** checks normal hints for client window **/
     
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
-    minHeightHint = sizeHints->min_height;
-    minWidthHint = sizeHints->min_width;
+    int minHAux = sizeHints->min_height;
+    int minWAux = sizeHints->min_width;
+    minHeightHint = minHAux;
+    minWidthHint = minWAux;
 
     if (minWidthHint > [aClientWindow windowRect].size.width)
     {

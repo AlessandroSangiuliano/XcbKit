@@ -24,14 +24,14 @@ typedef NS_ENUM(NSInteger, childrenMask)
     NSMutableDictionary *children;
 }
 
+@property (nonatomic) int minHeightHint;
+@property (nonatomic) int minWidthHint;
 @property (strong, nonatomic) XCBConnection *connection;
 @property (nonatomic) BOOL rightBorderClicked;
 @property (nonatomic) BOOL bottomBorderClicked;
 @property (nonatomic) BOOL leftBorderClicked;
 @property (nonatomic) BOOL topBorderClicked;
 @property (nonatomic) XCBPoint offset;
-@property (nonatomic) int32_t minWidthHint;
-@property (nonatomic) int32_t minHeightHint;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection withXcbWindow:(xcb_window_t) xcbWindow;
