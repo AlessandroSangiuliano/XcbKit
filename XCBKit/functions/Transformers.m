@@ -29,13 +29,15 @@ void FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, xcb_atom_t destination[],
 
 XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection, XCBWindow *clientWindow)
 {
-    XCBFrame *frame = [[XCBFrame alloc] initWithClientWindow:clientWindow withConnection:connection withXcbWindow:[aWindow window]];
+    XCBFrame *frame = [[XCBFrame alloc]
+                       initWithClientWindow:clientWindow
+                             withConnection:connection
+                              withXcbWindow:[aWindow window]
+                                   withRect:[aWindow windowRect]];
     
     [frame setAboveWindow:[aWindow aboveWindow]];
     [frame setParentWindow:[aWindow parentWindow]];
     [frame setAttributes:[aWindow attributes]];
-    [frame setWindowRect:[aWindow windowRect]];
-    [frame setOriginalRect:[aWindow originalRect]];
     [frame setWindowMask:[aWindow windowMask]];
     [frame setIsMapped:[aWindow isMapped]];
     

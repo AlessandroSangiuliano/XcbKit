@@ -569,6 +569,7 @@ ICCCMService *icccmService;
                                  withFormat:32
                              withDataLength:1
                                    withData:atomProtocols];
+    [self mapWindow:frame];
     [frame decorateClientWindow];
 
     NSLog(@"Client window decorated with id %u", [window window]);
@@ -1073,7 +1074,6 @@ ICCCMService *icccmService;
     if ([window isKindOfClass:[XCBFrame class]])
     {
         XCBFrame *frame = (XCBFrame *) window;
-        //NSLog(@"AISSALARAISS");
 
         /*if ([frame isMinimized])
         {
