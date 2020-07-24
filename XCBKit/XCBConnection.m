@@ -15,6 +15,7 @@
 #import "utils/CairoDrawer.h"
 #import "services/ICCCMService.h"
 #import "XCBRegion.h"
+#import "XCBGeometry.h"
 
 
 @implementation XCBConnection
@@ -527,9 +528,10 @@ ICCCMService *icccmService;
             name = nil;
         }
 
-        XCBRect rect = [self geometryForWindow:window];
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        //XCBRect rect = [self geometryForWindow:window];
+        //[window setWindowRect:rect];
+        //[window setOriginalRect:rect];
+        [window setRectaglesFromGeometries];
         [self registerWindow:window];
         [window setFirstRun:YES];
         free(reply);
@@ -569,6 +571,9 @@ ICCCMService *icccmService;
                                  withFormat:32
                              withDataLength:1
                                    withData:atomProtocols];
+    
+    XCBGeometry *geormetries = [frame geometries];
+    [geormetries description];
     [self mapWindow:frame];
     [frame decorateClientWindow];
 

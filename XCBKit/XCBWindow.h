@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "utils/XCBShape.h"
+#import "XCBGeometry.h"
 #include <xcb/xcb.h>
 
 @class XCBConnection;
@@ -115,6 +116,9 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) description;
 - (BOOL) grabPointer;
 - (void) ungrabPointer;
+- (XCBGeometry*) geometries;
+- (XCBRect) rectFromGeometries;
+- (void) setRectaglesFromGeometries;
 
 
 @end

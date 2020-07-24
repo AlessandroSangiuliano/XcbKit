@@ -850,6 +850,46 @@
     }
 }
 
+- (XCBGeometry*) geometries
+{
+    xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
+    xcb_generic_error_t *error;
+    xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
+    
+    if (reply == NULL)
+    {
+        NSLog(@"Reply is NULL");
+        
+        if (error)
+        {
+            NSLog(@"Error code: %d", error->error_code);
+            free(error);
+        }
+        
+        return nil;
+    }
+    
+    XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];
+    free(reply);
+
+    return geometry;
+}
+
+- (XCBRect) rectFromGeometries
+{
+    XCBGeometry *geo = [self geometries];
+    XCBRect rect = [geo rect];
+    geo = nil;
+    return rect;
+}
+
+- (void) setRectaglesFromGeometries
+{
+    XCBRect rect = [self rectFromGeometries];
+    windowRect = rect;
+    originalRect = rect;
+}
+
 
 - (void)description
 {
