@@ -21,6 +21,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBSelection.m \
 			XCBTitleBar.m \
 			XCBRegion.m \
+			XCBGeometry.m \
 			services/EWMHService.m \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
@@ -30,7 +31,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			functions/Transformers.m
 
 $(FRAMEWORK_NAME)_HEADER_FILES = \
-		  XCBKit.h \
+			XCBKit.h \
 			XCBConnection.h \
 			XCBScreen.h \
 			XCBWindow.h \
@@ -39,6 +40,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBSelection.h \
 			XCBTitleBar.h \
 			XCBRegion.h \
+			XCBGeometry.h \
 			services/EWMHService.h \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \
