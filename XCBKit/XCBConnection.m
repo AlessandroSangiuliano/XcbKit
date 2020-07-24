@@ -528,9 +528,6 @@ ICCCMService *icccmService;
             name = nil;
         }
 
-        //XCBRect rect = [self geometryForWindow:window];
-        //[window setWindowRect:rect];
-        //[window setOriginalRect:rect];
         [window setRectaglesFromGeometries];
         [self registerWindow:window];
         [window setFirstRun:YES];
