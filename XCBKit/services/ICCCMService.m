@@ -100,17 +100,16 @@
 - (NSString*) getWmNameForWindow:(XCBWindow *)aWindow
 {
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_name([[aWindow connection] connection], [aWindow window]);
-    xcb_icccm_get_text_property_reply_t* property = malloc(sizeof(xcb_icccm_get_text_property_reply_t));
+    xcb_icccm_get_text_property_reply_t property;
     
     xcb_icccm_get_wm_name_reply([[aWindow connection] connection],
                                 cookie,
-                                property,
+                                &property,
                                 NULL);
     NSString* name;
-    if (property->name != NULL)
-        name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
+    if (property.name != NULL)
+        name = [NSString stringWithCString:property.name encoding:NSASCIIStringEncoding];
     
-    free(property);
     return name;
 }
 

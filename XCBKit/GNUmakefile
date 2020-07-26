@@ -22,6 +22,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBTitleBar.m \
 			XCBRegion.m \
 			XCBGeometry.m \
+			XCBReply.m \
 			services/EWMHService.m \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
@@ -41,6 +42,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBTitleBar.h \
 			XCBRegion.h \
 			XCBGeometry.h \
+			XCBReply.h \
 			services/EWMHService.h \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \

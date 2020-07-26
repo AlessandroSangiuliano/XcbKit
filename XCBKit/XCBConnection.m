@@ -475,12 +475,6 @@ ICCCMService *icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-        
-        /* check allowed actions */
-        
-        [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
-
-        /* check the ovveride redirect flag, if yes the WM must not handle the window */
 
         //xcb_get_window_attributes_reply_t *reply = [self getAttributesForWindow:window];
         
@@ -492,6 +486,8 @@ ICCCMService *icccmService;
             reply = nil;
             return;
         }
+
+        /** check the ovveride redirect flag, if yes the WM must not handle the window **/
 
         if (![reply isError])
         {
@@ -509,6 +505,9 @@ ICCCMService *icccmService;
             rep = NULL;
             reply = nil;
         }
+
+        /** check allowed actions **/
+        [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
         NSString *lel = [ewmhService EWMHWMWindowType];
         NSLog(@"XD %@ and window: %u", lel, [window window]);
