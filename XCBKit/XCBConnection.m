@@ -381,8 +381,14 @@ ICCCMService *icccmService;
 
 - (xcb_get_window_attributes_reply_t *)getAttributesForWindow:(XCBWindow *)aWindow
 {
+    xcb_generic_error_t *error;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
-    xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, NULL);
+    xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, &error);
+
+    if (error)
+    {
+
+    }
 
     return reply;
 }
@@ -533,7 +539,6 @@ ICCCMService *icccmService;
         [window setFirstRun:YES];
         free(reply);
         free(windowTypeReply);
-        ewmhService = nil;
     }
 
     XCBScreen *screen = [[self screens] objectAtIndex:0];
@@ -569,8 +574,7 @@ ICCCMService *icccmService;
                              withDataLength:1
                                    withData:atomProtocols];
     
-    XCBGeometry *geormetries = [frame geometries];
-    [geormetries description];
+    [ewmhService updateNetFrameExtentsForWindow:frame];
     [self mapWindow:frame];
     [frame decorateClientWindow];
 
@@ -582,6 +586,7 @@ ICCCMService *icccmService;
     frame = nil;
     request = nil;
     response = nil;
+    ewmhService = nil;
 }
 
 - (void)handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -872,6 +877,7 @@ ICCCMService *icccmService;
 - (void)handleClientMessage:(xcb_client_message_event_t *)anEvent
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
     XCBWindow *window;
     XCBTitleBar *titleBar;
@@ -888,24 +894,37 @@ ICCCMService *icccmService;
     if (window == nil && frame == nil && titleBar == nil)
     {
         NSLog(@"No existing window for id: %u", anEvent->window);
+
+        NSString* pagliacciata = [atomService atomNameFromAtom:anEvent->type];
+        NSLog(@"Type: %@", pagliacciata);
+
+        NSLog(@"Atom: %d", anEvent->data.data32[0]);
+
+        if (anEvent->type == [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHRequestFrameExtents]])
+        {
+            NSLog(@"Pene");
+        }
         screen = nil;
         visual = nil;
         atomService = nil;
+        ewmhService = nil;
         return;
     }
 
 
-    if ([[self windowForXCBId:anEvent->window] isKindOfClass:[XCBFrame class]])
+    if ([window isKindOfClass:[XCBFrame class]])
     {
         frame = (XCBFrame *) [self windowForXCBId:anEvent->window];
         titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
         clientWindow = [frame childWindowForKey:ClientWindow];
-    } else if ([[self windowForXCBId:anEvent->window] isKindOfClass:[XCBTitleBar class]])
+    }
+    else if ([window isKindOfClass:[XCBTitleBar class]])
     {
         titleBar = (XCBTitleBar *) [self windowForXCBId:anEvent->window];
         frame = (XCBFrame *) [titleBar parentWindow];
         clientWindow = [frame childWindowForKey:ClientWindow];
-    } else if ([[self windowForXCBId:anEvent->window] isKindOfClass:[XCBWindow class]])
+    }
+    else if ([window isKindOfClass:[XCBWindow class]])
     {
         window = [self windowForXCBId:anEvent->window];
 
@@ -917,9 +936,9 @@ ICCCMService *icccmService;
         }
     }
 
-    xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
+    //xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
 
-    if (anEvent->type == changeStateAtom &&
+    if (anEvent->type == [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"] &&
         anEvent->format == 32 &&
         anEvent->data.data32[0] == ICCCM_WM_STATE_ICONIC)
     {
@@ -946,6 +965,11 @@ ICCCMService *icccmService;
             [drawer setPreviewImage];
         }
 
+    }
+
+    if (anEvent->type == [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHRequestFrameExtents]])
+    {
+        NSLog(@"Pene");
     }
 
     window = nil;

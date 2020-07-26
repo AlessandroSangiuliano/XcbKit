@@ -10,6 +10,7 @@
 #import <xcb/xcb.h>
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
+#import "XCBGeometry.h"
 
 @implementation EWMHService
 
@@ -496,7 +497,7 @@
                     withDataLength:(uint32_t)dataLength
                           withData:(const void *) data
 {
-    xcb_atom_t property = [[[atomService cachedAtoms] objectForKey:propertyKey] unsignedIntValue];
+    xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:propertyKey];
     
     xcb_change_property([connection connection],
                         mode,
@@ -546,6 +547,28 @@
     //void* value = xcb_get_property_value(reply);
     free(error);
     return reply;
+}
+
+- (void) updateNetFrameExtentsForWindow:(XCBWindow *)aWindow
+{
+    XCBGeometry *geometry = [aWindow geometries];
+    uint32_t extents[4];
+    uint32_t border = [geometry borderWidth];
+
+    extents[0] = border;
+    extents[1] = border;
+    extents[2] = border;
+    extents[3] = border;
+
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMFrameExtents
+                           withType:XCB_ATOM_CARDINAL
+                         withFormat:32
+                     withDataLength:4
+                           withData:extents];
+
+    geometry = nil;
 }
 
 

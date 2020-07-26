@@ -867,6 +867,7 @@
         }
         
         return nil;
+
     }
     
     XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];

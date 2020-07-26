@@ -251,6 +251,8 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
              forWindow:(XCBWindow*)aWindow
                 delete:(BOOL)deleteProperty ;
 
+- (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
+
 - (void) dealloc;
 
 @end
