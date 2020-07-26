@@ -379,18 +379,23 @@ ICCCMService *icccmService;
     return attributesChanged;
 }
 
-- (xcb_get_window_attributes_reply_t *)getAttributesForWindow:(XCBWindow *)aWindow
+- (XCBReply *)getAttributesForWindow:(XCBWindow *)aWindow
 {
     xcb_generic_error_t *error;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
     xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, &error);
+    
+    XCBReply* aReply;
 
     if (error)
     {
-
+        aReply = [[XCBReply alloc] initWithError:error];
+        [aReply description];
+        return aReply;
     }
 
-    return reply;
+    aReply = [[XCBReply alloc] initWithReply:(xcb_get_window_attributes_reply_t*)reply];
+    return aReply;
 }
 
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
@@ -477,18 +482,32 @@ ICCCMService *icccmService;
 
         /* check the ovveride redirect flag, if yes the WM must not handle the window */
 
-        xcb_get_window_attributes_reply_t *reply = [self getAttributesForWindow:window];
-
-        if (reply != NULL)
+        //xcb_get_window_attributes_reply_t *reply = [self getAttributesForWindow:window];
+        
+        XCBReply* reply = [self getAttributesForWindow:window];
+        
+        if ([reply isError])
         {
-            if (reply->override_redirect == YES)
+            [reply description];
+            reply = nil;
+            return;
+        }
+
+        if (![reply isError])
+        {
+            xcb_get_window_attributes_reply_t *rep = [reply reply];
+            
+            if (rep->override_redirect == YES)
             {
                 NSLog(@"Override redirect detected"); //useless log
                 window = nil;
-                free(reply);
+                rep = NULL;
+                reply = nil;
                 ewmhService = nil;
                 return;
             }
+            rep = NULL;
+            reply = nil;
         }
 
         NSString *lel = [ewmhService EWMHWMWindowType];
@@ -537,7 +556,6 @@ ICCCMService *icccmService;
         [window setRectaglesFromGeometries];
         [self registerWindow:window];
         [window setFirstRun:YES];
-        free(reply);
         free(windowTypeReply);
     }
 

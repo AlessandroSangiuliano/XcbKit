@@ -117,14 +117,15 @@
     [connection flush];
     XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[screen screen]->root andConnection:connection];
     
-    xcb_get_window_attributes_reply_t* reply = [connection getAttributesForWindow:rootWindow];
-    NSLog(@"All events: %u", reply->all_event_masks);
+    XCBReply* reply = [connection getAttributesForWindow:rootWindow];
+    xcb_get_window_attributes_reply_t* rep = [reply reply];
+    NSLog(@"All events: %u", rep->all_event_masks);
     NSLog(@"Redirect: %u", XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT);
     NSLog(@"Notify: %u", XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
     pause();
     
-    free(reply);
-    
+    free(rep);
+    reply = nil;
 }
 
 - (void) testChangeAttributes
@@ -162,10 +163,12 @@
     
     [connection changeAttributes:overraideValue forWindow:window withMask:mask checked:NO];
     
-    xcb_get_window_attributes_reply_t *reply = [connection getAttributesForWindow:window];
+    XCBReply *reply = [connection getAttributesForWindow:window];
+    xcb_get_window_attributes_reply_t *rep = [reply reply];
     
-    STAssertTrue(reply->override_redirect == YES, @"");
-    free(reply);
+    STAssertTrue(rep->override_redirect == YES, @"");
+    free(rep);
+    reply = nil;
 }
 
 - (void) testCreateWindow
