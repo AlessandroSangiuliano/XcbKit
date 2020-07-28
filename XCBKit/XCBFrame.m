@@ -47,20 +47,13 @@
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
 
-    /**FIXME: this is not working; clang bug? note: assigning to int ivar is not working; assigning to local int var is warking. **/
-   /* int minHAux = sizeHints->min_height;
-    int minWAux = sizeHints->min_width;
-    minHeightHint = minHAux;
-    minWidthHint = minWAux;*/
+    [self setMinHeightHint:sizeHints->min_height];
+    [self setMinWidthHint:sizeHints->min_width];
 
-   /**FIXME: above workaoround:**/
-   minHeightHint = [NSNumber numberWithInt:sizeHints->min_height];
-   minWidthHint = [NSNumber numberWithInt:sizeHints->min_width];
-   NSLog(@"Gigio:%d", [minHeightHint intValue]);
 
-    if ([minWidthHint intValue] > [aClientWindow windowRect].size.width)
+    if (minWidthHint > [aClientWindow windowRect].size.width)
     {
-        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([minWidthHint intValue], [aClientWindow windowRect].size.height));
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize(minWidthHint, [aClientWindow windowRect].size.height));
         [aClientWindow setWindowRect:rect];
         [aClientWindow setOriginalRect:rect];
         rect.size.width = rect.size.width + 1;
@@ -68,13 +61,13 @@
         [self setOriginalRect:rect];
         uint32_t values[] = {rect.size.width};
         xcb_configure_window([aConnection connection], window, XCB_CONFIG_WINDOW_WIDTH, values);
-        values[0] = [minWidthHint intValue];
+        values[0] = minWidthHint;
         xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_WIDTH, values);
     }
 
-    if ([minHeightHint intValue] > [aClientWindow windowRect].size.height)
+    if (minHeightHint > [aClientWindow windowRect].size.height)
     {
-        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([aClientWindow windowRect].size.width, [minHeightHint intValue]));
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([aClientWindow windowRect].size.width, minHeightHint));
         [aClientWindow setWindowRect:rect];
         [aClientWindow setOriginalRect:rect];
         rect.size.height = rect.size.height + 21;
@@ -82,11 +75,10 @@
         [self setOriginalRect:rect];
         uint32_t values[] = {rect.size.height};
         xcb_configure_window([aConnection connection], window, XCB_CONFIG_WINDOW_HEIGHT, values);
-        values[0] = [minHeightHint intValue];
+        values[0] = minHeightHint;
         xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_HEIGHT, values);
     }
 
-    [self description];
     connection = aConnection;
     children = [[NSMutableDictionary alloc] init];
     NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
@@ -185,20 +177,20 @@
     /*** width ***/
 
     if (rightBorderClicked && !bottomBorderClicked && !leftBorderClicked && !topBorderClicked)
-        resizeFromRightForEvent(anEvent, self, [minWidthHint intValue]);
+        resizeFromRightForEvent(anEvent, self, minWidthHint);
 
     if (leftBorderClicked && !bottomBorderClicked && !rightBorderClicked && !topBorderClicked)
-        resizeFromLeftForEvent(anEvent, self, [minWidthHint intValue]);
+        resizeFromLeftForEvent(anEvent, self, minWidthHint);
 
 
 
     /** height **/
 
     if (bottomBorderClicked && !rightBorderClicked && !leftBorderClicked)
-        resizeFromBottomForEvent(anEvent, self, [minHeightHint intValue]);
+        resizeFromBottomForEvent(anEvent, self, minHeightHint);
 
     if (topBorderClicked && !rightBorderClicked && !leftBorderClicked && !bottomBorderClicked)
-        resizeFromTopForEvent(anEvent, self, [minHeightHint intValue]);
+        resizeFromTopForEvent(anEvent, self, minHeightHint);
 
 
 
@@ -206,7 +198,7 @@
 
     if (rightBorderClicked && bottomBorderClicked && !leftBorderClicked)
     {
-        resizeFromAngleForEvent(anEvent, self, [minWidthHint intValue], [minHeightHint intValue]);
+        resizeFromAngleForEvent(anEvent, self, minWidthHint, minHeightHint);
     }
 
 }
@@ -586,8 +578,6 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
 {
     [children removeAllObjects];
     children = nil;
-    minWidthHint = nil;
-    minHeightHint = nil;
 }
 
 

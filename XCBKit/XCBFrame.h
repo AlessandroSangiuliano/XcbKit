@@ -24,8 +24,8 @@ typedef NS_ENUM(NSInteger, childrenMask)
     NSMutableDictionary *children;
 }
 
-@property (strong, nonatomic) NSNumber *minHeightHint;
-@property (strong, nonatomic) NSNumber *minWidthHint;
+@property (nonatomic) int minHeightHint;
+@property (nonatomic) int minWidthHint;
 @property (strong, nonatomic) XCBConnection *connection;
 @property (nonatomic) BOOL rightBorderClicked;
 @property (nonatomic) BOOL bottomBorderClicked;
