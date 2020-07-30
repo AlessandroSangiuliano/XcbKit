@@ -897,7 +897,7 @@ ICCCMService *icccmService;
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
-    //NSLog(@"Atom name: %@, for atom id: %u", [atomService atomNameFromAtom:anEvent->type], anEvent->type);
+    NSLog(@"Atom name: %@, for atom id: %u", [atomService atomNameFromAtom:anEvent->type], anEvent->type);
 
     XCBWindow *window;
     XCBTitleBar *titleBar;
