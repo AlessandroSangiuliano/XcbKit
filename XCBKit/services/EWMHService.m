@@ -420,6 +420,7 @@
         EWMHWMStateModal,
         EWMHWMStateHidden,
         EWMHWMStateDemandsAttention,
+        EWMHRequestFrameExtents,
         UTF8_STRING,
         GNUStepFrameOffset,
         GNUStepHideApp,

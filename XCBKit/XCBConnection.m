@@ -438,6 +438,7 @@ ICCCMService *icccmService;
 
     window = nil;
     frameWindow = nil;
+    frameWindow = nil;
 }
 
 - (void)handleMapRequest:(xcb_map_request_event_t *)anEvent
@@ -896,6 +897,8 @@ ICCCMService *icccmService;
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
+    //NSLog(@"Atom name: %@, for atom id: %u", [atomService atomNameFromAtom:anEvent->type], anEvent->type);
+
     XCBWindow *window;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
@@ -912,15 +915,6 @@ ICCCMService *icccmService;
     {
         NSLog(@"No existing window for id: %u", anEvent->window);
 
-        NSString* pagliacciata = [atomService atomNameFromAtom:anEvent->type];
-        NSLog(@"Type: %@", pagliacciata);
-
-        NSLog(@"Atom: %d", anEvent->data.data32[0]);
-
-        if (anEvent->type == [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHRequestFrameExtents]])
-        {
-            NSLog(@"Pene");
-        }
         screen = nil;
         visual = nil;
         atomService = nil;
