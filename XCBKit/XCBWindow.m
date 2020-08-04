@@ -469,7 +469,7 @@
                             withDataLength:1
                                   withData:state];
 
-    /*** what i should set fow ewmh? iconifying a window will set _NET_WM_STATE to _HIDDEN as required by EWMH docs, and IconicState for ICCCM.
+    /*** what i should set for ewmh? iconifying a window will set _NET_WM_STATE to _HIDDEN as required by EWMH docs, and IconicState for ICCCM.
      The docs are not saying what I should set after restoring a window from iconified for EWMH,
      but the ICCCM says I have to set WM_STATE to NormalState as I do above ****/
 

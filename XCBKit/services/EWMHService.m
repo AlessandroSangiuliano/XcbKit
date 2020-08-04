@@ -572,6 +572,31 @@
     geometry = nil;
 }
 
+- (BOOL) ewmhClientMessage:(NSString *)anAtomMessageName
+{
+    NSString *net = @"NET";
+    BOOL ewmh = NO;
+
+    NSString *sub = [anAtomMessageName componentsSeparatedByString:@"_"][1];
+
+    if ([net isEqualToString:sub])
+        ewmh = YES;
+    else
+        ewmh = NO;
+
+    net = nil;
+    sub = nil;
+
+    return ewmh;
+}
+
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
+{
+    if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
+    {
+        [self updateNetFrameExtentsForWindow:aWindow];
+    }
+}
 
 -(void)dealloc
 {

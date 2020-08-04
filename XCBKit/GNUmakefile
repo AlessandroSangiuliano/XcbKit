@@ -52,7 +52,8 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/XCBShape.h \
 			functions/Transformers.h \
 			enums/EMessage.h \
-			enums/ETitleBarColor.h
+			enums/ETitleBarColor.h \
+			enums/EXErrorMessages.h
 
 ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -Wall #-Wno-unused -Werror -Wall
 

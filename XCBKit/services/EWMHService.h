@@ -253,6 +253,9 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
 
+- (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;
+
 - (void) dealloc;
 
 @end

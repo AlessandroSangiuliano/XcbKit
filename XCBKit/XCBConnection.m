@@ -896,8 +896,9 @@ ICCCMService *icccmService;
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+    NSString *atomMessageName = [atomService atomNameFromAtom:anEvent->type];
 
-    NSLog(@"Atom name: %@, for atom id: %u", [atomService atomNameFromAtom:anEvent->type], anEvent->type);
+    NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
 
     XCBWindow *window;
     XCBTitleBar *titleBar;
@@ -915,10 +916,21 @@ ICCCMService *icccmService;
     {
         NSLog(@"No existing window for id: %u", anEvent->window);
 
+        if ([ewmhService ewmhClientMessage:atomMessageName])
+        {
+            window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+            uint32_t values[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
+            [self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
+            [ewmhService handleClientMessage:atomMessageName forWindow:window];
+        }
+
+
         screen = nil;
         visual = nil;
         atomService = nil;
         ewmhService = nil;
+        atomMessageName = nil;
+        window = nil;
         return;
     }
 
@@ -978,11 +990,6 @@ ICCCMService *icccmService;
 
     }
 
-    if (anEvent->type == [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHRequestFrameExtents]])
-    {
-        NSLog(@"Pene");
-    }
-
     window = nil;
     titleBar = nil;
     frame = nil;
@@ -991,6 +998,7 @@ ICCCMService *icccmService;
     screen = nil;
     visual = nil;
     atomService = nil;
+    atomMessageName = nil;
 
     return;
 }
