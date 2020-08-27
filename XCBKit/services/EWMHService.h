@@ -16,7 +16,7 @@
 
 @interface EWMHService : NSObject
 {
-    
+
 }
 
 @property (strong, nonatomic) NSArray *atoms;
@@ -229,7 +229,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
     EWMHVisibleIconName,
     UTF8_STRING,
     MANAGER
-    
+
 };
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
@@ -252,6 +252,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
                 delete:(BOOL)deleteProperty ;
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
+- (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[])extents;
 
 - (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;

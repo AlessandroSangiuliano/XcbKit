@@ -48,7 +48,7 @@ ICCCMService *icccmService;
         NSLog(@"XCBConnection: Creating connection with display: %@", aDisplay);
         localDisplayName = [aDisplay UTF8String];
     }
-
+    
     windowsMap = [[NSMutableDictionary alloc] initWithCapacity:1000];
 
     screens = [NSMutableArray new];
@@ -384,7 +384,7 @@ ICCCMService *icccmService;
     xcb_generic_error_t *error;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
     xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, &error);
-    
+
     XCBReply* aReply;
 
     if (error)
@@ -478,9 +478,9 @@ ICCCMService *icccmService;
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
 
         //xcb_get_window_attributes_reply_t *reply = [self getAttributesForWindow:window];
-        
+
         XCBReply* reply = [self getAttributesForWindow:window];
-        
+
         if ([reply isError])
         {
             [reply description];
@@ -493,7 +493,7 @@ ICCCMService *icccmService;
         if (![reply isError])
         {
             xcb_get_window_attributes_reply_t *rep = [reply reply];
-            
+
             if (rep->override_redirect == YES)
             {
                 NSLog(@"Override redirect detected"); //useless log
@@ -564,7 +564,7 @@ ICCCMService *icccmService;
     [visual setVisualTypeForScreen:screen];
 
     uint32_t values[2] = {[screen screen]->white_pixel, FRAMEMASK};
-    
+
     XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
     [request setDepth:[screen screen]->root_depth];
     [request setParentWindow:[screen rootWindow]];
@@ -578,9 +578,9 @@ ICCCMService *icccmService;
     [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
     [request setValueList:values];
     [request setClientWindow:window];
-    
+
     XCBWindowTypeResponse *response = [self createWindowForRequest:request registerWindow:YES];
-    
+
     XCBFrame *frame = [response frame];
     const xcb_atom_t atomProtocols[1] = {[[icccmService atomService] atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]]};
 
@@ -591,7 +591,7 @@ ICCCMService *icccmService;
                                  withFormat:32
                              withDataLength:1
                                    withData:atomProtocols];
-    
+
     [ewmhService updateNetFrameExtentsForWindow:frame];
     [self mapWindow:frame];
     [frame decorateClientWindow];
