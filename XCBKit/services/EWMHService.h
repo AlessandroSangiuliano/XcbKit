@@ -121,6 +121,7 @@
 @property (strong, nonatomic)NSString* EWMHWMFullPlacement;
 @property (strong, nonatomic)NSString* UTF8_STRING;
 @property (strong, nonatomic)NSString* MANAGER;
+@property (strong, nonatomic)NSString* KdeNetWFrameStrut;
 
 //GNUstep properties
 @property (strong, nonatomic)NSString *GNUStepMiniaturizeWindow;

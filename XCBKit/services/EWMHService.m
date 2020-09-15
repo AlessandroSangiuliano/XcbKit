@@ -116,6 +116,7 @@
 @synthesize EWMHWMFullPlacement;
 @synthesize UTF8_STRING;
 @synthesize MANAGER;
+@synthesize KdeNetWFrameStrut;
 
 //GNUstep properties
 @synthesize GNUStepMiniaturizeWindow;
@@ -241,7 +242,7 @@
     EWMHWMFullPlacement = @"_NET_WM_FULL_PLACEMENT";
     UTF8_STRING = @"UTF8_STRING";
     MANAGER = @"MANAGER";
-
+    KdeNetWFrameStrut = @"_KDE_NET_WM_FRAME_STRUT";
 
     //GNUStep properties
 
@@ -249,7 +250,7 @@
     GNUStepHideApp = @"_GNUSTEP_WM_HIDE_APP";
     GNUStepFrameOffset = @"_GNUSTEP_FRAME_OFFSETS";
     GNUStepWmAttr = @"_GNUSTEP_WM_ATTR";
-    GNUStepTitleBarState = @"_GNUSTEP_FRAME_OFFSETS";
+    GNUStepTitleBarState = @"_GNUSTEP_TITLEBAR_STATE";
 
     // Added EWMH properties
 
@@ -349,7 +350,8 @@
         EWMHStrutPartial,
         EWMHVisibleIconName,
         UTF8_STRING,
-        MANAGER
+        MANAGER,
+        KdeNetWFrameStrut
     };
 
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
@@ -420,13 +422,14 @@
         EWMHWMStateModal,
         EWMHWMStateHidden,
         EWMHWMStateDemandsAttention,
-        EWMHRequestFrameExtents,
+        //EWMHRequestFrameExtents,
         UTF8_STRING,
         GNUStepFrameOffset,
         GNUStepHideApp,
         GNUStepWmAttr,
         GNUStepMiniaturizeWindow,
-        GNUStepTitleBarState
+        GNUStepTitleBarState,
+        KdeNetWFrameStrut
     };
 
     NSArray *rootAtoms = [NSArray arrayWithObjects:rootProperties count:sizeof(rootProperties)/sizeof(NSString*)];
@@ -558,7 +561,7 @@
 
     extents[0] = border;
     extents[1] = border;
-    extents[2] = border;
+    extents[2] = 21;
     extents[3] = border;
 
     [self changePropertiesForWindow:aWindow
@@ -599,7 +602,7 @@
 {
     if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
     {
-        uint32_t extents[] = {3,3,3,3};
+        uint32_t extents[] = {3,3,21,3};
         [self updateNetFrameExtentsForWindow:aWindow andExtents:extents];
     }
 }
@@ -702,6 +705,7 @@
     EWMHWMFullPlacement = nil;
     UTF8_STRING = nil;
     MANAGER = nil;
+    KdeNetWFrameStrut = nil;
 
     //GNUStep properties
 

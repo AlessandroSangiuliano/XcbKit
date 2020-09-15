@@ -48,7 +48,7 @@ ICCCMService *icccmService;
         NSLog(@"XCBConnection: Creating connection with display: %@", aDisplay);
         localDisplayName = [aDisplay UTF8String];
     }
-    
+
     windowsMap = [[NSMutableDictionary alloc] initWithCapacity:1000];
 
     screens = [NSMutableArray new];
@@ -597,9 +597,11 @@ ICCCMService *icccmService;
     [frame decorateClientWindow];
 
     NSLog(@"Client window decorated with id %u", [window window]);
+    [window description];
+    [frame description];
+
 
     [self setNeedFlush:YES];
-
     window = nil;
     frame = nil;
     request = nil;
@@ -674,6 +676,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
+    NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
     XCBFrame *frame;
     XCBWindow *clientWindow;
 
