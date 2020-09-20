@@ -568,7 +568,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
 
     NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
 
-    /*** synthetic event: coordinates must be in oot space. ***/
+    /*** synthetic event: coordinates must be in root space. ***/
 
     event.event = [clientWindow window];
     event.window = [clientWindow window];
