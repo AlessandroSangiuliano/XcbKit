@@ -550,6 +550,19 @@ ICCCMService *icccmService;
                 return;
             }
 
+            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDialog]])
+            {
+                /*** FIXME: fix the position and the stack order of the dialog window ***/
+                NSLog(@"Dialog window %u to be registered", [window window]);
+                [self registerWindow:window];
+                [self mapWindow:window];
+                window = nil;
+                ewmhService = nil;
+                name = nil;
+                free(windowTypeReply);
+                return;
+            }
+
             atom = NULL;
             name = nil;
         }
