@@ -44,6 +44,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (void) removeChild:(childrenMask) frameChild;
 - (void) resize:(xcb_motion_notify_event_t *)anEvent;
 - (void) moveTo:(NSPoint)coordinates;
+- (void) configureClient;
 
 
  /********************************

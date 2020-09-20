@@ -461,7 +461,8 @@ ICCCMService *icccmService;
         return;
     }
 
-    // if already decorated and managed, map it.
+    /*** if already decorated and managed, map it. ***/
+
     if ([window decorated] && isManaged)
     {
         NSLog(@"Window with id %u already decorated", [window window]);
@@ -594,9 +595,9 @@ ICCCMService *icccmService;
 
     [ewmhService updateNetFrameExtentsForWindow:frame];
     [self mapWindow:frame];
-    [frame decorateClientWindow];
 
     NSLog(@"Client window decorated with id %u", [window window]);
+    [frame decorateClientWindow];
     [window description];
     [frame description];
 
@@ -621,55 +622,86 @@ ICCCMService *icccmService;
 - (void)handleConfigureWindowRequest:(xcb_configure_request_event_t *)anEvent
 {
     uint16_t config_win_mask = 0;
+    uint16_t config_frame_mask = 0;
     uint32_t config_win_vals[7];
-    unsigned short i = 0;
+    uint32_t config_frame_vals[7];
+    unsigned short win_i = 0;
+    unsigned short frame_i = 0;
+
+    if (anEvent->parent == [[self rootWindowForScreenNumber:0] window]) //this check is done because of casting to XCBFrame the parent window. w/o the cast just decomment the line 635 and is possible to remoe this check
+        return;
+
+
+    XCBFrame *frame = (XCBFrame*)[self windowForXCBId:anEvent->parent];
+    //XCBWindow *frame = [self windowForXCBId:anEvent->parent];
+
+    NSLog(@"In configure request: %d, %d", anEvent->x, anEvent->y);
+
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
     {
-        config_win_mask |= XCB_CONFIG_WINDOW_X;
-        config_win_vals[i++] = anEvent->x;
+        //config_win_mask |= XCB_CONFIG_WINDOW_X;
+        //config_win_vals[win_i++] = 0;
+        config_frame_mask |= XCB_CONFIG_WINDOW_X;
+        config_frame_vals[frame_i++] = anEvent->x;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_Y)
     {
-        config_win_mask |= XCB_CONFIG_WINDOW_Y;
-        config_win_vals[i++] = anEvent->y;
+        //config_win_mask |= XCB_CONFIG_WINDOW_Y;
+        //config_win_vals[win_i++] = 21;
+        config_frame_mask |= XCB_CONFIG_WINDOW_Y;
+        config_frame_vals[frame_i++] = anEvent->y;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_WIDTH)
     {
         config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
-        config_win_vals[i++] = anEvent->width;
+        config_frame_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_win_vals[win_i++] = anEvent->width;
+        config_frame_vals[frame_i++] = anEvent->width;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
     {
         config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
-        config_win_vals[i++] = anEvent->height;
+        config_frame_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_win_vals[win_i++] = anEvent->height;
+        config_frame_vals[frame_i++] = anEvent->height + 21;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
     {
         config_win_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
-        config_win_vals[i++] = anEvent->border_width;
+        config_win_vals[win_i++] = anEvent->border_width;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_SIBLING)
     {
         config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
-        config_win_vals[i++] = anEvent->sibling;
+        config_win_vals[win_i++] = anEvent->sibling;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
     {
         config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
-        config_win_vals[i++] = anEvent->stack_mode;
+        config_win_vals[win_i++] = anEvent->stack_mode;
     }
 
+    xcb_configure_window(connection, [frame window], config_frame_mask, config_frame_vals);
     xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
+    [frame configureClient];
+
+    // check and eventually update the frame and windows rects
+    /*XCBRect rect = [frame windowRect];
+    rect.position.x = anEvent->x;
+    rect.position.y = anEvent->y;
+    rect.size.height = anEvent->height;
+    rect.size.width = anEvent->width;*/
 
     window = nil;
+    frame = nil;
 }
 
 - (void)handleConfigureNotify:(xcb_configure_notify_event_t *)anEvent
@@ -677,17 +709,9 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
     NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
-    XCBFrame *frame;
-    XCBWindow *clientWindow;
-
-    if ([window isKindOfClass:[XCBFrame class]])
-    {
-        frame = (XCBFrame *) window;
-        clientWindow = [frame childWindowForKey:ClientWindow];
-    }
 
     window = nil;
-    clientWindow = nil;
+
 }
 
 - (void)handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
@@ -901,7 +925,7 @@ ICCCMService *icccmService;
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     NSString *atomMessageName = [atomService atomNameFromAtom:anEvent->type];
 
-    NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
+    //NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
 
     XCBWindow *window;
     XCBTitleBar *titleBar;
@@ -917,13 +941,13 @@ ICCCMService *icccmService;
 
     if (window == nil && frame == nil && titleBar == nil)
     {
-        NSLog(@"No existing window for id: %u", anEvent->window);
+        //NSLog(@"No existing window for id: %u", anEvent->window);
 
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-            uint32_t values[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
-            [self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
+            //uint32_t values[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
+            //[self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
             [ewmhService handleClientMessage:atomMessageName forWindow:window];
         }
 
@@ -1358,6 +1382,11 @@ ICCCMService *icccmService;
     }
 
     atomService = nil;
+}
+
+- (void) sendEvent:(const char *)anEvent toClient:(XCBWindow*)aWindow propagate:(BOOL)propagating
+{
+    xcb_send_event(connection, propagating, [aWindow window], XCB_EVENT_MASK_STRUCTURE_NOTIFY, anEvent);
 }
 
 //TODO: tenere traccia del tempo per ogni evento.

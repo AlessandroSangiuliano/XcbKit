@@ -163,6 +163,8 @@
     XCBPoint position = XCBMakePoint(0, 21);
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];
+    uint32_t border[] = {0};
+    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_BORDER_WIDTH, border);
 
     titleBar = nil;
     clientWindow = nil;
@@ -555,6 +557,33 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     int32_t values[] = {pos.x, pos.y};
 
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+}
+
+- (void) configureClient
+{
+    xcb_configure_notify_event_t event;
+    XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
+    XCBRect rect = [[self geometries] rect];
+    XCBRect  clientRect = [[clientWindow geometries] rect];
+
+    NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
+
+    /*** synthetic event: coordinates must be in oot space. ***/
+
+    event.event = [clientWindow window];
+    event.window = [clientWindow window];
+    event.x = rect.position.x;
+    event.y = rect.position.y + 21;
+    event.border_width = 0;
+    event.width = clientRect.size.width;
+    event.height = clientRect.size.height;
+    event.override_redirect = 0;
+    event.above_sibling = XCB_NONE;
+    event.response_type = XCB_CONFIGURE_NOTIFY;
+    event.sequence = 0;
+    [connection sendEvent:(const char*) &event toClient:clientWindow propagate:NO];
+
+    clientWindow = nil;
 }
 
 

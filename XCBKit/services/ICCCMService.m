@@ -97,6 +97,11 @@
     return sizeHints;
 }
 
+- (void)updateWMNormalHints:(xcb_size_hints_t*)sizeHints forWindow:(XCBWindow*)aWindow
+{
+    xcb_icccm_set_wm_size_hints([[aWindow connection] connection], [aWindow window], XCB_ATOM_WM_NORMAL_HINTS, sizeHints);
+}
+
 - (NSString*) getWmNameForWindow:(XCBWindow *)aWindow
 {
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_name([[aWindow connection] connection], [aWindow window]);

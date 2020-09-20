@@ -280,7 +280,7 @@
         EWMHMoveresizeWindow,
         EWMHWMMoveresize,
         EWMHRestackWindow,
-        EWMHRequestFrameExtents,
+        //EWMHRequestFrameExtents,
         EWMHWMName,
         EWMHWMVisibleName,
         EWMHWMIconName,
@@ -558,6 +558,8 @@
     XCBGeometry *geometry = [aWindow geometries];
     uint32_t extents[4];
     uint32_t border = [geometry borderWidth];
+    NSLog(@"Border: %d", border);
+
 
     extents[0] = border;
     extents[1] = border;
@@ -577,7 +579,13 @@
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[]) extents
 {
-    [self changePropertiesForWindow:aWindow withMode:XCB_PROP_MODE_REPLACE withProperty:EWMHWMFrameExtents withType:XCB_ATOM_CARDINAL withFormat:32 withDataLength:4 withData:extents];
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMFrameExtents
+                           withType:XCB_ATOM_CARDINAL
+                         withFormat:32
+                     withDataLength:4
+                           withData:extents];
 }
 
 - (BOOL) ewmhClientMessage:(NSString *)anAtomMessageName
