@@ -117,6 +117,7 @@
 @synthesize UTF8_STRING;
 @synthesize MANAGER;
 @synthesize KdeNetWFrameStrut;
+@synthesize MotifWMHints;
 
 //GNUstep properties
 @synthesize GNUStepMiniaturizeWindow;
@@ -243,6 +244,7 @@
     UTF8_STRING = @"UTF8_STRING";
     MANAGER = @"MANAGER";
     KdeNetWFrameStrut = @"_KDE_NET_WM_FRAME_STRUT";
+    MotifWMHints = @"_MOTIF_WM_HINTS";
 
     //GNUStep properties
 
@@ -351,7 +353,8 @@
         EWMHVisibleIconName,
         UTF8_STRING,
         MANAGER,
-        KdeNetWFrameStrut
+        KdeNetWFrameStrut,
+        MotifWMHints
     };
 
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
@@ -518,6 +521,7 @@
          propertyType:(xcb_atom_t)propertyType
             forWindow:(XCBWindow *)aWindow
                delete:(BOOL)deleteProperty
+               length:(uint32_t)len
 {
     xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:aPropertyName];
 
@@ -527,7 +531,7 @@
                                                         property,
                                                         propertyType,
                                                         0,
-                                                        UINT32_MAX);
+                                                        len);
 
     xcb_generic_error_t *error;
     xcb_get_property_reply_t *reply = xcb_get_property_reply([connection connection],
@@ -714,6 +718,7 @@
     UTF8_STRING = nil;
     MANAGER = nil;
     KdeNetWFrameStrut = nil;
+    MotifWMHints = nil;
 
     //GNUStep properties
 

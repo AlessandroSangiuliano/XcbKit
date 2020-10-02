@@ -511,12 +511,14 @@ ICCCMService *icccmService;
         /** check allowed actions **/
         [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
+        /** check window type **/
         NSString *lel = [ewmhService EWMHWMWindowType];
         NSLog(@"XD %@ and window: %u", lel, [window window]);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
-                                           propertyType:XCB_ATOM_ATOM
-                                              forWindow:window
-                                                 delete:NO];
+                                            propertyType:XCB_ATOM_ATOM
+                                               forWindow:window
+                                                  delete:NO
+                                                  length:UINT32_MAX];
 
         if (windowTypeReply)
         {
@@ -556,6 +558,7 @@ ICCCMService *icccmService;
                 NSLog(@"Dialog window %u to be registered", [window window]);
                 [self registerWindow:window];
                 [self mapWindow:window];
+                [self registerWindow:window];
                 window = nil;
                 ewmhService = nil;
                 name = nil;
@@ -565,6 +568,32 @@ ICCCMService *icccmService;
 
             atom = NULL;
             name = nil;
+        }
+
+        /** check motif hints  **/
+
+        void *motifHints = [ewmhService getProperty:[ewmhService MotifWMHints]
+                                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                          forWindow:window
+                                             delete:NO
+                                             length:5 * sizeof(uint64_t)];
+
+        if (motifHints)
+        {
+            xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(motifHints);
+
+            if (atom[0] == 3 && atom[1] == 0 && atom[2] == 0 && atom[3] == 0 && atom[4] == 0)
+            {
+                NSLog(@"Motif Icon: %d", [window window]);
+                [window description];
+                free(motifHints);
+                [self mapWindow:window];
+                window = nil;
+                ewmhService = nil;
+                [self flush];
+                return;
+            }
+
         }
 
         [window setRectaglesFromGeometries];
@@ -608,6 +637,7 @@ ICCCMService *icccmService;
 
     [ewmhService updateNetFrameExtentsForWindow:frame];
     [self mapWindow:frame];
+    //[frame configureClient];
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
@@ -641,12 +671,8 @@ ICCCMService *icccmService;
     unsigned short win_i = 0;
     unsigned short frame_i = 0;
 
-    if (anEvent->parent == [[self rootWindowForScreenNumber:0] window]) //this check is done because of casting to XCBFrame the parent window. w/o the cast just decomment the line 635 and is possible to remoe this check
-        return;
-
-
-    XCBFrame *frame = (XCBFrame*)[self windowForXCBId:anEvent->parent];
-    //XCBWindow *frame = [self windowForXCBId:anEvent->parent];
+    //XCBFrame *frame = (XCBFrame*)[self windowForXCBId:anEvent->parent];
+    XCBWindow *frame = [self windowForXCBId:anEvent->parent];
 
     NSLog(@"In configure request: %d, %d", anEvent->x, anEvent->y);
 
@@ -654,18 +680,31 @@ ICCCMService *icccmService;
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
     {
-        //config_win_mask |= XCB_CONFIG_WINDOW_X;
-        //config_win_vals[win_i++] = 0;
-        config_frame_mask |= XCB_CONFIG_WINDOW_X;
-        config_frame_vals[frame_i++] = anEvent->x;
+        if (window != nil)
+        {
+
+            config_frame_mask |= XCB_CONFIG_WINDOW_X;
+            config_frame_vals[frame_i++] = anEvent->x;
+        }
+        else
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_X;
+            config_win_vals[win_i++] = anEvent->x;
+        }
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_Y)
     {
-        //config_win_mask |= XCB_CONFIG_WINDOW_Y;
-        //config_win_vals[win_i++] = 21;
-        config_frame_mask |= XCB_CONFIG_WINDOW_Y;
-        config_frame_vals[frame_i++] = anEvent->y;
+        if (window != nil)
+        {
+            config_frame_mask |= XCB_CONFIG_WINDOW_Y;
+            config_frame_vals[frame_i++] = anEvent->y;
+        }
+        else
+        {
+            config_win_mask |= XCB_CONFIG_WINDOW_Y;
+            config_win_vals[win_i++] = anEvent->y;
+        }
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_WIDTH)
@@ -702,16 +741,54 @@ ICCCMService *icccmService;
         config_win_vals[win_i++] = anEvent->stack_mode;
     }
 
-    xcb_configure_window(connection, [frame window], config_frame_mask, config_frame_vals);
-    xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
-    [frame configureClient];
+    if ([window isMapped] &&  [window parentWindow] != [self rootWindowForScreenNumber:0])
+    {
+        xcb_configure_window(connection, [frame window], config_frame_mask, config_frame_vals);
 
-    // check and eventually update the frame and windows rects
-    /*XCBRect rect = [frame windowRect];
-    rect.position.x = anEvent->x;
-    rect.position.y = anEvent->y;
-    rect.size.height = anEvent->height;
-    rect.size.width = anEvent->width;*/
+        if ([frame isKindOfClass:[XCBFrame class]])
+        {
+            NSLog(@"Sending synthetic event");
+            XCBFrame* frm = (XCBFrame*)frame;
+            [frm configureClient];
+            frm = nil;
+        }
+
+        xcb_configure_window(connection, [window window], config_win_mask, config_win_vals);
+        XCBPoint position = XCBMakePoint(anEvent->x, anEvent->y);
+        XCBSize size = XCBMakeSize(anEvent->width, anEvent->height);
+        XCBRect newRect = XCBMakeRect(position, size);
+
+        [frame setOldRect:[frame windowRect]];
+        [frame setWindowRect:newRect];
+
+        XCBPoint clientPos = XCBMakePoint(0,21);
+        XCBSize clientSize = XCBMakeSize(anEvent->width, anEvent->height);
+        [window setOldRect:[window windowRect]];
+        [window setWindowRect:XCBMakeRect(clientPos, clientSize)];
+
+    }
+    else
+    {
+        NSLog(@"Window %u not mapped; x: %d, y: %d, w: %d, h: %d", anEvent->window, anEvent->x, anEvent->y, anEvent->width, anEvent->height);
+
+        XCBWindow* clientWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
+        xcb_configure_window(connection, anEvent->window, config_win_mask, config_win_vals);
+        xcb_configure_notify_event_t event;
+
+        event.event = anEvent->window;
+        event.window = anEvent->window;
+        event.x = anEvent->x;
+        event.y = anEvent->y;
+        event.border_width = anEvent->border_width;
+        event.width = anEvent->width;
+        event.height = anEvent->height;
+        event.override_redirect = 0;
+        event.above_sibling = anEvent->sibling;
+        event.response_type = XCB_CONFIGURE_NOTIFY;
+        event.sequence = 0;
+        [self sendEvent:(const char*) &event toClient:clientWindow propagate:NO];
+        clientWindow = nil;
+    }
 
     window = nil;
     frame = nil;
@@ -853,9 +930,6 @@ ICCCMService *icccmService;
     XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
-
-    /*XCBWindow *clientWindw = [frame childWindowForKey:ClientWindow];
-     [clientWindw checkNetWMAllowedActions];*/
 
     [frame setOffset:XCBMakePoint(anEvent->event_x, anEvent->event_y)];
 

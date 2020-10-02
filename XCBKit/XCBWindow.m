@@ -119,9 +119,10 @@
     xcb_atom_t *allowed_actions = NULL;
 
     xcb_get_property_reply_t *reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
-                              propertyType:XCB_ATOM_ATOM
-                                 forWindow:self
-                                    delete:NO];
+                                                  propertyType:XCB_ATOM_ATOM
+                                                     forWindow:self
+                                                        delete:NO
+                                                        length:UINT32_MAX];
     if (reply)
         allowed_actions = xcb_get_property_value(reply);
 
@@ -850,33 +851,33 @@
     }
 }
 
-- (XCBGeometry*) geometries
+- (XCBGeometry *)geometries
 {
     xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
     xcb_generic_error_t *error;
     xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
-    
+
     if (reply == NULL)
     {
         NSLog(@"Reply is NULL");
-        
+
         if (error)
         {
             NSLog(@"Error code: %d", error->error_code);
             free(error);
         }
-        
+
         return nil;
 
     }
-    
+
     XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];
     free(reply);
 
     return geometry;
 }
 
-- (XCBRect) rectFromGeometries
+- (XCBRect)rectFromGeometries
 {
     XCBGeometry *geo = [self geometries];
     XCBRect rect = [geo rect];
@@ -884,7 +885,7 @@
     return rect;
 }
 
-- (void) setRectaglesFromGeometries
+- (void)setRectaglesFromGeometries
 {
     XCBRect rect = [self rectFromGeometries];
     windowRect = rect;

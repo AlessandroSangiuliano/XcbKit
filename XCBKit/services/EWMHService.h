@@ -11,6 +11,31 @@
 #import "../XCBWindow.h"
 #import "XCBAtomService.h"
 
+/*** define motif stuff in this class ***/
+
+#define MWM_HINTS_FUNCTIONS   (1L << 0)
+#define MWM_HINTS_DECORATIONS (1L << 1)
+#define MWM_HINTS_INPUT_MODE  (1L << 2)
+#define MWM_HINTS_STATUS      (1L << 3)
+
+/* functions */
+#define MWM_FUNC_ALL          (1L << 0)
+#define MWM_FUNC_RESIZE       (1L << 1)
+#define MWM_FUNC_MOVE         (1L << 2)
+#define MWM_FUNC_MINIMIZE     (1L << 3)
+#define MWM_FUNC_MAXIMIZE     (1L << 4)
+#define MWM_FUNC_CLOSE        (1L << 5)
+
+/* decorations */
+#define MWM_DECOR_ALL         (1L << 0)
+#define MWM_DECOR_BORDER      (1L << 1)
+#define MWM_DECOR_RESIZEH     (1L << 2)
+#define MWM_DECOR_TITLE       (1L << 3)
+#define MWM_DECOR_MENU        (1L << 4)
+#define MWM_DECOR_MINIMIZE    (1L << 5)
+#define MWM_DECOR_MAXIMIZE    (1L << 6)
+
+
 
 //Actually it is a singleton
 
@@ -122,6 +147,7 @@
 @property (strong, nonatomic)NSString* UTF8_STRING;
 @property (strong, nonatomic)NSString* MANAGER;
 @property (strong, nonatomic)NSString* KdeNetWFrameStrut;
+@property (strong, nonatomic)NSString* MotifWMHints;
 
 //GNUstep properties
 @property (strong, nonatomic)NSString *GNUStepMiniaturizeWindow;
@@ -250,7 +276,8 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 - (void *) getProperty:(NSString*) aPropertyName
           propertyType:(xcb_atom_t) propertyType
              forWindow:(XCBWindow*)aWindow
-                delete:(BOOL)deleteProperty ;
+                delete:(BOOL)deleteProperty
+                length:(uint32_t)len;
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[])extents;

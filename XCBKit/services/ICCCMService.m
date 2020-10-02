@@ -69,7 +69,8 @@
     xcb_get_property_reply_t* reply = [self getProperty:WMProtocols
                                            propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                               forWindow:window
-                                                 delete:NO];
+                                                 delete:NO
+                                                 length:UINT32_MAX];
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
 
