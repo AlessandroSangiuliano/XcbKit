@@ -119,6 +119,22 @@
     return name;
 }
 
+- (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow
+{
+    xcb_icccm_wm_hints_t wmHints;
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_hints([[super connection] connection],
+                                                              [aWindow window]);
+    uint8_t success = xcb_icccm_get_wm_hints_reply([[super connection] connection],
+                                                   cookie,
+                                                   &wmHints,
+                                                   NULL);
+
+    if (!success)
+        NSLog(@"Error: Can't fill wmHints structure!");
+
+    return wmHints;
+}
+
 - (void) dealloc
 {
     WMDeleteWindow = nil;

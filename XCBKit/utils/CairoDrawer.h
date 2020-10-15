@@ -23,7 +23,7 @@
 @property (strong, nonatomic) XCBVisual *visual;
 @property (nonatomic) CGFloat height;
 @property (nonatomic) CGFloat width;
-@property (nonatomic) BOOL alreadyScaled; //potrebbe servire solo per i test
+@property (nonatomic) BOOL alreadyScaled; //could be useful only for tests
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow visual:(XCBVisual*) aVisual;
@@ -36,5 +36,6 @@
 - (void) restoreContext;
 - (void) setPreviewImage;
 - (void) drawContent;
-
+- (cairo_surface_t*) drawContentFromData:(uint32_t *)data withWidht:(int)aWidth andHeight:(int)aHeight;
+- (void) drawIconFromSurface:(cairo_surface_t*)aSurface;
 @end

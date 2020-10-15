@@ -163,101 +163,6 @@
 @property (strong, nonatomic)NSString *EWMHStrutPartial;
 @property (strong, nonatomic)NSString *EWMHVisibleIconName;
 
-//this enum now is useless
-
-typedef NS_ENUM(NSUInteger, EWMHNames)
-{
-    EWMHSupportedIndex,
-    EWMHClientListIndex,
-    EWMHClientListStackingIndex,
-    EWMHNumberOfDesktopsIndex,
-    EWMHDesktopGeometryIndex,
-    EWMHDesktopViewportIndex,
-    EWMHCurrentDesktopIndex,
-    EWMHDesktopNamesIndex,
-    EWMHActiveWindowIndex,
-    EWMHWorkareaIndex,
-    EWMHSupportingWMCheckIndex,
-    EWMHVirtualRootsIndex,
-    EWMHDesktopLayoutIndex,
-    EWMHShowingDesktopIndex,
-    EWMHCloseWindowIndex,
-    EWMHMoveresizeWindowIndex,
-    EWMHWMMoveresizeIndex,
-    EWMHRestackWindowIndex,
-    EWMHRequestFrameExtentsIndex,
-    EWMHWMNameIndex,
-    EWMHWMVisibleNameIndex,
-    EWMHWMIconNameIndex,
-    EWMHWMVisibleIconNameIndex,
-    EWMHWMDesktopIndex,
-    EWMHWMWindowTypeIndex,
-    EWMHWMStateIndex,
-    EWMHWMAllowedActionsIndex,
-    EWMHWMStrutIndex,
-    EWMHWMStrutPartialIndex,
-    EWMHWMIconGeometryIndex,
-    EWMHWMIconIndex,
-    EWMHWMPidIndex,
-    EWMHWMHandledIconsIndex,
-    EWMHWMUserTimeIndex,
-    EWMHWMUserTimeWindowIndex,
-    EWMHWMFrameExtentsIndex,
-    EWMHWMWindowTypeDesktopIndex,
-    EWMHWMWindowTypeDockIndex,
-    EWMHWMWindowTypeToolbarIndex,
-    EWMHWMWindowTypeMenuIndex,
-    EWMHWMWindowTypeUtilityIndex,
-    EWMHWMWindowTypeSplashIndex,
-    EWMHWMWindowTypeDialogIndex,
-    EWMHWMWindowTypeDropdownMenuIndex,
-    EWMHWMWindowTypePopupMenuIndex,
-    EWMHWMWindowTypeTooltipIndex,
-    EWMHWMWindowTypeNotificationIndex,
-    EWMHWMWindowTypeComboIndex,
-    EWMHWMWindowTypeDndIndex,
-    EWMHWMWindowTypeNormalIndex,
-    EWMHWMStateModalIndex,
-    EWMHWMStateStickyIndex,
-    EWMHWMStateMaximizedVertIndex,
-    EWMHWMStateMaximizedHorzIndex,
-    EWMHWMStateShadedIndex,
-    EWMHWMStateSkipTaskbarIndex,
-    EWMHWMStateSkipPagerIndex,
-    EWMHWMStateHiddenIndex,
-    EWMHWMStateFullscreenIndex,
-    EWMHWMStateAboveIndex,
-    EWMHWMStateBelowIndex,
-    EWMHWMStateDemandsAttentionIndex,
-    EWMHWMActionMoveIndex,
-    EWMHWMActionResizeIndex,
-    EWMHWMActionMinimizeIndex,
-    EWMHWMActionShadeIndex,
-    EWMHWMActionStickIndex,
-    EWMHWMActionMaximizeHorzIndex,
-    EWMHWMActionMaximizeVertIndex,
-    EWMHWMActionFullscreenIndex,
-    EWMHWMActionChangeDesktopIndex,
-    EWMHWMActionCloseIndex,
-    EWMHWMActionAboveIndex,
-    EWMHWMActionBelowIndex,
-    EWMHWMPingIndex,
-    EWMHWMSyncRequestIndex,
-    EWMHWMFullscreenMonitorsIndex,
-    EWMHWMFullPlacementIndex,
-    GNUStepMiniaturizeWindowIndex,
-    GNUStepHideAppIndex,
-    GNUStepWmAttrIndex,
-    GNUStepTitleBarStateIndex,
-    GNUStepFrameOffsetIndex,
-    EWMHStartupIdIndex,
-    EWMHFrameExtentsIndex,
-    EWMHStrutPartialIndex,
-    EWMHVisibleIconName,
-    UTF8_STRING,
-    MANAGER
-
-};
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
@@ -284,6 +189,7 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 
 - (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;
+- (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
 
 - (void) dealloc;
 

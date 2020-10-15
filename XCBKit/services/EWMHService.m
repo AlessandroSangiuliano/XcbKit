@@ -619,6 +619,20 @@
     }
 }
 
+- (xcb_get_property_reply_t*) netWmIconFromWindow:(XCBWindow*)aWindow
+{
+    xcb_get_property_cookie_t cookie = xcb_get_property_unchecked([connection connection],
+                                                                  false,
+                                                                  [aWindow window],
+                                                                  [atomService atomFromCachedAtomsWithKey:EWMHWMIcon],
+                                                                  XCB_ATOM_CARDINAL,
+                                                                  0,
+                                                                  UINT32_MAX);
+
+    xcb_get_property_reply_t *reply = xcb_get_property_reply([connection connection], cookie, NULL);
+    return reply;
+}
+
 -(void)dealloc
 {
     EWMHSupported = nil;

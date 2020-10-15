@@ -50,6 +50,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) NSMutableArray* allowedActions;
 @property (nonatomic) BOOL isAbove;
 @property (nonatomic) XCBSize pixmapSize;
+@property (strong, nonatomic) NSMutableArray *icons;
 
 /*** ALLOWED ACTIONS ***/
 
@@ -119,6 +120,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (XCBGeometry*) geometries;
 - (XCBRect) rectFromGeometries;
 - (void) setRectaglesFromGeometries;
+- (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;
+- (void) drawIcons;
 
 
 @end

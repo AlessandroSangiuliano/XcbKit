@@ -27,6 +27,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
 			utils/CairoDrawer.m \
+			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
 			functions/Transformers.m
@@ -47,6 +48,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \
 			utils/CairoDrawer.h \
+			utils/CairoSurfacesSet.h \
 			utils/XCBCreateWindowTypeRequest.h \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \

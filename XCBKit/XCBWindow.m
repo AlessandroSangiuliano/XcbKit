@@ -46,6 +46,7 @@
 @synthesize canStick;
 @synthesize isAbove;
 @synthesize pixmapSize;
+@synthesize icons;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -885,6 +886,94 @@
     return rect;
 }
 
+- (void) configureForEvent:(xcb_configure_request_event_t *)anEvent
+{
+    uint16_t config_frame_mask = 0;
+    uint16_t config_win_mask = 0;
+    uint32_t config_frame_vals[7];
+    uint32_t config_win_vals[7];
+    unsigned short frame_i = 0;
+    unsigned short win_i = 0;
+
+    XCBFrame *frame = (XCBFrame*)parentWindow;
+    XCBRect frameRect = [[frame geometries] rect];
+
+    /*** Handle windows we manage ***/
+
+    if (anEvent->parent == [connection rootWindowForScreenNumber:0])
+        return;
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_X;
+        config_frame_vals[frame_i++] = frameRect.position.x;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_Y)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_Y;
+        config_frame_vals[frame_i++] = frameRect.position.y;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_frame_vals[frame_i++] = anEvent->width;
+        config_win_vals[win_i++] = anEvent->width;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_frame_vals[frame_i++] = anEvent->height + 21;
+        config_win_vals[win_i++] = anEvent->height;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
+        config_frame_vals[frame_i++] = anEvent->border_width;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_SIBLING)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
+        config_win_vals[win_i++] = anEvent->sibling;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+        config_frame_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+        config_win_vals[win_i++] = anEvent->stack_mode;
+        config_frame_vals[frame_i++] = anEvent->stack_mode;
+    }
+
+    xcb_configure_window([connection connection], window, config_win_mask, config_win_vals);
+    xcb_configure_window([connection connection], [frame window], config_frame_mask, config_frame_vals);
+
+    /*** required by ICCCM compliance ***/
+    xcb_configure_notify_event_t event;
+
+    event.event = window;
+    event.window = window;
+    event.x = frameRect.position.x;
+    event.y = frameRect.position.y;
+    event.border_width = anEvent->border_width;
+    event.width = anEvent->width;
+    event.height = anEvent->height;
+    event.override_redirect = 0;
+    event.above_sibling = anEvent->sibling;
+    event.response_type = XCB_CONFIGURE_NOTIFY;
+    event.sequence = 0;
+
+    [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+
+    frame = nil;
+}
+
 - (void)setRectaglesFromGeometries
 {
     XCBRect rect = [self rectFromGeometries];
@@ -892,6 +981,27 @@
     originalRect = rect;
 }
 
+- (void) drawIcons
+{
+    /***FIXME:
+     * This thing of the screens and visual is now HORRIBLE!
+     */
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self visual:visual];
+
+    if (icons == nil)
+    {
+        NSLog(@"No icons. Array nil");
+        return;
+    }
+
+    [drawer drawIconFromSurface:[[icons objectAtIndex:0] pointerValue]];
+
+    drawer = nil;
+    visual = nil;
+    screen = nil;
+}
 
 - (void)description
 {
