@@ -204,17 +204,21 @@ static inline void free_callback(void *data)
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     //cairoSurface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cr = cairo_create(cairoSurface);
-    cairo_surface_t *similar = cairo_surface_create_similar_image(aSurface, CAIRO_FORMAT_ARGB32, width, height);
-    cairo_t *aux = cairo_create(similar);
+    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    cairo_t* aux = cairo_create(similar);
     cairo_set_source_surface(aux, aSurface, 0, 0);
     cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
     cairo_paint(aux);
-    cairo_set_source_surface(cr, similar,0,0);
+    cairo_surface_write_to_png(similar, "/tmp/Pova.png");
+    /*cairo_set_source_surface(aux, aSurface, 0, 0);
+    cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(aux);*/
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_surface(cr, similar,0,0);
     cairo_paint(cr);
-    cairo_surface_write_to_png(cairoSurface, "/tmp/Pova.png");
-    cairo_surface_flush(aSurface);
-    cairo_surface_flush(cairoSurface);
+    //cairo_surface_write_to_png(cairoSurface, "/tmp/Pova.png");
+    /*cairo_surface_flush(aSurface);
+    cairo_surface_flush(cairoSurface);*/
     cairo_surface_destroy(aSurface);
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);

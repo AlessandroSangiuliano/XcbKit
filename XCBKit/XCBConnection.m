@@ -683,29 +683,6 @@ ICCCMService *icccmService;
 
     if (window == nil || ![window decorated])
     {
-        //window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-        /*EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
-
-        void *motifHints = [ewmhService getProperty:[ewmhService MotifWMHints]
-                                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                                          forWindow:window
-                                             delete:NO
-                                             length:5 * sizeof(uint64_t)];
-
-        if (motifHints)
-        {
-            xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(motifHints);
-
-            if (atom[0] == 2 && atom[1] == 0 && atom[2] == 10 && atom[3] == 0 && atom[4] == 0)
-            {
-                free(motifHints);
-                [self mapWindow:window];
-                window = nil;
-                ewmhService = nil;
-                return;
-            }
-        }*/
-
         if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
         {
             config_win_mask |= XCB_CONFIG_WINDOW_X;
