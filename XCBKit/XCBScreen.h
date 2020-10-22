@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <xcb/xcb.h>
-#import "XCBWindow.h"
+
+@class XCBWindow;
 
 @interface XCBScreen : NSObject
 {

@@ -13,6 +13,7 @@
 #import "functions/Transformers.h"
 #import "utils/CairoDrawer.h"
 #import "services/EWMHService.h"
+#import <xcb/xcb_aux.h>
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
@@ -46,6 +47,8 @@
 @synthesize canStick;
 @synthesize isAbove;
 @synthesize pixmapSize;
+@synthesize icons;
+@synthesize screen;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -118,16 +121,17 @@
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     xcb_atom_t *allowed_actions = NULL;
 
-    void *reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
-                              propertyType:XCB_ATOM_ATOM
-                                 forWindow:self
-                                    delete:NO];
+    xcb_get_property_reply_t *reply = [ewmhService getProperty:[ewmhService EWMHWMAllowedActions]
+                                                  propertyType:XCB_ATOM_ATOM
+                                                     forWindow:self
+                                                        delete:NO
+                                                        length:UINT32_MAX];
     if (reply)
         allowed_actions = xcb_get_property_value(reply);
 
     int allowedActionSize = 0;
 
-    (allowed_actions != NULL) ? (allowedActionSize = sizeof(allowed_actions) / sizeof(allowed_actions[0]))
+    (allowed_actions != NULL) ? (allowedActionSize = reply->length)
                               : (allowedActionSize = 0);
 
     if (allowedActionSize > 0)
@@ -231,15 +235,20 @@
 - (void)createPixmap
 {
     pixmap = xcb_generate_id([connection connection]);
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
     //sleep(1);
+
+    xcb_visualid_t visualId = [self attributes]->visual;
+
+    XCBVisual* visual = [[XCBVisual alloc]
+                         initWithVisualId:visualId
+                           withVisualType:xcb_aux_find_visual_by_id([screen screen], visualId)];
 
     uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_GRAPHICS_EXPOSURES;
     uint32_t values[] = {[screen screen]->white_pixel, [screen screen]->white_pixel, 0};
     [self createGraphicContextWithMask:mask andValues:values];
 
     xcb_create_pixmap([connection connection],
-                      [screen screen]->root_depth,
+                      xcb_aux_get_depth_of_visual([screen screen], [visual visualId]),
                       pixmap,
                       window,
                       windowRect.size.width,
@@ -264,18 +273,46 @@
                   windowRect.size.width,
                   windowRect.size.height);
 
-    /*XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
+    /*CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
+     * [drawer drawContent];*/
 
-    [drawer drawContent];*/
-    screen = nil;
+    visual = nil;
 }
 
 - (void)createPixmapDelayed
 {
     [NSThread sleepForTimeInterval:1];
     [self createPixmap];
+}
+
+- (void) cairoPreview
+{
+    CairoDrawer *cairoDrawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
+
+    [cairoDrawer makePreviewImage];
+    cairoDrawer = nil;
+}
+
+- (XCBScreen*) onScreen
+{
+    NSUInteger size = [[connection screens] count];
+    XCBQueryTreeReply *queryTreeReply = [self queryTree];
+    XCBWindow *rootWindow = [queryTreeReply rootWindow];
+    XCBScreen *scr = nil;
+
+    for (int i = 0; i < size; i++)
+    {
+        scr = [[connection screens] objectAtIndex:i];
+
+        if ([[scr rootWindow] window] == [rootWindow window])
+        {
+            break;
+        }
+    }
+
+    queryTreeReply = nil;
+    rootWindow = nil;
+    return scr;
 }
 
 - (void)updatePixmap
@@ -304,12 +341,8 @@
 
     pixmapSize = XCBMakeSize(windowRect.size.width, windowRect.size.height);
 
-    /** FIXME: REMEMBER TO DELETE ALL THIS */
-
-    /*XCBScreen* screen = [[connection screens] objectAtIndex:0];
-    XCBVisual* visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self  visual:visual];
+    /** just for test */
+    /*CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
 
     [drawer drawContent];*/
 }
@@ -371,12 +404,29 @@
     return isMapped;
 }
 
-- (xcb_get_window_attributes_reply_t)attributes
+- (void) updateAttributes
+{
+    xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes([connection connection], window);
+    attributes = xcb_get_window_attributes_reply([connection connection], cookie, NULL);
+}
+
+- (xcb_get_window_attributes_reply_t*)attributes
 {
     return attributes;
 }
 
-- (void)setAttributes:(xcb_get_window_attributes_reply_t)someAttributes
+- (XCBQueryTreeReply*) queryTree
+{
+    XCBQueryTreeReply *queryReply;
+
+    xcb_query_tree_cookie_t cookie = xcb_query_tree([connection connection], window);
+    xcb_query_tree_reply_t *reply = xcb_query_tree_reply([connection connection], cookie, NULL);
+    queryReply = [[XCBQueryTreeReply alloc] initWithReply:reply andConnection:connection];
+
+    return queryReply;
+}
+
+- (void)setAttributes:(xcb_get_window_attributes_reply_t*)someAttributes
 {
     attributes = someAttributes;
 }
@@ -469,7 +519,7 @@
                             withDataLength:1
                                   withData:state];
 
-    /*** what i should set fow ewmh? iconifying a window will set _NET_WM_STATE to _HIDDEN as required by EWMH docs, and IconicState for ICCCM.
+    /*** what i should set for ewmh? iconifying a window will set _NET_WM_STATE to _HIDDEN as required by EWMH docs, and IconicState for ICCCM.
      The docs are not saying what I should set after restoring a window from iconified for EWMH,
      but the ICCCM says I have to set WM_STATE to NormalState as I do above ****/
 
@@ -593,7 +643,7 @@
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     xcb_atom_t changeStateAtom = [atomService cacheAtom:@"WM_CHANGE_STATE"];
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *scr = [[connection screens] objectAtIndex:0];
 
 
     /*** TODO: check if the if the window is already miniaturized ***/
@@ -612,7 +662,7 @@
     event.data.data32[4] = 0;
 
     xcb_send_event([connection connection], 0,
-                   [[screen rootWindow] window],
+                   [[scr rootWindow] window],
                    XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
                    (const char *) &event);
 
@@ -850,6 +900,149 @@
     }
 }
 
+- (XCBGeometry *)geometries
+{
+    xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
+    xcb_generic_error_t *error;
+    xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
+
+    if (reply == NULL)
+    {
+        NSLog(@"Reply is NULL");
+
+        if (error)
+        {
+            NSLog(@"Error code: %d", error->error_code);
+            free(error);
+        }
+
+        return nil;
+
+    }
+
+    XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];
+    free(reply);
+
+    return geometry;
+}
+
+- (XCBRect)rectFromGeometries
+{
+    XCBGeometry *geo = [self geometries];
+    XCBRect rect = [geo rect];
+    geo = nil;
+    return rect;
+}
+
+- (void) configureForEvent:(xcb_configure_request_event_t *)anEvent
+{
+    uint16_t config_frame_mask = 0;
+    uint16_t config_win_mask = 0;
+    uint32_t config_frame_vals[7];
+    uint32_t config_win_vals[7];
+    unsigned short frame_i = 0;
+    unsigned short win_i = 0;
+
+    XCBFrame *frame = (XCBFrame*)parentWindow;
+    XCBRect frameRect = [[frame geometries] rect];
+
+    /*** Handle windows we manage ***/
+
+    if (anEvent->parent == [[connection rootWindowForScreenNumber:0] window])
+        return;
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_X;
+        config_frame_vals[frame_i++] = frameRect.position.x;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_Y)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_Y;
+        config_frame_vals[frame_i++] = frameRect.position.y;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_frame_vals[frame_i++] = anEvent->width;
+        config_win_vals[win_i++] = anEvent->width;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_frame_vals[frame_i++] = anEvent->height + 21;
+        config_win_vals[win_i++] = anEvent->height;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+    {
+        config_frame_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
+        config_frame_vals[frame_i++] = anEvent->border_width;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_SIBLING)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
+        config_win_vals[win_i++] = anEvent->sibling;
+    }
+
+    if (anEvent->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+        config_frame_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+        config_win_vals[win_i++] = anEvent->stack_mode;
+        config_frame_vals[frame_i++] = anEvent->stack_mode;
+    }
+
+    xcb_configure_window([connection connection], window, config_win_mask, config_win_vals);
+    xcb_configure_window([connection connection], [frame window], config_frame_mask, config_frame_vals);
+
+    /*** required by ICCCM compliance ***/
+    xcb_configure_notify_event_t event;
+
+    event.event = window;
+    event.window = window;
+    event.x = frameRect.position.x;
+    event.y = frameRect.position.y;
+    event.border_width = anEvent->border_width;
+    event.width = anEvent->width;
+    event.height = anEvent->height;
+    event.override_redirect = 0;
+    event.above_sibling = anEvent->sibling;
+    event.response_type = XCB_CONFIGURE_NOTIFY;
+    event.sequence = 0;
+
+    [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+
+    frame = nil;
+}
+
+- (void)setRectaglesFromGeometries
+{
+    XCBRect rect = [self rectFromGeometries];
+    windowRect = rect;
+    originalRect = rect;
+}
+
+- (void) drawIcons
+{
+    CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
+
+    if (icons == nil)
+    {
+        NSLog(@"No icons. Array nil");
+        return;
+    }
+
+    [drawer drawIconFromSurface:[[icons objectAtIndex:0] pointerValue]];
+
+    drawer = nil;
+}
 
 - (void)description
 {
@@ -863,6 +1056,7 @@
     aboveWindow = nil;
     [allowedActions removeAllObjects];
     allowedActions = nil;
+    screen = nil;
 }
 
 @end

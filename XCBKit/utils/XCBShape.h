@@ -93,7 +93,7 @@ static inline BOOL FnCheckXCBRectIsValid(XCBRect rect)
 
 static inline NSString* FnFromXCBRectToString(XCBRect rect)
 {
-    return [NSString stringWithFormat:@"Position: (x: %hd, y: %hd), Size: (width: %hd, height: %hd",
+    return [NSString stringWithFormat:@"Position: (x: %hd, y: %hd), Size: (width: %hd, height: %hd)",
             rect.position.x, rect.position.y, rect.size.width, rect.size.height];
 }
 

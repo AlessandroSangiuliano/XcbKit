@@ -65,17 +65,16 @@
     BOOL hasProtocol = NO;
     
     xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:protocol];
-    
-    void* reply = [self getProperty:WMProtocols
-                       propertyType:XCB_GET_PROPERTY_TYPE_ANY
-                          forWindow:window
-                             delete:NO];
+
+    xcb_get_property_reply_t* reply = [self getProperty:WMProtocols
+                                           propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                              forWindow:window
+                                                 delete:NO
+                                                 length:UINT32_MAX];
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
-    
-    int size = sizeof(windowProtocols)/ sizeof(windowProtocols);
-    
-    for(int i = 0; i < size; i++)
+
+    for(int i = 0; i < reply->length; i++)
     {
         if (windowProtocols[i] == atom)
             hasProtocol = YES;
@@ -99,21 +98,41 @@
     return sizeHints;
 }
 
+- (void)updateWMNormalHints:(xcb_size_hints_t*)sizeHints forWindow:(XCBWindow*)aWindow
+{
+    xcb_icccm_set_wm_size_hints([[aWindow connection] connection], [aWindow window], XCB_ATOM_WM_NORMAL_HINTS, sizeHints);
+}
+
 - (NSString*) getWmNameForWindow:(XCBWindow *)aWindow
 {
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_name([[aWindow connection] connection], [aWindow window]);
-    xcb_icccm_get_text_property_reply_t* property = malloc(sizeof(xcb_icccm_get_text_property_reply_t));
+    xcb_icccm_get_text_property_reply_t property;
     
     xcb_icccm_get_wm_name_reply([[aWindow connection] connection],
                                 cookie,
-                                property,
+                                &property,
                                 NULL);
     NSString* name;
-    if (property->name != NULL)
-        name = [NSString stringWithCString:property->name encoding:NSASCIIStringEncoding];
+    if (property.name != NULL)
+        name = [NSString stringWithCString:property.name encoding:NSASCIIStringEncoding];
     
-    free(property);
     return name;
+}
+
+- (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow
+{
+    xcb_icccm_wm_hints_t wmHints;
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_hints([[super connection] connection],
+                                                              [aWindow window]);
+    uint8_t success = xcb_icccm_get_wm_hints_reply([[super connection] connection],
+                                                   cookie,
+                                                   &wmHints,
+                                                   NULL);
+
+    if (!success)
+        NSLog(@"Error: Can't fill wmHints structure!");
+
+    return wmHints;
 }
 
 - (void) dealloc

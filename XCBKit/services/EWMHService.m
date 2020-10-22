@@ -10,6 +10,7 @@
 #import <xcb/xcb.h>
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
+#import "XCBGeometry.h"
 
 @implementation EWMHService
 
@@ -115,6 +116,8 @@
 @synthesize EWMHWMFullPlacement;
 @synthesize UTF8_STRING;
 @synthesize MANAGER;
+@synthesize KdeNetWFrameStrut;
+@synthesize MotifWMHints;
 
 //GNUstep properties
 @synthesize GNUStepMiniaturizeWindow;
@@ -133,17 +136,17 @@
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
     self = [super init];
-    
+
     if (self == nil)
     {
         NSLog(@"Unable to init!");
         return nil;
     }
-    
+
     connection = aConnection;
-    
+
     // Root window properties (some are also messages too)
-    
+
     EWMHSupported = @"_NET_SUPPORTED";
     EWMHClientList = @"_NET_CLIENT_LIST";
     EWMHClientListStacking = @"_NET_CLIENT_LIST_STACKING";
@@ -158,14 +161,14 @@
     EWMHVirtualRoots = @"_NET_VIRTUAL_ROOTS";
     EWMHDesktopLayout = @"_NET_DESKTOP_LAYOUT";
     EWMHShowingDesktop = @"_NET_SHOWING_DESKTOP";
-    
+
     // Root Window Messages
     EWMHCloseWindow = @"_NET_CLOSE_WINDOW";
     EWMHMoveresizeWindow = @"_NET_MOVERESIZE_WINDOW";
     EWMHWMMoveresize = @"_NET_WM_MOVERESIZE";
     EWMHRestackWindow = @"_NET_RESTACK_WINDOW";
     EWMHRequestFrameExtents = @"_NET_REQUEST_FRAME_EXTENTS";
-    
+
     // Application window properties
     EWMHWMName = @"_NET_WM_NAME";
     EWMHWMVisibleName = @"_NET_WM_VISIBLE_NAME";
@@ -184,7 +187,7 @@
     EWMHWMUserTime = @"_NET_WM_USER_TIME";
     EWMHWMUserTimeWindow = @"_NET_WM_USER_TIME_WINDOW";
     EWMHWMFrameExtents = @"_NET_FRAME_EXTENTS";
-    
+
     // The window types (used with EWMH_WMWindowType)
     EWMHWMWindowTypeDesktop = @"_NET_WM_WINDOW_TYPE_DESKTOP";
     EWMHWMWindowTypeDock = @"_NET_WM_WINDOW_TYPE_DOCK";
@@ -195,14 +198,14 @@
     EWMHWMWindowTypeDialog = @"_NET_WM_WINDOW_TYPE_DIALOG";
     EWMHWMWindowTypeDropdownMenu = @"_NET_WM_WINDOW_TYPE_DROPDOWN_MENU";
     EWMHWMWindowTypePopupMenu = @"_NET_WM_WINDOW_TYPE_POPUP_MENU";
-    
+
     EWMHWMWindowTypeTooltip = @"_NET_WM_WINDOW_TYPE_TOOLTIP";
     EWMHWMWindowTypeNotification = @"_NET_WM_WINDOW_TYPE_NOTIFICATION";
     EWMHWMWindowTypeCombo = @"_NET_WM_WINDOW_TYPE_COMBO";
     EWMHWMWindowTypeDnd = @"_NET_WM_WINDOW_TYPE_DND";
-    
+
     EWMHWMWindowTypeNormal = @"_NET_WM_WINDOW_TYPE_NORMAL";
-    
+
     // The application window states (used with EWMH_WMWindowState)
     EWMHWMStateModal = @"_NET_WM_STATE_MODAL";
     EWMHWMStateSticky = @"_NET_WM_STATE_STICKY";
@@ -216,7 +219,7 @@
     EWMHWMStateAbove = @"_NET_WM_STATE_ABOVE";
     EWMHWMStateBelow = @"_NET_WM_STATE_BELOW";
     EWMHWMStateDemandsAttention = @"_NET_WM_STATE_DEMANDS_ATTENTION";
-    
+
     // The application window allowed actions (used with EWMH_WMAllowedActions)
     EWMHWMActionMove = @"_NET_WM_ACTION_MOVE";
     EWMHWMActionResize = @"_NET_WM_ACTION_RESIZE";
@@ -230,114 +233,115 @@
     EWMHWMActionClose = @"_NET_WM_ACTION_CLOSE";
     EWMHWMActionAbove = @"_NET_WM_ACTION_ABOVE";
     EWMHWMActionBelow = @"_NET_WM_ACTION_BELOW";
-    
+
     // Window Manager Protocols
     EWMHWMPing = @"_NET_WM_PING";
     EWMHWMSyncRequest = @"_NET_WM_SYNC_REQUEST";
     EWMHWMFullscreenMonitors = @"_NET_WM_FULLSCREEN_MONITORS";
-    
+
     // Other properties
     EWMHWMFullPlacement = @"_NET_WM_FULL_PLACEMENT";
     UTF8_STRING = @"UTF8_STRING";
     MANAGER = @"MANAGER";
-    
-    
+    KdeNetWFrameStrut = @"_KDE_NET_WM_FRAME_STRUT";
+    MotifWMHints = @"_MOTIF_WM_HINTS";
+
     //GNUStep properties
-    
+
     GNUStepMiniaturizeWindow = @"_GNUSTEP_WM_MINIATURIZE_WINDOW";
     GNUStepHideApp = @"_GNUSTEP_WM_HIDE_APP";
     GNUStepFrameOffset = @"_GNUSTEP_FRAME_OFFSETS";
     GNUStepWmAttr = @"_GNUSTEP_WM_ATTR";
-    GNUStepTitleBarState = @"_GNUSTEP_FRAME_OFFSETS";
-    
+    GNUStepTitleBarState = @"_GNUSTEP_TITLEBAR_STATE";
+
     // Added EWMH properties
-    
+
     EWMHStartupId = @"_NET_STARTUP_ID";
     EWMHFrameExtents = @"_NET_FRAME_EXTENTS";
     EWMHStrutPartial = @"_NET_WM_STRUT_PARTIAL";
     EWMHVisibleIconName = @"_NET_WM_VISIBLE_ICON_NAME";
-    
-    
+
     //Array iitialization
-    NSString* atomStrings[] = {
-		EWMHSupported,
-		EWMHClientList,
-		EWMHClientListStacking,
-		EWMHNumberOfDesktops,
-		EWMHDesktopGeometry,
-		EWMHDesktopViewport,
-		EWMHCurrentDesktop,
-		EWMHDesktopNames,
-		EWMHActiveWindow,
-		EWMHWorkarea,
-		EWMHSupportingWMCheck,
-		EWMHVirtualRoots,
-		EWMHDesktopLayout,
-		EWMHShowingDesktop,
-		EWMHCloseWindow,
-		EWMHMoveresizeWindow,
-		EWMHWMMoveresize,
-		EWMHRestackWindow,
-		EWMHRequestFrameExtents,
-		EWMHWMName,
-		EWMHWMVisibleName,
-		EWMHWMIconName,
-		EWMHWMVisibleIconName,
-		EWMHWMDesktop,
-		EWMHWMWindowType,
-		EWMHWMState,
-		EWMHWMAllowedActions,
-		EWMHWMStrut,
-		EWMHWMStrutPartial,
-		EWMHWMIconGeometry,
-		EWMHWMIcon,
-		EWMHWMPid,
-		EWMHWMHandledIcons,
-		EWMHWMUserTime,
-		EWMHWMUserTimeWindow,
-		EWMHWMFrameExtents,
-		EWMHWMWindowTypeDesktop,
-		EWMHWMWindowTypeDock,
-		EWMHWMWindowTypeToolbar,
-		EWMHWMWindowTypeMenu,
-		EWMHWMWindowTypeUtility,
-		EWMHWMWindowTypeSplash,
-		EWMHWMWindowTypeDialog,
-		EWMHWMWindowTypeDropdownMenu,
-		EWMHWMWindowTypePopupMenu,
-		EWMHWMWindowTypeTooltip,
-		EWMHWMWindowTypeNotification,
-		EWMHWMWindowTypeCombo,
-		EWMHWMWindowTypeDnd,
-		EWMHWMWindowTypeNormal,
-		EWMHWMStateModal,
-		EWMHWMStateSticky,
-		EWMHWMStateMaximizedVert,
-		EWMHWMStateMaximizedHorz,
-		EWMHWMStateShaded,
-		EWMHWMStateSkipTaskbar,
-		EWMHWMStateSkipPager,
-		EWMHWMStateHidden,
-		EWMHWMStateFullscreen,
-		EWMHWMStateAbove,
-		EWMHWMStateBelow,
-		EWMHWMStateDemandsAttention,
-		EWMHWMActionMove,
-		EWMHWMActionResize,
-		EWMHWMActionMinimize,
-		EWMHWMActionShade,
-		EWMHWMActionStick,
-		EWMHWMActionMaximizeHorz,
-		EWMHWMActionMaximizeVert,
-		EWMHWMActionFullscreen,
-		EWMHWMActionChangeDesktop,
-		EWMHWMActionClose,
-		EWMHWMActionAbove,
-		EWMHWMActionBelow,
-		EWMHWMPing,
-		EWMHWMSyncRequest,
-		EWMHWMFullscreenMonitors,
-		EWMHWMFullPlacement,
+    NSString* atomStrings[] =
+    {
+        EWMHSupported,
+        EWMHClientList,
+        EWMHClientListStacking,
+        EWMHNumberOfDesktops,
+        EWMHDesktopGeometry,
+        EWMHDesktopViewport,
+        EWMHCurrentDesktop,
+        EWMHDesktopNames,
+        EWMHActiveWindow,
+        EWMHWorkarea,
+        EWMHSupportingWMCheck,
+        EWMHVirtualRoots,
+        EWMHDesktopLayout,
+        EWMHShowingDesktop,
+        EWMHCloseWindow,
+        EWMHMoveresizeWindow,
+        EWMHWMMoveresize,
+        EWMHRestackWindow,
+        //EWMHRequestFrameExtents,
+        EWMHWMName,
+        EWMHWMVisibleName,
+        EWMHWMIconName,
+        EWMHWMVisibleIconName,
+        EWMHWMDesktop,
+        EWMHWMWindowType,
+        EWMHWMState,
+        EWMHWMAllowedActions,
+        EWMHWMStrut,
+        EWMHWMStrutPartial,
+        EWMHWMIconGeometry,
+        EWMHWMIcon,
+        EWMHWMPid,
+        EWMHWMHandledIcons,
+        EWMHWMUserTime,
+        EWMHWMUserTimeWindow,
+        EWMHWMFrameExtents,
+        EWMHWMWindowTypeDesktop,
+        EWMHWMWindowTypeDock,
+        EWMHWMWindowTypeToolbar,
+        EWMHWMWindowTypeMenu,
+        EWMHWMWindowTypeUtility,
+        EWMHWMWindowTypeSplash,
+        EWMHWMWindowTypeDialog,
+        EWMHWMWindowTypeDropdownMenu,
+        EWMHWMWindowTypePopupMenu,
+        EWMHWMWindowTypeTooltip,
+        EWMHWMWindowTypeNotification,
+        EWMHWMWindowTypeCombo,
+        EWMHWMWindowTypeDnd,
+        EWMHWMWindowTypeNormal,
+        EWMHWMStateModal,
+        EWMHWMStateSticky,
+        EWMHWMStateMaximizedVert,
+        EWMHWMStateMaximizedHorz,
+        EWMHWMStateShaded,
+        EWMHWMStateSkipTaskbar,
+        EWMHWMStateSkipPager,
+        EWMHWMStateHidden,
+        EWMHWMStateFullscreen,
+        EWMHWMStateAbove,
+        EWMHWMStateBelow,
+        EWMHWMStateDemandsAttention,
+        EWMHWMActionMove,
+        EWMHWMActionResize,
+        EWMHWMActionMinimize,
+        EWMHWMActionShade,
+        EWMHWMActionStick,
+        EWMHWMActionMaximizeHorz,
+        EWMHWMActionMaximizeVert,
+        EWMHWMActionFullscreen,
+        EWMHWMActionChangeDesktop,
+        EWMHWMActionClose,
+        EWMHWMActionAbove,
+        EWMHWMActionBelow,
+        EWMHWMPing,
+        EWMHWMSyncRequest,
+        EWMHWMFullscreenMonitors,
+        EWMHWMFullPlacement,
         GNUStepMiniaturizeWindow,
         GNUStepHideApp,
         GNUStepWmAttr,
@@ -348,27 +352,28 @@
         EWMHStrutPartial,
         EWMHVisibleIconName,
         UTF8_STRING,
-        MANAGER
-        
-	};
-    
+        MANAGER,
+        KdeNetWFrameStrut,
+        MotifWMHints
+    };
+
     atoms = [NSArray arrayWithObjects:atomStrings count:sizeof(atomStrings)/sizeof(NSString*)];
     atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     [atomService cacheAtoms:atoms];
-    
+
     return self;
 }
 
 + (id) sharedInstanceWithConnection:(XCBConnection *)aConnection
 {
     static EWMHService *sharedInstance = nil;
-    
+
     // this is not thread safe, switch to libdispatch some day.
     if (sharedInstance == nil)
     {
         sharedInstance = [[self alloc] initWithConnection:aConnection];
     }
-    
+
     return sharedInstance;
 }
 
@@ -420,19 +425,21 @@
         EWMHWMStateModal,
         EWMHWMStateHidden,
         EWMHWMStateDemandsAttention,
+        //EWMHRequestFrameExtents,
         UTF8_STRING,
         GNUStepFrameOffset,
         GNUStepHideApp,
         GNUStepWmAttr,
         GNUStepMiniaturizeWindow,
-        GNUStepTitleBarState
+        GNUStepTitleBarState,
+        KdeNetWFrameStrut
     };
-    
+
     NSArray *rootAtoms = [NSArray arrayWithObjects:rootProperties count:sizeof(rootProperties)/sizeof(NSString*)];
-    
+
     xcb_atom_t atomsTransformed[[rootAtoms count]];
     FnFromNSArrayAtomsToXcbAtomTArray(rootAtoms, atomsTransformed, atomService);
-    
+
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         [rootWindow window],
@@ -441,9 +448,9 @@
                         32,
                         (uint32_t)[rootAtoms count],
                         &atomsTransformed);
-    
+
     xcb_window_t wmXcbWindow = [wmWindow window];
-    
+
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         [rootWindow window],
@@ -452,7 +459,7 @@
                         32,
                         1,
                         &wmXcbWindow);
-    
+
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         wmXcbWindow,
@@ -461,7 +468,7 @@
                         32,
                         1,
                         &wmXcbWindow);
-    
+
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         wmXcbWindow,
@@ -470,10 +477,10 @@
                         8,
                         6,
                         "uroswm");
-    
-    
+
+
     int pid = getpid();
-    
+
     xcb_change_property([connection connection],
                         XCB_PROP_MODE_REPLACE,
                         wmXcbWindow,
@@ -482,11 +489,11 @@
                         32,
                         1,
                         &pid);
-    
+
     //TODO: wm-specs says that if the _NET_WM_PID is set the ICCCM WM_CLIENT_MACHINE atom must be set.
-    
+
     rootAtoms = nil;
-    
+
 }
 
 - (void) changePropertiesForWindow:(XCBWindow *)aWindow
@@ -497,8 +504,8 @@
                     withDataLength:(uint32_t)dataLength
                           withData:(const void *) data
 {
-    xcb_atom_t property = [[[atomService cachedAtoms] objectForKey:propertyKey] unsignedIntValue];
-    
+    xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:propertyKey];
+
     xcb_change_property([connection connection],
                         mode,
                         [aWindow window],
@@ -514,41 +521,117 @@
          propertyType:(xcb_atom_t)propertyType
             forWindow:(XCBWindow *)aWindow
                delete:(BOOL)deleteProperty
+               length:(uint32_t)len
 {
     xcb_atom_t property = [atomService atomFromCachedAtomsWithKey:aPropertyName];
-    
+
     xcb_get_property_cookie_t cookie = xcb_get_property([connection connection],
                                                         deleteProperty,
                                                         [aWindow window],
                                                         property,
                                                         propertyType,
                                                         0,
-                                                        UINT32_MAX);
-    
+                                                        len);
+
     xcb_generic_error_t *error;
     xcb_get_property_reply_t *reply = xcb_get_property_reply([connection connection],
                                                              cookie,
                                                              &error);
-    
+
     if (error)
     {
         NSLog(@"Error: %d for window: %u", error->error_code, [aWindow window]);
         free(error);
         return NULL;
     }
-    
+
     if (reply->length == 0 && reply->format == 0 && reply->type == 0)
     {
         free(error);
         return NULL;
     }
-    
-    
+
+
     //void* value = xcb_get_property_value(reply);
     free(error);
     return reply;
 }
 
+- (void) updateNetFrameExtentsForWindow:(XCBWindow *)aWindow
+{
+    XCBGeometry *geometry = [aWindow geometries];
+    uint32_t extents[4];
+    uint32_t border = [geometry borderWidth];
+    NSLog(@"Border: %d", border);
+
+
+    extents[0] = border;
+    extents[1] = border;
+    extents[2] = 21;
+    extents[3] = border;
+
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMFrameExtents
+                           withType:XCB_ATOM_CARDINAL
+                         withFormat:32
+                     withDataLength:4
+                           withData:extents];
+
+    geometry = nil;
+}
+
+- (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[]) extents
+{
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMFrameExtents
+                           withType:XCB_ATOM_CARDINAL
+                         withFormat:32
+                     withDataLength:4
+                           withData:extents];
+}
+
+- (BOOL) ewmhClientMessage:(NSString *)anAtomMessageName
+{
+    NSString *net = @"NET";
+    BOOL ewmh = NO;
+
+    NSString *sub = [anAtomMessageName componentsSeparatedByString:@"_"][1];
+
+    if ([net isEqualToString:sub])
+        ewmh = YES;
+    else
+        ewmh = NO;
+
+    net = nil;
+    sub = nil;
+
+    return ewmh;
+}
+
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
+{
+    if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
+    {
+        uint32_t extents[] = {3,3,21,3};
+        [self updateNetFrameExtentsForWindow:aWindow andExtents:extents];
+    }
+}
+
+- (xcb_get_property_reply_t*) netWmIconFromWindow:(XCBWindow*)aWindow
+{
+    xcb_get_property_cookie_t cookie = xcb_get_property_unchecked([connection connection],
+                                                                  false,
+                                                                  [aWindow window],
+                                                                  [atomService atomFromCachedAtomsWithKey:EWMHWMIcon],
+                                                                  XCB_ATOM_CARDINAL,
+                                                                  0,
+                                                                  UINT32_MAX);
+
+    xcb_get_property_reply_t *reply = xcb_get_property_reply([connection connection], cookie, NULL);
+    return reply;
+}
 
 -(void)dealloc
 {
@@ -566,14 +649,14 @@
     EWMHVirtualRoots = nil;
     EWMHDesktopLayout = nil;
     EWMHShowingDesktop = nil;
-    
+
     // Root Window Messages
     EWMHCloseWindow = nil;
     EWMHMoveresizeWindow = nil;
     EWMHWMMoveresize = nil;
     EWMHRestackWindow = nil;
     EWMHRequestFrameExtents = nil;
-    
+
     // Application window properties
     EWMHWMName = nil;
     EWMHWMVisibleName = nil;
@@ -592,7 +675,7 @@
     EWMHWMUserTime = nil;
     EWMHWMUserTimeWindow = nil;
     EWMHWMFrameExtents = nil;
-    
+
     // The window types (used with EWMH_WMWindowType)
     EWMHWMWindowTypeDesktop = nil;
     EWMHWMWindowTypeDock = nil;
@@ -603,14 +686,14 @@
     EWMHWMWindowTypeDialog = nil;
     EWMHWMWindowTypeDropdownMenu = nil;
     EWMHWMWindowTypePopupMenu = nil;
-    
+
     EWMHWMWindowTypeTooltip = nil;
     EWMHWMWindowTypeNotification = nil;
     EWMHWMWindowTypeCombo = nil;
     EWMHWMWindowTypeDnd = nil;
-    
+
     EWMHWMWindowTypeNormal = nil;
-    
+
     // The application window states (used with EWMH_WMWindowState)
     EWMHWMStateModal = nil;
     EWMHWMStateSticky = nil;
@@ -624,7 +707,7 @@
     EWMHWMStateAbove = nil;
     EWMHWMStateBelow = nil;
     EWMHWMStateDemandsAttention = nil;
-    
+
     // The application window allowed actions (used with EWMH_WMAllowedActions)
     EWMHWMActionMove = nil;
     EWMHWMActionResize = nil;
@@ -638,32 +721,34 @@
     EWMHWMActionClose = nil;
     EWMHWMActionAbove = nil;
     EWMHWMActionBelow = nil;
-    
+
     // Window Manager Protocols
     EWMHWMPing = nil;
     EWMHWMSyncRequest = nil;
     EWMHWMFullscreenMonitors = nil;
-    
+
     // Other properties
     EWMHWMFullPlacement = nil;
     UTF8_STRING = nil;
     MANAGER = nil;
-    
+    KdeNetWFrameStrut = nil;
+    MotifWMHints = nil;
+
     //GNUStep properties
-    
+
     GNUStepMiniaturizeWindow = nil;
     GNUStepHideApp = nil;
     GNUStepFrameOffset = nil;
     GNUStepWmAttr = nil;
     GNUStepTitleBarState = nil;
-    
+
     // added properties
-    
+
     EWMHStartupId = nil;
     EWMHFrameExtents = nil;
     EWMHStrutPartial = nil;
     EWMHVisibleIconName = nil;
-    
+
     atoms = nil;
     connection = nil;
     atomService = nil;
