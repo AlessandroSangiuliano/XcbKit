@@ -7,126 +7,41 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XCBConnection.h"
-#import "XCBWindow.h"
+#import "../XCBConnection.h"
+#import "../XCBWindow.h"
 #import "XCBAtomService.h"
+
+/*** define motif stuff in this class ***/
+
+#define MWM_HINTS_FUNCTIONS   (1L << 0)
+#define MWM_HINTS_DECORATIONS (1L << 1)
+#define MWM_HINTS_INPUT_MODE  (1L << 2)
+#define MWM_HINTS_STATUS      (1L << 3)
+
+/* functions */
+#define MWM_FUNC_ALL          (1L << 0)
+#define MWM_FUNC_RESIZE       (1L << 1)
+#define MWM_FUNC_MOVE         (1L << 2)
+#define MWM_FUNC_MINIMIZE     (1L << 3)
+#define MWM_FUNC_MAXIMIZE     (1L << 4)
+#define MWM_FUNC_CLOSE        (1L << 5)
+
+/* decorations */
+#define MWM_DECOR_ALL         (1L << 0)
+#define MWM_DECOR_BORDER      (1L << 1)
+#define MWM_DECOR_RESIZEH     (1L << 2)
+#define MWM_DECOR_TITLE       (1L << 3)
+#define MWM_DECOR_MENU        (1L << 4)
+#define MWM_DECOR_MINIMIZE    (1L << 5)
+#define MWM_DECOR_MAXIMIZE    (1L << 6)
+
 
 
 //Actually it is a singleton
 
 @interface EWMHService : NSObject
 {
-    // Root window properties (some are also messages too)
-    /*NSString* EWMHSupported;
-    NSString* EWMHClientList;
-    NSString* EWMHClientListStacking;
-    NSString* EWMHNumberOfDesktops;
-    NSString* EWMHDesktopGeometry;
-    NSString* EWMHDesktopViewport;
-    NSString* EWMHCurrentDesktop;
-    NSString* EWMHDesktopNames;
-    NSString* EWMHActiveWindow;
-    NSString* EWMHWorkarea;
-    NSString* EWMHSupportingWMCheck;
-    NSString* EWMHVirtualRoots;
-    NSString* EWMHDesktopLayout;
-    NSString* EWMHShowingDesktop;
-    
-    // Root Window Messages
-    NSString* EWMHCloseWindow;
-    NSString* EWMHMoveresizeWindow;
-    NSString* EWMHWMMoveresize;
-    NSString* EWMHRestackWindow;
-    NSString* EWMHRequestFrameExtents;
-    
-    // Application window properties
-    NSString* EWMHWMName;
-    NSString* EWMHWMVisibleName;
-    NSString* EWMHWMIconName;
-    NSString* EWMHWMVisibleIconName;
-    NSString* EWMHWMDesktop;
-    NSString* EWMHWMWindowType;
-    NSString* EWMHWMState;
-    NSString* EWMHWMAllowedActions;
-    NSString* EWMHWMStrut;
-    NSString* EWMHWMStrutPartial;
-    NSString* EWMHWMIconGeometry;
-    NSString* EWMHWMIcon;
-    NSString* EWMHWMPid;
-    NSString* EWMHWMHandledIcons;
-    NSString* EWMHWMUserTime;
-    NSString* EWMHWMUserTimeWindow;
-    NSString* EWMHWMFrameExtents;
-    
-    // The window types (used with EWMH_WMWindowType)
-    NSString* EWMHWMWindowTypeDesktop;
-    NSString* EWMHWMWindowTypeDock;
-    NSString* EWMHWMWindowTypeToolbar;
-    NSString* EWMHWMWindowTypeMenu;
-    NSString* EWMHWMWindowTypeUtility;
-    NSString* EWMHWMWindowTypeSplash;
-    NSString* EWMHWMWindowTypeDialog;
-    NSString* EWMHWMWindowTypeDropdownMenu;
-    NSString* EWMHWMWindowTypePopupMenu;
-    
-    NSString* EWMHWMWindowTypeTooltip;
-    NSString* EWMHWMWindowTypeNotification;
-    NSString* EWMHWMWindowTypeCombo;
-    NSString* EWMHWMWindowTypeDnd;
-    
-    NSString* EWMHWMWindowTypeNormal;
-    
-    // The application window states (used with EWMH_WMWindowState)
-    NSString* EWMHWMStateModal;
-    NSString* EWMHWMStateSticky;
-    NSString* EWMHWMStateMaximizedVert;
-    NSString* EWMHWMStateMaximizedHorz;
-    NSString* EWMHWMStateShaded;
-    NSString* EWMHWMStateSkipTaskbar;
-    NSString* EWMHWMStateSkipPager;
-    NSString* EWMHWMStateHidden ;
-    NSString* EWMHWMStateFullscreen;
-    NSString* EWMHWMStateAbove;
-    NSString* EWMHWMStateBelow;
-    NSString* EWMHWMStateDemandsAttention;
-    
-    // The application window allowed actions (used with EWMH_WMAllowedActions)
-    NSString* EWMHWMActionMove;
-    NSString* EWMHWMActionResize;
-    NSString* EWMHWMActionMinimize;
-    NSString* EWMHWMActionShade;
-    NSString* EWMHWMActionStick;
-    NSString* EWMHWMActionMaximizeHorz;
-    NSString* EWMHWMActionMaximizeVert;
-    NSString* EWMHWMActionFullscreen;
-    NSString* EWMHWMActionChangeDesktop;
-    NSString* EWMHWMActionClose;
-    NSString* EWMHWMActionAbove;
-    NSString* EWMHWMActionBelow;
-    
-    // Window Manager Protocols
-    NSString* EWMHWMPing;
-    NSString* EWMHWMSyncRequest;
-    NSString* EWMHWMFullscreenMonitors;
-    
-    // Other properties
-    NSString* EWMHWMFullPlacement;
-    NSString* UTF8_STRING;
-    
-    //GNUstep properties
-    NSString *GNUStepMiniaturizeWindow;
-    NSString *GNUStepHideApp;
-    NSString *GNUStepWmAttr;
-    NSString *GNUStepTitleBarState;
-    NSString *GNUStepFrameOffset;
-    
-    //Added EWMH properties
-    
-    NSString *EWMHStartupId;
-    NSString *EWMHFrameExtents;
-    NSString *EWMHStrutPartial;
-    NSString *EWMHVisibleIconName;*/
-    
+
 }
 
 @property (strong, nonatomic) NSArray *atoms;
@@ -231,6 +146,8 @@
 @property (strong, nonatomic)NSString* EWMHWMFullPlacement;
 @property (strong, nonatomic)NSString* UTF8_STRING;
 @property (strong, nonatomic)NSString* MANAGER;
+@property (strong, nonatomic)NSString* KdeNetWFrameStrut;
+@property (strong, nonatomic)NSString* MotifWMHints;
 
 //GNUstep properties
 @property (strong, nonatomic)NSString *GNUStepMiniaturizeWindow;
@@ -246,101 +163,6 @@
 @property (strong, nonatomic)NSString *EWMHStrutPartial;
 @property (strong, nonatomic)NSString *EWMHVisibleIconName;
 
-//this enum now is useless
-
-typedef NS_ENUM(NSUInteger, EWMHNames)
-{
-    EWMHSupportedIndex,
-    EWMHClientListIndex,
-    EWMHClientListStackingIndex,
-    EWMHNumberOfDesktopsIndex,
-    EWMHDesktopGeometryIndex,
-    EWMHDesktopViewportIndex,
-    EWMHCurrentDesktopIndex,
-    EWMHDesktopNamesIndex,
-    EWMHActiveWindowIndex,
-    EWMHWorkareaIndex,
-    EWMHSupportingWMCheckIndex,
-    EWMHVirtualRootsIndex,
-    EWMHDesktopLayoutIndex,
-    EWMHShowingDesktopIndex,
-    EWMHCloseWindowIndex,
-    EWMHMoveresizeWindowIndex,
-    EWMHWMMoveresizeIndex,
-    EWMHRestackWindowIndex,
-    EWMHRequestFrameExtentsIndex,
-    EWMHWMNameIndex,
-    EWMHWMVisibleNameIndex,
-    EWMHWMIconNameIndex,
-    EWMHWMVisibleIconNameIndex,
-    EWMHWMDesktopIndex,
-    EWMHWMWindowTypeIndex,
-    EWMHWMStateIndex,
-    EWMHWMAllowedActionsIndex,
-    EWMHWMStrutIndex,
-    EWMHWMStrutPartialIndex,
-    EWMHWMIconGeometryIndex,
-    EWMHWMIconIndex,
-    EWMHWMPidIndex,
-    EWMHWMHandledIconsIndex,
-    EWMHWMUserTimeIndex,
-    EWMHWMUserTimeWindowIndex,
-    EWMHWMFrameExtentsIndex,
-    EWMHWMWindowTypeDesktopIndex,
-    EWMHWMWindowTypeDockIndex,
-    EWMHWMWindowTypeToolbarIndex,
-    EWMHWMWindowTypeMenuIndex,
-    EWMHWMWindowTypeUtilityIndex,
-    EWMHWMWindowTypeSplashIndex,
-    EWMHWMWindowTypeDialogIndex,
-    EWMHWMWindowTypeDropdownMenuIndex,
-    EWMHWMWindowTypePopupMenuIndex,
-    EWMHWMWindowTypeTooltipIndex,
-    EWMHWMWindowTypeNotificationIndex,
-    EWMHWMWindowTypeComboIndex,
-    EWMHWMWindowTypeDndIndex,
-    EWMHWMWindowTypeNormalIndex,
-    EWMHWMStateModalIndex,
-    EWMHWMStateStickyIndex,
-    EWMHWMStateMaximizedVertIndex,
-    EWMHWMStateMaximizedHorzIndex,
-    EWMHWMStateShadedIndex,
-    EWMHWMStateSkipTaskbarIndex,
-    EWMHWMStateSkipPagerIndex,
-    EWMHWMStateHiddenIndex,
-    EWMHWMStateFullscreenIndex,
-    EWMHWMStateAboveIndex,
-    EWMHWMStateBelowIndex,
-    EWMHWMStateDemandsAttentionIndex,
-    EWMHWMActionMoveIndex,
-    EWMHWMActionResizeIndex,
-    EWMHWMActionMinimizeIndex,
-    EWMHWMActionShadeIndex,
-    EWMHWMActionStickIndex,
-    EWMHWMActionMaximizeHorzIndex,
-    EWMHWMActionMaximizeVertIndex,
-    EWMHWMActionFullscreenIndex,
-    EWMHWMActionChangeDesktopIndex,
-    EWMHWMActionCloseIndex,
-    EWMHWMActionAboveIndex,
-    EWMHWMActionBelowIndex,
-    EWMHWMPingIndex,
-    EWMHWMSyncRequestIndex,
-    EWMHWMFullscreenMonitorsIndex,
-    EWMHWMFullPlacementIndex,
-    GNUStepMiniaturizeWindowIndex,
-    GNUStepHideAppIndex,
-    GNUStepWmAttrIndex,
-    GNUStepTitleBarStateIndex,
-    GNUStepFrameOffsetIndex,
-    EWMHStartupIdIndex,
-    EWMHFrameExtentsIndex,
-    EWMHStrutPartialIndex,
-    EWMHVisibleIconName,
-    UTF8_STRING,
-    MANAGER
-
-};
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
@@ -359,7 +181,15 @@ typedef NS_ENUM(NSUInteger, EWMHNames)
 - (void *) getProperty:(NSString*) aPropertyName
           propertyType:(xcb_atom_t) propertyType
              forWindow:(XCBWindow*)aWindow
-              delete:(BOOL)deleteProperty ;
+                delete:(BOOL)deleteProperty
+                length:(uint32_t)len;
+
+- (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
+- (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[])extents;
+
+- (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;
+- (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
 
 - (void) dealloc;
 

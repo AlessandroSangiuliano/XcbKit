@@ -31,6 +31,7 @@ typedef NS_ENUM(NSInteger, XCBWindowType)
 @property (nonatomic) uint32_t valueMask;
 @property (nonatomic) const uint32_t * valueList;
 @property (nonatomic) XCBWindowType windowType;
+@property (strong, nonatomic) XCBWindow *clientWindow;
 
 
 - (id) initForWindowType:(XCBWindowType)aWindowType;

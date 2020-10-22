@@ -11,36 +11,35 @@
 
 @implementation Transformers
 
-xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *atomService)
+void FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, xcb_atom_t destination[], XCBAtomService *atomService)
 {
     NSUInteger size = [array count];
-    xcb_atom_t *transformed = calloc(size, sizeof(xcb_atom_t));
     
     NSDictionary *cachedAtoms = [atomService cachedAtoms];
     
     for (NSUInteger i = 0; i < size; i++)
     {
         NSString *key = [array objectAtIndex:i];
-        transformed[i] = [[cachedAtoms objectForKey:key] unsignedIntValue];
+        destination[i] = [[cachedAtoms objectForKey:key] unsignedIntValue];
+        key = nil;
     }
     
-    return transformed;
+    cachedAtoms = nil;
 }
 
-XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection)
+XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection, XCBWindow *clientWindow)
 {
-    XCBFrame *frame = [[XCBFrame alloc] init];
+    XCBFrame *frame = [[XCBFrame alloc]
+                       initWithClientWindow:clientWindow
+                             withConnection:connection
+                              withXcbWindow:[aWindow window]
+                                   withRect:[aWindow windowRect]];
     
     [frame setAboveWindow:[aWindow aboveWindow]];
-    [frame setWindow:[aWindow window]];
     [frame setParentWindow:[aWindow parentWindow]];
     [frame setAttributes:[aWindow attributes]];
-    [frame setWindowRect:[aWindow windowRect]];
-    [frame setOriginalRect:[aWindow originalRect]];
     [frame setWindowMask:[aWindow windowMask]];
     [frame setIsMapped:[aWindow isMapped]];
-    [frame setConnection:connection];
-    
     
     return frame;
 }

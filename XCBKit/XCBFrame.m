@@ -15,89 +15,80 @@
 #import "utils/XCBWindowTypeResponse.h"
 #import "services/ICCCMService.h"
 
-
 @implementation XCBFrame
 
+@synthesize minWidthHint;
+@synthesize minHeightHint;
 @synthesize connection;
 @synthesize rightBorderClicked;
 @synthesize bottomBorderClicked;
 @synthesize offset;
 @synthesize leftBorderClicked;
 @synthesize topBorderClicked;
-@synthesize minWidthHint;
-@synthesize minHeightHint;
-
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection
 {
-    return [self initWithClientWindow:aClientWindow withConnection:aConnection withXcbWindow:0];
+    return [self initWithClientWindow:aClientWindow
+                       withConnection:aConnection
+                        withXcbWindow:0
+                             withRect:XCBInvalidRect];
 }
 
-- (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection withXcbWindow:(xcb_window_t)xcbWindow
+- (id) initWithClientWindow:(XCBWindow *)aClientWindow
+             withConnection:(XCBConnection *)aConnection
+              withXcbWindow:(xcb_window_t)xcbWindow
+                   withRect:(XCBRect)aRect
 {
     self = [super initWithXCBWindow: xcbWindow andConnection:aConnection];
-    [self setWindowRect:[aClientWindow windowRect]];
-    [self setOriginalRect:[aClientWindow windowRect]];
-
+    [self setWindowRect:aRect];
+    [self setOriginalRect:aRect];
     /*** checks normal hints for client window **/
+    
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
-    xcb_size_hints_t* sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
-    minHeightHint = sizeHints->min_height;
-    minWidthHint = sizeHints->min_width;
+    xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
 
-    uint16_t width =  [aClientWindow windowRect].size.width + 1;
-    uint16_t height =  [aClientWindow windowRect].size.height + 22;
-
-    connection = aConnection;
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
-
-    uint32_t values[2] = {[screen screen]->white_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS |
-        XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS |
-        XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-        XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
-        XCB_EVENT_MASK_VISIBILITY_CHANGE};
+    [self setMinHeightHint:sizeHints->min_height];
+    [self setMinWidthHint:sizeHints->min_width];
 
 
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-
-    XCBWindowTypeResponse* response;
-
-    if (xcbWindow == 0)
+    if (minWidthHint > [aClientWindow windowRect].size.width)
     {
-        XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
-        [request setDepth:[screen screen]->root_depth];
-        [request setParentWindow:[screen rootWindow]];
-        [request setXPosition:[aClientWindow windowRect].position.x];
-        [request setXPosition:[aClientWindow windowRect].position.y];
-        [request setWidth:width];
-        [request setHeight:height];
-        [request setBorderWidth:3];
-        [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
-        [request setVisual:visual];
-        [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
-        [request setValueList:values];
-
-        response = [connection createWindowForRequest:request registerWindow:NO];
-
-        CsMapXCBWindoToXCBFrame([response frame], self);
-
-        children = [[NSMutableDictionary alloc] init];
-        NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
-        [children setObject:aClientWindow forKey: key];
-        [connection registerWindow:self];
-
-        response = nil;
-        request = nil;
-        key= nil;
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize(minWidthHint, [aClientWindow windowRect].size.height));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        rect.size.width = rect.size.width + 1;
+        [self setWindowRect: rect];
+        [self setOriginalRect:rect];
+        uint32_t values[] = {rect.size.width};
+        xcb_configure_window([aConnection connection], window, XCB_CONFIG_WINDOW_WIDTH, values);
+        values[0] = minWidthHint;
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_WIDTH, values);
     }
 
+    if (minHeightHint > [aClientWindow windowRect].size.height)
+    {
+        XCBRect rect = XCBMakeRect(XCBMakePoint(0,0), XCBMakeSize([aClientWindow windowRect].size.width, minHeightHint));
+        [aClientWindow setWindowRect:rect];
+        [aClientWindow setOriginalRect:rect];
+        rect.size.height = rect.size.height + 21;
+        [self setWindowRect:rect];
+        [self setOriginalRect:rect];
+        uint32_t values[] = {rect.size.height};
+        xcb_configure_window([aConnection connection], window, XCB_CONFIG_WINDOW_HEIGHT, values);
+        values[0] = minHeightHint;
+        xcb_configure_window([aConnection connection], [aClientWindow window], XCB_CONFIG_WINDOW_HEIGHT, values);
+    }
+
+    connection = aConnection;
+    children = [[NSMutableDictionary alloc] init];
+    NSNumber *key = [NSNumber numberWithInteger:ClientWindow];
+    [children setObject:aClientWindow forKey: key];
+    [connection registerWindow:self];
+
     [super setIsAbove:YES];
-    [connection mapWindow:self];
     free(sizeHints);
     icccmService = nil;
-    visual = nil;
-    screen = nil;
+    key= nil;
     return self;
 }
 
@@ -111,8 +102,9 @@
 - (XCBWindow*) childWindowForKey:(childrenMask)key
 {
     NSNumber* keyNumber = [NSNumber numberWithInteger:key];
-    return [children objectForKey:keyNumber];
+    XCBWindow* child = [children objectForKey:keyNumber];
     keyNumber = nil;
+    return child;
 }
 
 -(void)removeChild:(childrenMask)frameChild
@@ -133,15 +125,19 @@
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
-    char* value = [ewmhService getProperty:[ewmhService EWMHWMName]
-                              propertyType:[[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService UTF8_STRING]]
+    void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
+                              propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                  forWindow:clientWindow
-                                    delete:NO];
+                                    delete:NO
+                                    length:UINT32_MAX];
 
-    NSString *windowTitle = [NSString stringWithUTF8String:value];
-
-    //free(value);
-    value = NULL;
+    NSString* windowTitle;
+    if (reply)
+    {
+        char *value = xcb_get_property_value(reply);
+        windowTitle = [NSString stringWithUTF8String:value];
+        value = NULL;
+    }
 
     // for now if it is nil just set an empty string
 
@@ -150,7 +146,6 @@
         ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
 
         windowTitle = [icccmService getWmNameForWindow:clientWindow];
-
 
         if (windowTitle == nil)
             windowTitle = @"";
@@ -169,11 +164,15 @@
     XCBPoint position = XCBMakePoint(0, 21);
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];
+    uint32_t border[] = {0};
+    xcb_configure_window([connection connection], [clientWindow window], XCB_CONFIG_WINDOW_BORDER_WIDTH, border);
 
     titleBar = nil;
     clientWindow = nil;
     ewmhService = nil;
     windowTitle = nil;
+    
+    free(reply);
 }
 
 - (void) resize:(xcb_motion_notify_event_t *)anEvent
@@ -549,7 +548,9 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     pos.x = x;
     pos.y = y;
 
+    /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
     XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
+    [super setOldRect:[super windowRect]];
     [super setWindowRect:newRect];
 
     [super setOriginalRect:XCBMakeRect(XCBMakePoint(x, y),
@@ -559,6 +560,33 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     int32_t values[] = {pos.x, pos.y};
 
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+}
+
+- (void) configureClient
+{
+    xcb_configure_notify_event_t event;
+    XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
+    XCBRect rect = [[self geometries] rect];
+    XCBRect  clientRect = [[clientWindow geometries] rect];
+
+    NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
+
+    /*** synthetic event: coordinates must be in root space. ***/
+
+    event.event = [clientWindow window];
+    event.window = [clientWindow window];
+    event.x = rect.position.x;
+    event.y = rect.position.y + 21;
+    event.border_width = 0;
+    event.width = clientRect.size.width;
+    event.height = clientRect.size.height;
+    event.override_redirect = 0;
+    event.above_sibling = XCB_NONE;
+    event.response_type = XCB_CONFIGURE_NOTIFY;
+    event.sequence = 0;
+    [connection sendEvent:(const char*) &event toClient:clientWindow propagate:NO];
+
+    clientWindow = nil;
 }
 
 

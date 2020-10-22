@@ -22,6 +22,7 @@
 @synthesize valueMask;
 @synthesize valueList;
 @synthesize windowType;
+@synthesize clientWindow;
 
 - (id) initForWindowType:(XCBWindowType)aWindowType
 {
@@ -43,6 +44,7 @@
 {
     parentWindow = nil;
     visual = nil;
+    clientWindow = nil;
 }
 
 @end

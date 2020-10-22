@@ -10,18 +10,18 @@
 #import "../services/XCBAtomService.h"
 #import "../utils/XCBShape.h"
 #import <xcb/xcb_atom.h>
-#import "XCBWindow.h"
-#import "XCBFrame.h"
-#import "XCBTitleBar.h"
-#import "XCBConnection.h"
+#import "../XCBWindow.h"
+#import "../XCBFrame.h"
+#import "../XCBTitleBar.h"
+#import "../XCBConnection.h"
 
 @interface Transformers : NSObject
 
-xcb_atom_t * FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, XCBAtomService *atomService);
+void FnFromNSArrayAtomsToXcbAtomTArray(NSArray *array, xcb_atom_t destinaton[], XCBAtomService *atomService);
 
 /***Transforms a window in a frame ***/
 
-XCBFrame* FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection);
+XCBFrame* FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connection, XCBWindow *clientWindow);
 
 /*** Transforms a window to a title bar ***/
 

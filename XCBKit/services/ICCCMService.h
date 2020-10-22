@@ -23,6 +23,8 @@
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (BOOL)hasProtocol:(NSString*)protocol forWindow:(XCBWindow*)window;
 - (xcb_size_hints_t*) wmNormalHintsForWindow:(XCBWindow*)aWindow;
+- (void)updateWMNormalHints:(xcb_size_hints_t*)sizeHints forWindow:(XCBWindow*)aWindow;
 - (NSString*) getWmNameForWindow:(XCBWindow*)aWindow;
+- (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow;
 
 @end

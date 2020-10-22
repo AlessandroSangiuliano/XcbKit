@@ -50,7 +50,9 @@
     if (atomValue != nil)
     {
         NSLog(@"Atom previously cached!");
-        return [atomValue unsignedIntValue];
+        xcb_atom_t value = [atomValue unsignedIntValue];
+        atomValue = nil;
+        return value;
     }
     
     const char *str = [atomName UTF8String];
@@ -74,6 +76,7 @@
     {
         NSString *atomName = [atoms objectAtIndex:i];
         [self cacheAtom:atomName];
+        atomName = nil;
     }
     
 }
@@ -86,6 +89,21 @@
 - (NSNumber*) atomNumberFromCachedAtomsWithKey:(NSString *)atomName
 {
     return [cachedAtoms objectForKey:atomName];
+}
+
+- (NSString*) atomNameFromAtom:(xcb_atom_t)anAtom
+{
+    xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name([connection connection], anAtom);
+    xcb_get_atom_name_reply_t *reply = xcb_get_atom_name_reply([connection connection], cookie, NULL);
+    int length = xcb_get_atom_name_name_length(reply);
+
+    if (length == 0)
+        return @"No atom name!";
+
+    char* n = xcb_get_atom_name_name(reply);
+
+    free(reply);
+    return [NSString stringWithUTF8String:n];
 }
 
 - (void) dealloc

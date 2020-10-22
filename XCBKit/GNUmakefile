@@ -2,7 +2,7 @@ PACKAGE_NAME = XCBKit
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.0.10
+VERSION = 0.0.12
 
 FRAMEWORK_NAME = XCBKit
 export FRAMEWORK_NAME
@@ -21,16 +21,20 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBSelection.m \
 			XCBTitleBar.m \
 			XCBRegion.m \
+			XCBGeometry.m \
+			XCBReply.m \
+			XCBQueryTreeReply.m\
 			services/EWMHService.m \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
 			utils/CairoDrawer.m \
+			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
 			functions/Transformers.m
 
 $(FRAMEWORK_NAME)_HEADER_FILES = \
-		  XCBKit.h \
+			XCBKit.h \
 			XCBConnection.h \
 			XCBScreen.h \
 			XCBWindow.h \
@@ -39,20 +43,25 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBSelection.h \
 			XCBTitleBar.h \
 			XCBRegion.h \
+			XCBGeometry.h \
+			XCBReply.h \
+			XCBQueryTreeReply.h \
 			services/EWMHService.h \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \
 			utils/CairoDrawer.h \
+			utils/CairoSurfacesSet.h \
 			utils/XCBCreateWindowTypeRequest.h \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
 			functions/Transformers.h \
 			enums/EMessage.h \
-			enums/ETitleBarColor.h
+			enums/ETitleBarColor.h \
+			enums/EXErrorMessages.h
 
-ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc #-Wno-unused -Werror -Wall
+ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -Wall #-Wno-unused -Werror -Wall
 
-LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
+LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes xcb-aux ) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 
 include $(GNUSTEP_MAKEFILES)/aggregate.make
 include $(GNUSTEP_MAKEFILES)/framework.make

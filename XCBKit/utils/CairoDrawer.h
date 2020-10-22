@@ -10,8 +10,8 @@
 #import <cairo/cairo-xcb.h>
 #import <cairo/cairo.h>
 #import <XCBConnection.h>
-#import "XCBWindow.h"
-#import "XCBVisual.h"
+#import "../XCBWindow.h"
+#import "../XCBVisual.h"
 #import "XCBShape.h"
 
 @interface CairoDrawer : NSObject
@@ -23,10 +23,11 @@
 @property (strong, nonatomic) XCBVisual *visual;
 @property (nonatomic) CGFloat height;
 @property (nonatomic) CGFloat width;
-@property (nonatomic) BOOL alreadyScaled; //potrebbe servire solo per i test
+@property (nonatomic) BOOL alreadyScaled; //could be useful only for tests
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow visual:(XCBVisual*) aVisual;
+- (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow;
 - (void) drawTitleBarButtonWithColor:(XCBColor) buttonColor withStopColor:(XCBColor) stopColor;
 - (void) drawTitleBarWithColor:(XCBColor) titleColor andStopColor:(XCBColor) stopColor;
 - (void) drawWindowWithColor:(XCBColor)aColor andStopColor:(XCBColor)stopColor;
@@ -36,5 +37,6 @@
 - (void) restoreContext;
 - (void) setPreviewImage;
 - (void) drawContent;
-
+- (cairo_surface_t*) drawContentFromData:(uint32_t *)data withWidht:(int)aWidth andHeight:(int)aHeight;
+- (void) drawIconFromSurface:(cairo_surface_t*)aSurface;
 @end
