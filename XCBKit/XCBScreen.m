@@ -7,6 +7,7 @@
 //
 
 #import "XCBScreen.h"
+#import "XCBWindow.h"
 
 @implementation XCBScreen
 

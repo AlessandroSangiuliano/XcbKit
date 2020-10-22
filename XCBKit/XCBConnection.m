@@ -17,6 +17,7 @@
 #import "XCBRegion.h"
 #import "XCBGeometry.h"
 #import "utils/CairoSurfacesSet.h"
+#import <xcb/xcb_aux.h>
 
 @implementation XCBConnection
 
@@ -81,7 +82,8 @@ ICCCMService *icccmService;
     {
         xcb_screen_t *scr = iterator.data;
         XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:scr->root withParentWindow:XCB_NONE andConnection:self];
-        [screens addObject:[XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow]];
+        XCBScreen *screen = [XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow];
+        [screens addObject:screen];
 
         NSLog(@"[XCBConnection] Screen with root window: %d;\n\
 			  With width in pixels: %d;\n\
@@ -91,8 +93,10 @@ ICCCMService *icccmService;
               scr->height_in_pixels);
 
         [self registerWindow:rootWindow];
+        [rootWindow setScreen:screen];
         xcb_screen_next(&iterator);
         rootWindow = nil;
+        screen = nil;
     }
 
     NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
@@ -377,6 +381,7 @@ ICCCMService *icccmService;
     return attributesChanged;
 }
 
+//TODO: is this method still necessary? XCBWindow now has updateAttributes to ask window attributes to X11
 - (XCBReply *)getAttributesForWindow:(XCBWindow *)aWindow
 {
     xcb_generic_error_t *error;
@@ -399,17 +404,15 @@ ICCCMService *icccmService;
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
-    xcb_get_window_attributes_reply_t attributes;
-    attributes.map_state = XCB_MAP_STATE_VIEWABLE;
-    attributes.response_type = anEvent->response_type;
-    [window setAttributes:attributes];
     NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
     [window setIsMapped:YES];
 
-    if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]] &&
-        [[window parentWindow] isKindOfClass:[XCBFrame class]])
-        [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];
-    //[window createPixmap];
+    /*** use this for slower machine?**/
+
+    /*if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]] &&
+        [[window parentWindow] isKindOfClass:[XCBFrame class]] &&
+        [window parentWindow] != [self rootWindowForScreenNumber:0])
+        [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];*/
 
 
     window = nil;
@@ -418,8 +421,6 @@ ICCCMService *icccmService;
 - (void)handleUnMapNotify:(xcb_unmap_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
-    xcb_get_window_attributes_reply_t attributes;
-    attributes.map_state = XCB_MAP_STATE_UNMAPPED; // check and eventually fix this.
     [window setIsMapped:NO];
     NSLog(@"[%@] The window %u is unmapped!", NSStringFromClass([self class]), [window window]);
 
@@ -476,9 +477,7 @@ ICCCMService *icccmService;
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
 
-        //xcb_get_window_attributes_reply_t *reply = [self getAttributesForWindow:window];
-
-        XCBReply* reply = [self getAttributesForWindow:window];
+        XCBReply* reply = [self getAttributesForWindow:window]; //TODO: MOVE THIS METHOD TO XCBWindow class
 
         if ([reply isError])
         {
@@ -594,6 +593,8 @@ ICCCMService *icccmService;
                 XCBGeometry *geometry = [window geometries];
                 [window setWindowRect:[geometry rect]];
                 [window setDecorated:NO];
+                [window setScreen:[window onScreen]];
+                [window updateAttributes];
                 //[window drawIcons];
                 [self mapWindow:window];
                 [self registerWindow:window];
@@ -653,7 +654,8 @@ ICCCMService *icccmService;
     [frame decorateClientWindow];
     [window description];
     [frame description];
-
+    [window setScreen:[window onScreen]];
+    [window updateAttributes];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -839,7 +841,10 @@ ICCCMService *icccmService;
 
     if ([window isMinimizeButton])
     {
-        XCBWindow *frameWindow = [[window parentWindow] parentWindow];
+        XCBFrame *frameWindow = (XCBFrame*)[[window parentWindow] parentWindow];
+        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        [clientWindow cairoPreview];
+        //[clientWindow createPixmap];
         [frameWindow minimize];
         frameWindow = nil;
         window = nil;
@@ -981,9 +986,8 @@ ICCCMService *icccmService;
     XCBFrame *frame;
     XCBWindow *clientWindow;
 
-    XCBScreen *screen = [[self screens] objectAtIndex:0];
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
+    XCBScreen *screen;
+    XCBVisual *visual;
 
     CairoDrawer *drawer;
     window = [self windowForXCBId:anEvent->window];
@@ -1044,7 +1048,7 @@ ICCCMService *icccmService;
 
         if (frame != nil)
         {
-            drawer = [[CairoDrawer alloc] initWithConnection:self window:clientWindow visual:visual];
+            drawer = [[CairoDrawer alloc] initWithConnection:self window:clientWindow];
             [drawer makePreviewImage];
             XCBPoint position = XCBMakePoint(100, 100); //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
@@ -1060,6 +1064,12 @@ ICCCMService *icccmService;
         {
             [clientWindow setIsMinimized:YES];
             [self unmapWindow:clientWindow];
+            [frame updateAttributes];
+            screen = [frame onScreen];
+            [frame setScreen:screen];
+            visual = [[XCBVisual alloc] initWithVisualId:[frame attributes]->visual
+                                        withVisualType:xcb_aux_find_visual_by_id([screen screen], [frame attributes]->visual)];
+            [drawer setVisual:visual];
             [drawer setWindow:frame];
             [drawer setPreviewImage];
         }

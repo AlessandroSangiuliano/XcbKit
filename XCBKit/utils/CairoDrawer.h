@@ -27,6 +27,7 @@
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow visual:(XCBVisual*) aVisual;
+- (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow;
 - (void) drawTitleBarButtonWithColor:(XCBColor) buttonColor withStopColor:(XCBColor) stopColor;
 - (void) drawTitleBarWithColor:(XCBColor) titleColor andStopColor:(XCBColor) stopColor;
 - (void) drawWindowWithColor:(XCBColor)aColor andStopColor:(XCBColor)stopColor;

@@ -8,6 +8,7 @@
 
 #import "CairoDrawer.h"
 #import "../XCBScreen.h"
+#import <xcb/xcb_aux.h>
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -47,7 +48,6 @@ static inline void free_callback(void *data)
     }
     
     connection = aConnection;
-    //window = aWindow;
     [self setWindow:aWindow];
     visual = aVisual;
     
@@ -62,6 +62,32 @@ static inline void free_callback(void *data)
     screen = nil;
     alreadyScaled = NO;
     
+    return self;
+}
+
+- (id) initWithConnection:(XCBConnection *)aConnection window:(XCBWindow*) aWindow
+{
+    self = [super init];
+
+    if (self == nil)
+    {
+        NSLog(@"Unable to init");
+        return nil;
+    }
+
+    connection = aConnection;
+    [self setWindow:aWindow];
+
+    xcb_visualid_t visualId = [window attributes]->visual;
+
+    visual = [[XCBVisual alloc]
+              initWithVisualId:visualId
+                withVisualType:xcb_aux_find_visual_by_id([[window screen] screen], visualId)];
+
+    height = (CGFloat)[aWindow windowRect].size.height;
+    width = (CGFloat)[aWindow windowRect].size.width;
+    alreadyScaled = NO;
+
     return self;
 }
 
@@ -204,22 +230,16 @@ static inline void free_callback(void *data)
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     //cairoSurface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cr = cairo_create(cairoSurface);
-    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    /*cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t* aux = cairo_create(similar);
     cairo_set_source_surface(aux, aSurface, 0, 0);
     cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(aux);
-    cairo_surface_write_to_png(similar, "/tmp/Pova.png");
-    /*cairo_set_source_surface(aux, aSurface, 0, 0);
-    cairo_set_operator(aux, CAIRO_OPERATOR_SOURCE);
     cairo_paint(aux);*/
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_set_source_surface(cr, similar,0,0);
+    cairo_surface_write_to_png(aSurface, "/tmp/Pova.png");
+
+    /*cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_surface(cr, similar,0,0);*/
     cairo_paint(cr);
-    //cairo_surface_write_to_png(cairoSurface, "/tmp/Pova.png");
-    /*cairo_surface_flush(aSurface);
-    cairo_surface_flush(cairoSurface);*/
-    cairo_surface_destroy(aSurface);
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }
@@ -257,18 +277,18 @@ static inline void free_callback(void *data)
 
 - (void) makePreviewImage
 {
-    XCBSize size = [window pixmapSize];
-
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     /*if ([[window parentWindow] isAbove] == NO)
         cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
     else
         cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);*/
-    
+
     cr = cairo_create(cairoSurface);
-    
+    cairo_set_source_surface(cr, cairoSurface, 0,0);
+    cairo_paint(cr);
+
     cairo_surface_write_to_png(cairoSurface, "/tmp/Preview.png");
-    
+
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
 }

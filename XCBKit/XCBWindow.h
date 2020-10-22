@@ -10,9 +10,10 @@
 #import "utils/XCBShape.h"
 #import "XCBGeometry.h"
 #include <xcb/xcb.h>
+#import "XCBQueryTreeReply.h"
+#import "XCBScreen.h"
 
 @class XCBConnection;
-
 
 @interface XCBWindow : NSObject
 {
@@ -20,7 +21,7 @@
 	XCBWindow *parentWindow;
 	XCBWindow *aboveWindow;
 	BOOL isMapped;
-	xcb_get_window_attributes_reply_t attributes;
+	xcb_get_window_attributes_reply_t *attributes;
     uint32_t windowMask;
 }
 
@@ -51,6 +52,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) BOOL isAbove;
 @property (nonatomic) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
+@property (strong, nonatomic) XCBScreen *screen;
 
 /*** ALLOWED ACTIONS ***/
 
@@ -96,12 +98,15 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setAboveWindow:(XCBWindow*) anAbove;
 - (void) setIsMapped:(BOOL) mapped;
 - (BOOL) isMapped;
-- (xcb_get_window_attributes_reply_t) attributes;
-- (void) setAttributes:(xcb_get_window_attributes_reply_t) someAttributes;
+- (void) updateAttributes;
+- (xcb_get_window_attributes_reply_t*) attributes;
+- (void) setAttributes:(xcb_get_window_attributes_reply_t*) someAttributes;
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
 - (void) setWindowBorderWidth:(uint32_t)border;
 - (void) checkNetWMAllowedActions;
+- (XCBQueryTreeReply*) queryTree;
+- (XCBScreen*) onScreen;
 
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;
@@ -122,6 +127,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setRectaglesFromGeometries;
 - (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;
 - (void) drawIcons;
+- (void) cairoPreview;
 
 
 @end
