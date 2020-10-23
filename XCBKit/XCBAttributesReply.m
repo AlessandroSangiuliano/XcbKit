@@ -27,7 +27,7 @@
 @synthesize yourEventMask;
 @synthesize doNotPropagateMask;
 
-- (id) initWithReply:(xcb_get_window_attributes_reply_t*)aReply
+- (id) initWithAttributesReply:(xcb_get_window_attributes_reply_t*)aReply
 {
     self = [super initWithReply:aReply];
 
@@ -75,6 +75,5 @@
     allEventMask = NULL;
     yourEventMask = NULL;
     doNotPropagateMask = NULL;*/
-    attributesReply = NULL;
 }
 @end

@@ -12,6 +12,7 @@
 #include <xcb/xcb.h>
 #import "XCBQueryTreeReply.h"
 #import "XCBScreen.h"
+#import "XCBAttributesReply.h"
 
 @class XCBConnection;
 
@@ -21,7 +22,6 @@
 	XCBWindow *parentWindow;
 	XCBWindow *aboveWindow;
 	BOOL isMapped;
-	xcb_get_window_attributes_reply_t *attributes;
     uint32_t windowMask;
 }
 
@@ -53,6 +53,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
+@property (strong, nonatomic) XCBAttributesReply *attributes;
+
 
 /*** ALLOWED ACTIONS ***/
 
@@ -99,8 +101,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setIsMapped:(BOOL) mapped;
 - (BOOL) isMapped;
 - (void) updateAttributes;
-- (xcb_get_window_attributes_reply_t*) attributes;
-- (void) setAttributes:(xcb_get_window_attributes_reply_t*) someAttributes;
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
 - (void) setWindowBorderWidth:(uint32_t)border;

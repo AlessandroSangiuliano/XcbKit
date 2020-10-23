@@ -110,7 +110,6 @@
 - (XCBWindow*) parentWindowForWindow:(XCBWindow*)aWindow;
 - (XCBRect) geometryForWindow:(XCBWindow*)aWindow;
 - (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
-- (XCBReply*) getAttributesForWindow:(XCBWindow*)aWindow;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 

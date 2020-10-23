@@ -78,7 +78,7 @@ static inline void free_callback(void *data)
     connection = aConnection;
     [self setWindow:aWindow];
 
-    xcb_visualid_t visualId = [window attributes]->visual;
+    xcb_visualid_t visualId = [[window attributes] visualId];
 
     visual = [[XCBVisual alloc]
               initWithVisualId:visualId

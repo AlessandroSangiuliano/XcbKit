@@ -18,6 +18,7 @@
 #import "XCBGeometry.h"
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
+#import "XCBAttributesReply.h"
 
 @implementation XCBConnection
 
@@ -381,26 +382,6 @@ ICCCMService *icccmService;
     return attributesChanged;
 }
 
-//TODO: is this method still necessary? XCBWindow now has updateAttributes to ask window attributes to X11
-- (XCBReply *)getAttributesForWindow:(XCBWindow *)aWindow
-{
-    xcb_generic_error_t *error;
-    xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(connection, [aWindow window]);
-    xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(connection, cookie, &error);
-
-    XCBReply* aReply;
-
-    if (error)
-    {
-        aReply = [[XCBReply alloc] initWithError:error];
-        [aReply description];
-        return aReply;
-    }
-
-    aReply = [[XCBReply alloc] initWithReply:(xcb_get_window_attributes_reply_t*)reply];
-    return aReply;
-}
-
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
@@ -476,8 +457,9 @@ ICCCMService *icccmService;
     if ([window decorated] == NO && !isManaged)
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-
-        XCBReply* reply = [self getAttributesForWindow:window]; //TODO: MOVE THIS METHOD TO XCBWindow class
+        [window updateAttributes];
+        //XCBReply* reply = [self getAttributesForWindow:window]; //TODO: MOVE THIS METHOD TO XCBWindow class
+        XCBAttributesReply *reply = [window attributes];
 
         if ([reply isError])
         {
@@ -490,18 +472,14 @@ ICCCMService *icccmService;
 
         if (![reply isError])
         {
-            xcb_get_window_attributes_reply_t *rep = [reply reply];
-
-            if (rep->override_redirect == YES)
+            if ([reply overrideRedirect] == YES)
             {
                 NSLog(@"Override redirect detected"); //useless log
                 window = nil;
-                rep = NULL;
                 reply = nil;
                 ewmhService = nil;
                 return;
             }
-            rep = NULL;
             reply = nil;
         }
 
@@ -1067,8 +1045,9 @@ ICCCMService *icccmService;
             [frame updateAttributes];
             screen = [frame onScreen];
             [frame setScreen:screen];
-            visual = [[XCBVisual alloc] initWithVisualId:[frame attributes]->visual
-                                        withVisualType:xcb_aux_find_visual_by_id([screen screen], [frame attributes]->visual)];
+            xcb_visualid_t visualid = [[frame attributes] visualId];
+            visual = [[XCBVisual alloc] initWithVisualId:visualid
+                                        withVisualType:xcb_aux_find_visual_by_id([screen screen], visualid)];
             [drawer setVisual:visual];
             [drawer setWindow:frame];
             [drawer setPreviewImage];

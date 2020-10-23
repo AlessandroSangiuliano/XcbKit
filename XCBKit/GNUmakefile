@@ -23,6 +23,8 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBRegion.m \
 			XCBGeometry.m \
 			XCBReply.m \
+			XCBAttributesReply.m \
+			XCBGeometryReply.m \
 			XCBQueryTreeReply.m\
 			services/EWMHService.m \
 			services/XCBAtomService.m \
@@ -45,6 +47,8 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBRegion.h \
 			XCBGeometry.h \
 			XCBReply.h \
+			XCBAttributesReply.h \
+			XCBGeometryReply.h \
 			XCBQueryTreeReply.h \
 			services/EWMHService.h \
 			services/XCBAtomService.h \

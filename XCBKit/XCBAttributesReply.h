@@ -32,6 +32,6 @@
 @property (nonatomic) uint32_t yourEventMask;
 @property (nonatomic) uint16_t doNotPropagateMask;
 
-- (id) initWithReply:(xcb_get_window_attributes_reply_t*)aReply;
+- (id) initWithAttributesReply:(xcb_get_window_attributes_reply_t*)aReply;
 
 @end

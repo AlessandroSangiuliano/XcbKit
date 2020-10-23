@@ -49,6 +49,7 @@
 @synthesize pixmapSize;
 @synthesize icons;
 @synthesize screen;
+@synthesize attributes;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -237,7 +238,7 @@
     pixmap = xcb_generate_id([connection connection]);
     //sleep(1);
 
-    xcb_visualid_t visualId = [self attributes]->visual;
+    xcb_visualid_t visualId = [[self attributes] visualId];
 
     XCBVisual* visual = [[XCBVisual alloc]
                          initWithVisualId:visualId
@@ -406,13 +407,21 @@
 
 - (void) updateAttributes
 {
+    xcb_generic_error_t *error;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes([connection connection], window);
-    attributes = xcb_get_window_attributes_reply([connection connection], cookie, NULL);
-}
+    xcb_get_window_attributes_reply_t *attr = xcb_get_window_attributes_reply([connection connection], cookie, &error);
 
-- (xcb_get_window_attributes_reply_t*)attributes
-{
-    return attributes;
+    if (attributes != nil)
+        attributes = nil;
+
+    if (error)
+    {
+        attributes = [[XCBAttributesReply alloc] initWithError:error];
+        [attributes description];
+        return;
+    }
+
+    attributes = [[XCBAttributesReply alloc] initWithAttributesReply:attr];
 }
 
 - (XCBQueryTreeReply*) queryTree
@@ -426,10 +435,6 @@
     return queryReply;
 }
 
-- (void)setAttributes:(xcb_get_window_attributes_reply_t*)someAttributes
-{
-    attributes = someAttributes;
-}
 
 - (uint32_t)windowMask
 {
@@ -1057,6 +1062,7 @@
     [allowedActions removeAllObjects];
     allowedActions = nil;
     screen = nil;
+    attributes = nil;
 }
 
 @end

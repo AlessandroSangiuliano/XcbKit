@@ -20,7 +20,7 @@
 @property (strong, nonatomic) XCBWindow *rootWindow;
 @property (nonatomic) xcb_get_geometry_reply_t *geometryReply;
 
-- (id) initWithReply:(xcb_get_geometry_reply_t*)aReplay;
+- (id) initWithGeometryReply:(xcb_get_geometry_reply_t*)aReplay;
 - (void) description;
 
 @end
