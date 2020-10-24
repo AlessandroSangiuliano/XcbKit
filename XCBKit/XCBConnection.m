@@ -15,7 +15,7 @@
 #import "utils/CairoDrawer.h"
 #import "services/ICCCMService.h"
 #import "XCBRegion.h"
-#import "XCBGeometry.h"
+#import "XCBGeometryReply.h"
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
 #import "XCBAttributesReply.h"
@@ -77,30 +77,7 @@ ICCCMService *icccmService;
 
     /** save all screens **/
 
-    xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
-
-    while (iterator.rem)
-    {
-        xcb_screen_t *scr = iterator.data;
-        XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:scr->root withParentWindow:XCB_NONE andConnection:self];
-        XCBScreen *screen = [XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow];
-        [screens addObject:screen];
-
-        NSLog(@"[XCBConnection] Screen with root window: %d;\n\
-			  With width in pixels: %d;\n\
-			  With height in pixels: %d\n",
-              scr->root,
-              scr->width_in_pixels,
-              scr->height_in_pixels);
-
-        [self registerWindow:rootWindow];
-        [rootWindow setScreen:screen];
-        xcb_screen_next(&iterator);
-        rootWindow = nil;
-        screen = nil;
-    }
-
-    NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
+    [self checkScreens];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
@@ -188,6 +165,34 @@ ICCCMService *icccmService;
     needFlush = aNeedFlushChoice;
 }
 
+- (void) checkScreens
+{
+    xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
+
+    while (iterator.rem)
+    {
+        xcb_screen_t *scr = iterator.data;
+        XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:scr->root withParentWindow:XCB_NONE andConnection:self];
+        XCBScreen *screen = [XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow];
+        [screens addObject:screen];
+
+        NSLog(@"[XCBConnection] Screen with root window: %d;\n\
+			  With width in pixels: %d;\n\
+			  With height in pixels: %d\n",
+              scr->root,
+              scr->width_in_pixels,
+              scr->height_in_pixels);
+
+        [self registerWindow:rootWindow];
+        [rootWindow setScreen:screen];
+        xcb_screen_next(&iterator);
+        rootWindow = nil;
+        screen = nil;
+    }
+
+    NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
+}
+
 - (NSMutableArray *)screens
 {
     return screens;
@@ -230,7 +235,6 @@ ICCCMService *icccmService;
 
         response = [[XCBWindowTypeResponse alloc] initWithXCBFrame:frame];
     }
-
 
     if ([aRequest windowType] == XCBTitleBarRequest)
     {
@@ -317,40 +321,6 @@ ICCCMService *icccmService;
     [aWindow setWindowRect:newRect];
     [aWindow setOriginalRect:newRect];
     [aWindow setParentWindow:parentWindow];
-}
-
-- (XCBWindow *)parentWindowForWindow:(XCBWindow *)aWindow
-{
-    xcb_query_tree_cookie_t cookie = xcb_query_tree(connection, [aWindow window]);
-
-    xcb_generic_error_t *error;
-
-    xcb_query_tree_reply_t *reply = xcb_query_tree_reply(connection, cookie, &error);
-
-    XCBWindow *parent = [[XCBWindow alloc] initWithXCBWindow:reply->parent andConnection:self];
-
-    XCBRect windowRect = [self geometryForWindow:parent];
-    [parent setWindowRect:windowRect];
-
-    return parent;
-}
-
-- (XCBRect)geometryForWindow:(XCBWindow *)aWindow
-{
-    xcb_get_geometry_cookie_t cookie = xcb_get_geometry(connection, [aWindow window]);
-    xcb_generic_error_t *error;
-    xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(connection, cookie, &error);
-
-    if (reply == NULL)
-    {
-        return XCBInvalidRect;
-    }
-
-    XCBRect rect = XCBMakeRect(XCBMakePoint(reply->x, reply->y), XCBMakeSize(reply->width, reply->height));
-
-    free(reply);
-
-    return rect;
 }
 
 - (BOOL)changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow withMask:(uint32_t)aMask checked:(BOOL)check
@@ -568,7 +538,7 @@ ICCCMService *icccmService;
                 CairoSurfacesSet *cairoSet = [[CairoSurfacesSet alloc] initWithConnection:self];
                 [cairoSet buildSetFromReply:reply];
                 [window setIcons:[cairoSet cairoSurfaces]];
-                XCBGeometry *geometry = [window geometries];
+                XCBGeometryReply *geometry = [window geometries];
                 [window setWindowRect:[geometry rect]];
                 [window setDecorated:NO];
                 [window setScreen:[window onScreen]];

@@ -8,11 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "utils/XCBShape.h"
-#import "XCBGeometry.h"
+#import "XCBGeometryReply.h"
 #include <xcb/xcb.h>
 #import "XCBQueryTreeReply.h"
 #import "XCBScreen.h"
 #import "XCBAttributesReply.h"
+#import "XCBVisual.h"
 
 @class XCBConnection;
 
@@ -107,6 +108,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) checkNetWMAllowedActions;
 - (XCBQueryTreeReply*) queryTree;
 - (XCBScreen*) onScreen;
+- (XCBVisual*) visual;
 
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;
@@ -122,7 +124,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) description;
 - (BOOL) grabPointer;
 - (void) ungrabPointer;
-- (XCBGeometry*) geometries;
+- (XCBGeometryReply*) geometries;
 - (XCBRect) rectFromGeometries;
 - (void) setRectaglesFromGeometries;
 - (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;

@@ -21,7 +21,6 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBSelection.m \
 			XCBTitleBar.m \
 			XCBRegion.m \
-			XCBGeometry.m \
 			XCBReply.m \
 			XCBAttributesReply.m \
 			XCBGeometryReply.m \
@@ -45,7 +44,6 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBSelection.h \
 			XCBTitleBar.h \
 			XCBRegion.h \
-			XCBGeometry.h \
 			XCBReply.h \
 			XCBAttributesReply.h \
 			XCBGeometryReply.h \

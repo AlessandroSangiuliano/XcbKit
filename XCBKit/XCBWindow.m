@@ -905,11 +905,12 @@
     }
 }
 
-- (XCBGeometry *)geometries
+- (XCBGeometryReply *)geometries
 {
     xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
     xcb_generic_error_t *error;
     xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
+    XCBGeometryReply *geometry;
 
     if (reply == NULL)
     {
@@ -917,23 +918,22 @@
 
         if (error)
         {
-            NSLog(@"Error code: %d", error->error_code);
-            free(error);
+           geometry = [[XCBGeometryReply alloc] initWithError:(error)];
+           [geometry setRect:XCBInvalidRect];
+           [geometry description];
         }
 
         return nil;
-
     }
 
-    XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];
-    free(reply);
+    geometry = [[XCBGeometryReply alloc] initWithGeometryReply:reply];
 
     return geometry;
 }
 
 - (XCBRect)rectFromGeometries
 {
-    XCBGeometry *geo = [self geometries];
+    XCBGeometryReply *geo = [self geometries];
     XCBRect rect = [geo rect];
     geo = nil;
     return rect;
@@ -1047,6 +1047,17 @@
     [drawer drawIconFromSurface:[[icons objectAtIndex:0] pointerValue]];
 
     drawer = nil;
+}
+
+- (XCBVisual*) visual
+{
+    xcb_visualid_t visualId = [attributes visualId];
+
+    XCBVisual *visual = [[XCBVisual alloc]
+                         initWithVisualId:visualId
+                           withVisualType:xcb_aux_find_visual_by_id([screen screen], visualId)];
+
+    return visual;
 }
 
 - (void)description

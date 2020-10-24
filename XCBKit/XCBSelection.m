@@ -80,7 +80,7 @@
         do
         {
             //geometry = XCBInvalidRect;
-            geometry = [connection geometryForWindow:currentOwner];
+            geometry =  [[currentOwner geometries] rect];
             
         } while (FnCheckXCBRectIsValid(geometry));
         
