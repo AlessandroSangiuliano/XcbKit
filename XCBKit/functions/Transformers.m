@@ -54,6 +54,7 @@ XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* con
     [titleBar setAttributes:[aWindow attributes]];
     [titleBar setWindowRect:[aWindow windowRect]];
     [titleBar setOriginalRect:[aWindow originalRect]];
+    [titleBar setOldRect:[aWindow oldRect]];
     [titleBar setWindowMask:[aWindow windowMask]];
     [titleBar setIsMapped:[aWindow isMapped]];
     [titleBar setConnection:connection];
