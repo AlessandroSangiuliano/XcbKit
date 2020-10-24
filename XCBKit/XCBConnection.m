@@ -556,7 +556,7 @@ ICCCMService *icccmService;
 
         }
 
-        [window setRectaglesFromGeometries];
+        [window updateRectsFromGeometries];
         [self registerWindow:window];
         [window setFirstRun:YES];
         free(windowTypeReply);

@@ -126,7 +126,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) ungrabPointer;
 - (XCBGeometryReply*) geometries;
 - (XCBRect) rectFromGeometries;
-- (void) setRectaglesFromGeometries;
+- (void) updateRectsFromGeometries;
 - (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;
 - (void) drawIcons;
 - (void) cairoPreview;

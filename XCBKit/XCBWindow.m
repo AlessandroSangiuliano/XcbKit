@@ -943,10 +943,13 @@
 {
     uint16_t config_frame_mask = 0;
     uint16_t config_win_mask = 0;
+    uint16_t config_title_mask = 0;
     uint32_t config_frame_vals[7];
     uint32_t config_win_vals[7];
+    uint32_t config_title_vals[7];
     unsigned short frame_i = 0;
     unsigned short win_i = 0;
+    unsigned short title_i = 0;
 
     XCBFrame *frame = (XCBFrame*)parentWindow;
     XCBRect frameRect = [[frame geometries] rect];
@@ -972,8 +975,10 @@
     {
         config_frame_mask |= XCB_CONFIG_WINDOW_WIDTH;
         config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_title_mask |= XCB_CONFIG_WINDOW_WIDTH;
         config_frame_vals[frame_i++] = anEvent->width;
         config_win_vals[win_i++] = anEvent->width;
+        config_title_vals[title_i++] = anEvent->width;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
@@ -1004,8 +1009,13 @@
         config_frame_vals[frame_i++] = anEvent->stack_mode;
     }
 
+    XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
     xcb_configure_window([connection connection], window, config_win_mask, config_win_vals);
     xcb_configure_window([connection connection], [frame window], config_frame_mask, config_frame_vals);
+    xcb_configure_window([connection connection], [titleBar window], config_title_mask, config_title_vals);
+
+    [titleBar updateRectsFromGeometries];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     /*** required by ICCCM compliance ***/
     xcb_configure_notify_event_t event;
@@ -1025,11 +1035,13 @@
     [connection sendEvent:(const char*) &event toClient:self propagate:NO];
 
     frame = nil;
+    titleBar = nil;
 }
 
-- (void)setRectaglesFromGeometries
+- (void)updateRectsFromGeometries
 {
     XCBRect rect = [self rectFromGeometries];
+    oldRect = windowRect;
     windowRect = rect;
     originalRect = rect;
 }
