@@ -51,6 +51,7 @@ XCB_EVENT_MASK_KEY_PRESS
 - (void) drawTitleBarForColor:(TitleBarColor)aColor; //maybe is better to set the color all the time if the default one is not desidered.
 - (void) setWindowTitle:(NSString*) title;
 - (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor;
+- (void) generateButtons;
 
 /****************
  *    ACCESORS  *

@@ -33,122 +33,14 @@
 - (id) initWithFrame:(XCBFrame *)aFrame withConnection:(XCBConnection *)aConnection
 {
     self = [super init];
-    uint32_t values[2];
-    
+
+    if (self == nil)
+        return nil;
+
     windowMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     
     [super setConnection:aConnection];
-    
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
-    XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    
-    [rootVisual setVisualTypeForScreen:screen];
-    
-    values[0] = [screen screen]->white_pixel;
-    values[1] = TITLE_MASK_VALUES;
-    
-    XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBTitleBarRequest];
-    [request setDepth:XCB_COPY_FROM_PARENT];
-    [request setParentWindow:aFrame];
-    [request setXPosition:0];
-    [request setYPosition:0];
-    [request setWidth:[aFrame windowRect].size.width];
-    [request setHeight:22];
-    [request setBorderWidth:0.2];
-    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
-    [request setVisual:rootVisual];
-    [request setValueMask:windowMask];
-    [request setValueList:values];
-    
-    XCBWindowTypeResponse* response = [[super connection] createWindowForRequest:request registerWindow:NO];
-    
-    CsMapXCBWindowToXCBTitleBar([response titleBar], self);
-    [[super connection] registerWindow:self];
-    
-    response = nil;
-    request = nil;
-    
-    values[0] = [screen screen]->white_pixel;
-    values[1] = XCB_EVENT_MASK_EXPOSURE |  XCB_EVENT_MASK_BUTTON_PRESS ;
-    
-    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    
-    uint32_t gcMask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES; //necessary code?
-    uint32_t gcValues[2];
-    gcValues[0] = [screen screen]->black_pixel;
-    gcValues[1] = 0;
-    
-    if ([[aFrame childWindowForKey:ClientWindow] canClose])
-    {
-        hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                                    withParentWindow:self
-                                                       withXPosition:5
-                                                       withYPosition:5
-                                                           withWidth:14
-                                                          withHeight:14
-                                                    withBorrderWidth:0
-                                                        withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                        withVisualId:rootVisual
-                                                       withValueMask:mask
-                                                       withValueList:values];
-        
-        [hideWindowButton setWindowMask:mask];
-        [hideWindowButton setCanMove:NO];
-        [hideWindowButton setIsCloseButton:YES];
 
-        hideButtonColor = XCBMakeColor(0.411, 0.176, 0.673, 1); //original: 0.7 0.427 1 1
-        
-        [hideWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
-    }
-    
-    if ([[aFrame childWindowForKey:ClientWindow] canMinimize])
-    {
-        minimizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                                        withParentWindow:self
-                                                           withXPosition:24
-                                                           withYPosition:5
-                                                               withWidth:14
-                                                              withHeight:14
-                                                        withBorrderWidth:0
-                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                            withVisualId:rootVisual
-                                                           withValueMask:mask
-                                                           withValueList:values];
-        
-        [minimizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
-        [minimizeWindowButton setWindowMask:mask];
-        [minimizeWindowButton setCanMove:NO];
-        [minimizeWindowButton setIsMinimizeButton:YES];
-        
-        minimizeButtonColor = XCBMakeColor(0.9,0.7,0.3,1);
-    }
-    
-    if ([[aFrame childWindowForKey:ClientWindow] canFullscreen])
-    {
-        maximizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
-                                                        withParentWindow:self
-                                                           withXPosition:44
-                                                           withYPosition:5
-                                                               withWidth:14
-                                                              withHeight:14
-                                                        withBorrderWidth:0
-                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
-                                                            withVisualId:rootVisual
-                                                           withValueMask:mask
-                                                           withValueList:values];
-        
-        [maximizeWindowButton createGraphicContextWithMask:gcMask andValues:gcValues];
-        [maximizeWindowButton setWindowMask:mask];
-        [maximizeWindowButton setCanMove:NO];
-        [maximizeWindowButton setIsMaximizeButton:YES];
-        
-        maximizeButtonColor = XCBMakeColor(0,0.74,1,1);
-    }
-    
-    [[super connection] mapWindow:self];
-    [[super connection] mapWindow:hideWindowButton];
-    [[super connection] mapWindow:minimizeWindowButton];
-    [[super connection] mapWindow:maximizeWindowButton];
     ewmhService = [EWMHService sharedInstanceWithConnection:[super connection]];
     
     return self;
@@ -244,6 +136,91 @@
     drawer = nil;
     screen = nil;
     visual = nil;
+}
+
+- (void) generateButtons
+{
+    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
+    XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
+
+    [rootVisual setVisualTypeForScreen:screen];
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    uint32_t values[2];
+    values[0] = [screen screen]->white_pixel;
+    values[1] = XCB_EVENT_MASK_EXPOSURE |  XCB_EVENT_MASK_BUTTON_PRESS;
+
+    XCBFrame* frame = (XCBFrame*)parentWindow;
+
+    if ([[frame childWindowForKey:ClientWindow] canClose])
+    {
+        hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                    withParentWindow:self
+                                                       withXPosition:5
+                                                       withYPosition:5
+                                                           withWidth:14
+                                                          withHeight:14
+                                                    withBorrderWidth:0
+                                                        withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                        withVisualId:rootVisual
+                                                       withValueMask:mask
+                                                       withValueList:values];
+
+        [hideWindowButton setWindowMask:mask];
+        [hideWindowButton setCanMove:NO];
+        [hideWindowButton setIsCloseButton:YES];
+
+        hideButtonColor = XCBMakeColor(0.411, 0.176, 0.673, 1); //original: 0.7 0.427 1 1
+    }
+
+    if ([[frame childWindowForKey:ClientWindow] canMinimize])
+    {
+        minimizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                        withParentWindow:self
+                                                           withXPosition:24
+                                                           withYPosition:5
+                                                               withWidth:14
+                                                              withHeight:14
+                                                        withBorrderWidth:0
+                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                            withVisualId:rootVisual
+                                                           withValueMask:mask
+                                                           withValueList:values];
+
+        [minimizeWindowButton setWindowMask:mask];
+        [minimizeWindowButton setCanMove:NO];
+        [minimizeWindowButton setIsMinimizeButton:YES];
+
+        minimizeButtonColor = XCBMakeColor(0.9,0.7,0.3,1);
+    }
+
+    if ([[frame childWindowForKey:ClientWindow] canFullscreen])
+    {
+        maximizeWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
+                                                        withParentWindow:self
+                                                           withXPosition:44
+                                                           withYPosition:5
+                                                               withWidth:14
+                                                              withHeight:14
+                                                        withBorrderWidth:0
+                                                            withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
+                                                            withVisualId:rootVisual
+                                                           withValueMask:mask
+                                                           withValueList:values];
+
+        [maximizeWindowButton setWindowMask:mask];
+        [maximizeWindowButton setCanMove:NO];
+        [maximizeWindowButton setIsMaximizeButton:YES];
+
+        maximizeButtonColor = XCBMakeColor(0,0.74,1,1);
+    }
+
+    [[super connection] mapWindow:hideWindowButton];
+    [[super connection] mapWindow:minimizeWindowButton];
+    [[super connection] mapWindow:maximizeWindowButton];
+
+    screen = nil;
+    rootVisual = nil;
+    frame = nil;
 }
 
 - (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
