@@ -562,7 +562,8 @@ ICCCMService *icccmService;
         free(windowTypeReply);
     }
 
-    XCBScreen *screen = [[self screens] objectAtIndex:0];
+    [window setScreen:[window onScreen]];
+    XCBScreen *screen =  [window screen]; //FIXME: [[window setScreen:[window onScreen]]; [window screen]?? So redundant!!!
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
@@ -600,10 +601,8 @@ ICCCMService *icccmService;
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
-    [window description];
-    [frame description];
-    [window setScreen:[window onScreen]];
     [window updateAttributes];
+    [frame setScreen:[window screen]];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -611,6 +610,8 @@ ICCCMService *icccmService;
     request = nil;
     response = nil;
     ewmhService = nil;
+    screen = nil;
+    visual = nil;
 }
 
 - (void)handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -761,27 +762,26 @@ ICCCMService *icccmService;
 
     if ([window isCloseButton])
     {
-        XCBFrame *frameWindow = (XCBFrame *) [[window parentWindow] parentWindow];
-        NSLog(@"Operations for frame window %u", [frameWindow window]);
+        XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
+        NSLog(@"Operations for frame window %u", [frame window]);
 
-        BOOL check = [frameWindow window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
+        BOOL check = [frame window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
         currentTime = anEvent->time;
 
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
         [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
 
-
-        if (frameWindow != nil && check) //probably unnecessary check when fixed
+        if (frame != nil && check) //probably unnecessary check when fixed
         {
-            /* i was using an artifact with [frameWindow setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
+            /* i was using an artifact with [frame setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
              an expose event is generated for the frame and close button, so i was calling [frame destroy]
-             in handleExpose method (XCBConnection). I think that is toally wrong and bad */
+             in handleExpose method (XCBConnection). I think that is totally wrong and bad */
 
-            [frameWindow setNeedDestroy:YES];
+            [frame setNeedDestroy:YES];
         }
 
-        frameWindow = nil;
+        frame = nil;
         window = nil;
         clientWindow = nil;
         return;
@@ -789,22 +789,24 @@ ICCCMService *icccmService;
 
     if ([window isMinimizeButton])
     {
-        XCBFrame *frameWindow = (XCBFrame*)[[window parentWindow] parentWindow];
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        frame = (XCBFrame*)[[window parentWindow] parentWindow];
+        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
         [clientWindow cairoPreview];
         //[clientWindow createPixmap];
-        [frameWindow minimize];
-        frameWindow = nil;
+        [frame minimize];
+        frame = nil;
         window = nil;
         return;
     }
 
     if ([window isMaximizeButton])
     {
-        XCBScreen *screen = [screens objectAtIndex:0];
+        frame = (XCBFrame*)[[window parentWindow] parentWindow];
+        XCBScreen *screen = [frame screen];
         [window maximizeToWidth:[screen width] andHeight:[screen height]];
         screen = nil;
         window = nil;
+        frame = nil;
         return;
     }
 
