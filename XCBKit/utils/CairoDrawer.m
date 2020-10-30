@@ -54,7 +54,7 @@ static inline void free_callback(void *data)
     height = (CGFloat)[aWindow windowRect].size.height;
     width = (CGFloat)[aWindow windowRect].size.width;
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [window onScreen];
     
     if (visual != nil)
         [visual setVisualTypeForScreen:screen];

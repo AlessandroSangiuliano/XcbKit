@@ -1139,9 +1139,8 @@ ICCCMService *icccmService;
 - (void)handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
-    XCBScreen *screen = [[self screens] objectAtIndex:0];
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
+    [window setScreen:[window onScreen]];
+    XCBVisual *visual = [window visual];
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
@@ -1168,7 +1167,6 @@ ICCCMService *icccmService;
     }
 
     window = nil;
-    screen = nil;
     visual = nil;
 }
 
@@ -1413,14 +1411,15 @@ ICCCMService *icccmService;
 
 - (void)registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
 {
-    XCBScreen *screen = [screens objectAtIndex:0];
+    [selectionWindow setScreen:[selectionWindow onScreen]];
+    XCBScreen *screen = [selectionWindow screen];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
     uint32_t values[1];
     values[0] = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
     XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:[[screen rootWindow] window] andConnection:self];
 
-    if (replace) //gli attributi vanno cambiati sempre poi chekko se il replace è attivo e getto la selection.
+    if (replace)
     {
         BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
 

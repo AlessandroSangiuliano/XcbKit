@@ -120,14 +120,14 @@
     XCBWindow *clientWindow = [children objectForKey:key];
     key = nil;
 
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
-    XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [rootVisual setVisualTypeForScreen:screen];
+    XCBScreen *scr = [parentWindow screen];
+    XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
+    [rootVisual setVisualTypeForScreen:scr];
 
     uint32_t values[2];
     uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 
-    values[0] = [screen screen]->white_pixel;
+    values[0] = [scr screen]->white_pixel;
     values[1] = TITLE_MASK_VALUES;
 
     XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBTitleBarRequest];
@@ -197,7 +197,7 @@
     clientWindow = nil;
     ewmhService = nil;
     windowTitle = nil;
-    screen = nil;
+    scr = nil;
     rootVisual = nil;
     
     free(reply);

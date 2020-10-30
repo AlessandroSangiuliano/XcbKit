@@ -427,9 +427,17 @@
 - (XCBQueryTreeReply*) queryTree
 {
     XCBQueryTreeReply *queryReply;
+    xcb_generic_error_t *error;
 
     xcb_query_tree_cookie_t cookie = xcb_query_tree([connection connection], window);
-    xcb_query_tree_reply_t *reply = xcb_query_tree_reply([connection connection], cookie, NULL);
+    xcb_query_tree_reply_t *reply = xcb_query_tree_reply([connection connection], cookie, &error);
+
+    if (error)
+    {
+        queryReply = [[XCBQueryTreeReply alloc] initWithError:error];
+        [queryReply description];
+        return queryReply;
+    }
     queryReply = [[XCBQueryTreeReply alloc] initWithReply:reply andConnection:connection];
 
     return queryReply;
@@ -648,8 +656,6 @@
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     xcb_atom_t changeStateAtom = [atomService cacheAtom:@"WM_CHANGE_STATE"];
-    XCBScreen *scr = [[connection screens] objectAtIndex:0];
-
 
     /*** TODO: check if the if the window is already miniaturized ***/
 
@@ -666,16 +672,15 @@
     event.data.data32[3] = 0;
     event.data.data32[4] = 0;
 
-    xcb_send_event([connection connection], 0,
-                   [[scr rootWindow] window],
+    xcb_send_event([connection connection],
+                   0,
+                   [[screen rootWindow] window],
                    XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
                    (const char *) &event);
 
     /*** set iconic hints? or normal if not iconized hints? ***/
 
     atomService = nil;
-    screen = nil;
-
 }
 
 - (void)createMiniWindowAtPosition:(XCBPoint)position

@@ -49,10 +49,11 @@
 - (void) drawArcsForColor:(TitleBarColor)aColor
 {
     XCBColor stopColor = XCBMakeColor(1,1,1,1);
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
-    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
-    [visual setVisualTypeForScreen:screen];
-    
+    XCBWindow *rootWindow = [parentWindow parentWindow];
+    XCBScreen *scr = [rootWindow screen];
+    XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
+    [visual setVisualTypeForScreen:scr];
+
     CairoDrawer *drawer = nil;
     
     if (hideWindowButton != nil)
@@ -82,8 +83,9 @@
         drawer = nil;
     }
     
-    screen = nil;
+    scr = nil;
     visual = nil;
+    rootWindow = nil;
 }
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor
@@ -96,8 +98,8 @@
     if (aColor == TitleBarDownColor)
         aux = titleBarDownColor;
     
-    
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
+    XCBWindow *rootWindow = [parentWindow parentWindow];
+    XCBScreen *screen = [rootWindow screen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
@@ -136,11 +138,13 @@
     drawer = nil;
     screen = nil;
     visual = nil;
+    rootWindow = nil;
 }
 
 - (void) generateButtons
 {
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
+    XCBWindow *rootWindow = [parentWindow parentWindow];
+    XCBScreen *screen = [rootWindow screen];
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
 
     [rootVisual setVisualTypeForScreen:screen];
@@ -220,6 +224,7 @@
 
     screen = nil;
     rootVisual = nil;
+    rootWindow = nil;
     frame = nil;
 }
 
@@ -238,8 +243,9 @@
         NSLog(@"No title to set to the window.");
         return;
     }
-    
-    XCBScreen *screen = [[[super connection] screens] objectAtIndex:0];
+
+    XCBWindow *rootWindow = [parentWindow parentWindow];
+    XCBScreen *screen = [rootWindow screen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
@@ -250,6 +256,7 @@
     drawer = nil;
     screen = nil;
     visual = nil;
+    rootWindow = nil;
 }
 
 - (xcb_arc_t*) arcs
