@@ -168,12 +168,14 @@ ICCCMService *icccmService;
 - (void) checkScreens
 {
     xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
+    NSUInteger number = 0;
 
     while (iterator.rem)
     {
         xcb_screen_t *scr = iterator.data;
         XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:scr->root withParentWindow:XCB_NONE andConnection:self];
         XCBScreen *screen = [XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow];
+        [screen setScreenNumber:number++];
         [screens addObject:screen];
 
         NSLog(@"[XCBConnection] Screen with root window: %d;\n\
