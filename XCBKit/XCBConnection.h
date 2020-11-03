@@ -68,7 +68,7 @@
 				 withValueList: (const uint32_t *) valueList;
 
 - (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
-
+- (void) checkScreens;
 - (NSMutableArray*) screens;
 
 /*** HANDLE EVENTS ***/
@@ -107,10 +107,7 @@
 - (void) reparentWindow: (XCBWindow*) aWindow toWindow:(XCBWindow*)parentWindow position:(XCBPoint)position;
 - (void) mapWindow: (XCBWindow*) aWindow;
 - (void) unmapWindow:(XCBWindow*)aWindow;
-- (XCBWindow*) parentWindowForWindow:(XCBWindow*)aWindow;
-- (XCBRect) geometryForWindow:(XCBWindow*)aWindow;
 - (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
-- (XCBReply*) getAttributesForWindow:(XCBWindow*)aWindow;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 

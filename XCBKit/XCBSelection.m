@@ -46,6 +46,7 @@
     
     XCBWindow *owner = reply->owner != XCB_NONE ? [[XCBWindow alloc] initWithXCBWindow:reply->owner andConnection:connection] : nil;
     [connection registerWindow:owner];
+    [owner setScreen:[owner onScreen]];
     
     free(reply);
     return owner;
@@ -79,8 +80,7 @@
         
         do
         {
-            //geometry = XCBInvalidRect;
-            geometry = [connection geometryForWindow:currentOwner];
+            geometry =  [[currentOwner geometries] rect];
             
         } while (FnCheckXCBRectIsValid(geometry));
         
@@ -89,7 +89,7 @@
     
     /* Announce that we are the new owner */
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [currentOwner screen];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     
     xcb_client_message_event_t ev;

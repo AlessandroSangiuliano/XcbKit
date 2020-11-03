@@ -54,7 +54,7 @@ static inline void free_callback(void *data)
     height = (CGFloat)[aWindow windowRect].size.height;
     width = (CGFloat)[aWindow windowRect].size.width;
     
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [window onScreen];
     
     if (visual != nil)
         [visual setVisualTypeForScreen:screen];
@@ -78,11 +78,7 @@ static inline void free_callback(void *data)
     connection = aConnection;
     [self setWindow:aWindow];
 
-    xcb_visualid_t visualId = [window attributes]->visual;
-
-    visual = [[XCBVisual alloc]
-              initWithVisualId:visualId
-                withVisualType:xcb_aux_find_visual_by_id([[window screen] screen], visualId)];
+    visual = [window visual];
 
     height = (CGFloat)[aWindow windowRect].size.height;
     width = (CGFloat)[aWindow windowRect].size.width;

@@ -13,6 +13,7 @@
 
 @synthesize height;
 @synthesize width;
+@synthesize screenNumber;
 
 + (XCBScreen*) screenWithXCBScreen:(xcb_screen_t *)aScreen andRootWindow:(XCBWindow*)theRootWindow
 {
@@ -62,6 +63,11 @@
 - (XCBWindow *) rootWindow
 {
 	return rootWindow;
+}
+
+- (void) description
+{
+    NSLog(@"Screen number: %hd", screenNumber);
 }
 
 - (void) dealloc

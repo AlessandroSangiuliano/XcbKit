@@ -49,6 +49,7 @@
 @synthesize pixmapSize;
 @synthesize icons;
 @synthesize screen;
+@synthesize attributes;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -237,7 +238,7 @@
     pixmap = xcb_generate_id([connection connection]);
     //sleep(1);
 
-    xcb_visualid_t visualId = [self attributes]->visual;
+    xcb_visualid_t visualId = [[self attributes] visualId];
 
     XCBVisual* visual = [[XCBVisual alloc]
                          initWithVisualId:visualId
@@ -406,30 +407,42 @@
 
 - (void) updateAttributes
 {
+    xcb_generic_error_t *error;
     xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes([connection connection], window);
-    attributes = xcb_get_window_attributes_reply([connection connection], cookie, NULL);
-}
+    xcb_get_window_attributes_reply_t *attr = xcb_get_window_attributes_reply([connection connection], cookie, &error);
 
-- (xcb_get_window_attributes_reply_t*)attributes
-{
-    return attributes;
+    if (attributes != nil)
+        attributes = nil;
+
+    if (error)
+    {
+        attributes = [[XCBAttributesReply alloc] initWithError:error];
+        [attributes description];
+        return;
+    }
+
+    attributes = [[XCBAttributesReply alloc] initWithAttributesReply:attr];
 }
 
 - (XCBQueryTreeReply*) queryTree
 {
     XCBQueryTreeReply *queryReply;
+    xcb_generic_error_t *error;
 
     xcb_query_tree_cookie_t cookie = xcb_query_tree([connection connection], window);
-    xcb_query_tree_reply_t *reply = xcb_query_tree_reply([connection connection], cookie, NULL);
+    xcb_query_tree_reply_t *reply = xcb_query_tree_reply([connection connection], cookie, &error);
+
+    if (error)
+    {
+        queryReply = [[XCBQueryTreeReply alloc] initWithError:error];
+        [queryReply description];
+        return queryReply;
+    }
     queryReply = [[XCBQueryTreeReply alloc] initWithReply:reply andConnection:connection];
 
     return queryReply;
 }
 
-- (void)setAttributes:(xcb_get_window_attributes_reply_t*)someAttributes
-{
-    attributes = someAttributes;
-}
 
 - (uint32_t)windowMask
 {
@@ -643,8 +656,6 @@
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     xcb_atom_t changeStateAtom = [atomService cacheAtom:@"WM_CHANGE_STATE"];
-    XCBScreen *scr = [[connection screens] objectAtIndex:0];
-
 
     /*** TODO: check if the if the window is already miniaturized ***/
 
@@ -661,16 +672,15 @@
     event.data.data32[3] = 0;
     event.data.data32[4] = 0;
 
-    xcb_send_event([connection connection], 0,
-                   [[scr rootWindow] window],
+    xcb_send_event([connection connection],
+                   0,
+                   [[screen rootWindow] window],
                    XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
                    (const char *) &event);
 
     /*** set iconic hints? or normal if not iconized hints? ***/
 
     atomService = nil;
-    screen = nil;
-
 }
 
 - (void)createMiniWindowAtPosition:(XCBPoint)position
@@ -843,7 +853,7 @@
         return;
     }
 
-    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+    [self ungrabButton];
 
     xcb_grab_button([connection connection],
                     YES,
@@ -900,11 +910,12 @@
     }
 }
 
-- (XCBGeometry *)geometries
+- (XCBGeometryReply *)geometries
 {
     xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
     xcb_generic_error_t *error;
     xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
+    XCBGeometryReply *geometry;
 
     if (reply == NULL)
     {
@@ -912,23 +923,22 @@
 
         if (error)
         {
-            NSLog(@"Error code: %d", error->error_code);
-            free(error);
+           geometry = [[XCBGeometryReply alloc] initWithError:(error)];
+           [geometry setRect:XCBInvalidRect];
+           [geometry description];
         }
 
         return nil;
-
     }
 
-    XCBGeometry *geometry = [[XCBGeometry alloc] initWithGeometryReply:reply];
-    free(reply);
+    geometry = [[XCBGeometryReply alloc] initWithGeometryReply:reply];
 
     return geometry;
 }
 
 - (XCBRect)rectFromGeometries
 {
-    XCBGeometry *geo = [self geometries];
+    XCBGeometryReply *geo = [self geometries];
     XCBRect rect = [geo rect];
     geo = nil;
     return rect;
@@ -938,10 +948,13 @@
 {
     uint16_t config_frame_mask = 0;
     uint16_t config_win_mask = 0;
+    uint16_t config_title_mask = 0;
     uint32_t config_frame_vals[7];
     uint32_t config_win_vals[7];
+    uint32_t config_title_vals[7];
     unsigned short frame_i = 0;
     unsigned short win_i = 0;
+    unsigned short title_i = 0;
 
     XCBFrame *frame = (XCBFrame*)parentWindow;
     XCBRect frameRect = [[frame geometries] rect];
@@ -967,8 +980,10 @@
     {
         config_frame_mask |= XCB_CONFIG_WINDOW_WIDTH;
         config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_title_mask |= XCB_CONFIG_WINDOW_WIDTH;
         config_frame_vals[frame_i++] = anEvent->width;
         config_win_vals[win_i++] = anEvent->width;
+        config_title_vals[title_i++] = anEvent->width;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
@@ -999,8 +1014,13 @@
         config_frame_vals[frame_i++] = anEvent->stack_mode;
     }
 
+    XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
     xcb_configure_window([connection connection], window, config_win_mask, config_win_vals);
     xcb_configure_window([connection connection], [frame window], config_frame_mask, config_frame_vals);
+    xcb_configure_window([connection connection], [titleBar window], config_title_mask, config_title_vals);
+
+    [titleBar updateRectsFromGeometries];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     /*** required by ICCCM compliance ***/
     xcb_configure_notify_event_t event;
@@ -1020,11 +1040,13 @@
     [connection sendEvent:(const char*) &event toClient:self propagate:NO];
 
     frame = nil;
+    titleBar = nil;
 }
 
-- (void)setRectaglesFromGeometries
+- (void)updateRectsFromGeometries
 {
     XCBRect rect = [self rectFromGeometries];
+    oldRect = windowRect;
     windowRect = rect;
     originalRect = rect;
 }
@@ -1044,6 +1066,17 @@
     drawer = nil;
 }
 
+- (XCBVisual*) visual
+{
+    xcb_visualid_t visualId = [attributes visualId];
+
+    XCBVisual *visual = [[XCBVisual alloc]
+                         initWithVisualId:visualId
+                           withVisualType:xcb_aux_find_visual_by_id([screen screen], visualId)];
+
+    return visual;
+}
+
 - (void)description
 {
     NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@", window, [parentWindow window],
@@ -1057,6 +1090,7 @@
     [allowedActions removeAllObjects];
     allowedActions = nil;
     screen = nil;
+    attributes = nil;
 }
 
 @end
