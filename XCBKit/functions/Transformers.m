@@ -46,7 +46,7 @@ XCBFrame * FnFromXCBWindowToXCBFrame(XCBWindow* aWindow, XCBConnection* connecti
 
 XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* connection)
 {
-    XCBTitleBar *titleBar = [[XCBTitleBar alloc] init];
+    XCBTitleBar *titleBar = [[XCBTitleBar alloc] initWithFrame:(XCBFrame*)[aWindow parentWindow] withConnection:connection];
     
     [titleBar setAboveWindow:[aWindow aboveWindow]];
     [titleBar setWindow:[aWindow window]];
@@ -54,6 +54,7 @@ XCBTitleBar* FnFromXCBWindowToXCBTitleBar(XCBWindow *aWindow, XCBConnection* con
     [titleBar setAttributes:[aWindow attributes]];
     [titleBar setWindowRect:[aWindow windowRect]];
     [titleBar setOriginalRect:[aWindow originalRect]];
+    [titleBar setOldRect:[aWindow oldRect]];
     [titleBar setWindowMask:[aWindow windowMask]];
     [titleBar setIsMapped:[aWindow isMapped]];
     [titleBar setConnection:connection];

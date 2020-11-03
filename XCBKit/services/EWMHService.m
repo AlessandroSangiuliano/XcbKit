@@ -10,7 +10,7 @@
 #import <xcb/xcb.h>
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
-#import "XCBGeometry.h"
+#import "../XCBGeometryReply.h"
 
 @implementation EWMHService
 
@@ -559,7 +559,7 @@
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow *)aWindow
 {
-    XCBGeometry *geometry = [aWindow geometries];
+    XCBGeometryReply *geometry = [aWindow geometries];
     uint32_t extents[4];
     uint32_t border = [geometry borderWidth];
     NSLog(@"Border: %d", border);

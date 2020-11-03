@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "utils/XCBShape.h"
-#import "XCBGeometry.h"
+#import "XCBGeometryReply.h"
 #include <xcb/xcb.h>
 #import "XCBQueryTreeReply.h"
 #import "XCBScreen.h"
+#import "XCBAttributesReply.h"
+#import "XCBVisual.h"
 
 @class XCBConnection;
 
@@ -21,7 +23,6 @@
 	XCBWindow *parentWindow;
 	XCBWindow *aboveWindow;
 	BOOL isMapped;
-	xcb_get_window_attributes_reply_t *attributes;
     uint32_t windowMask;
 }
 
@@ -53,6 +54,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
+@property (strong, nonatomic) XCBAttributesReply *attributes;
+
 
 /*** ALLOWED ACTIONS ***/
 
@@ -99,14 +102,13 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setIsMapped:(BOOL) mapped;
 - (BOOL) isMapped;
 - (void) updateAttributes;
-- (xcb_get_window_attributes_reply_t*) attributes;
-- (void) setAttributes:(xcb_get_window_attributes_reply_t*) someAttributes;
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
 - (void) setWindowBorderWidth:(uint32_t)border;
 - (void) checkNetWMAllowedActions;
 - (XCBQueryTreeReply*) queryTree;
 - (XCBScreen*) onScreen;
+- (XCBVisual*) visual;
 
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;
@@ -122,9 +124,9 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) description;
 - (BOOL) grabPointer;
 - (void) ungrabPointer;
-- (XCBGeometry*) geometries;
+- (XCBGeometryReply*) geometries;
 - (XCBRect) rectFromGeometries;
-- (void) setRectaglesFromGeometries;
+- (void) updateRectsFromGeometries;
 - (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;
 - (void) drawIcons;
 - (void) cairoPreview;

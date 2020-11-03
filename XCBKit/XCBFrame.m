@@ -120,7 +120,32 @@
     XCBWindow *clientWindow = [children objectForKey:key];
     key = nil;
 
-    XCBTitleBar *titleBar = [[XCBTitleBar alloc] initWithFrame:self withConnection:connection];
+    XCBScreen *scr = [parentWindow screen];
+    XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
+    [rootVisual setVisualTypeForScreen:scr];
+
+    uint32_t values[2];
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+
+    values[0] = [scr screen]->white_pixel;
+    values[1] = TITLE_MASK_VALUES;
+
+    XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBTitleBarRequest];
+    [request setDepth:XCB_COPY_FROM_PARENT];
+    [request setParentWindow:self];
+    [request setXPosition:0];
+    [request setYPosition:0];
+    [request setWidth:[self windowRect].size.width];
+    [request setHeight:22];
+    [request setBorderWidth:0];
+    [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
+    [request setVisual:rootVisual];
+    [request setValueMask:mask];
+    [request setValueList:values];
+
+    XCBWindowTypeResponse* response = [[super connection] createWindowForRequest:request registerWindow:YES];
+    XCBTitleBar *titleBar = [response titleBar];
+
     [self addChildWindow:titleBar withKey:TitleBar];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
@@ -153,6 +178,7 @@
         icccmService = nil;
     }
 
+    [titleBar generateButtons];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [titleBar setWindowTitle:windowTitle];
 
@@ -171,6 +197,8 @@
     clientWindow = nil;
     ewmhService = nil;
     windowTitle = nil;
+    scr = nil;
+    rootVisual = nil;
     
     free(reply);
 }
