@@ -378,7 +378,7 @@ ICCCMService *icccmService;
 
     XCBFrame *frameWindow = (XCBFrame *) [window parentWindow];
 
-    if (frameWindow && ![frameWindow isMinimized])
+    if (frameWindow && ![frameWindow isMinimized]) //FIXME: Check if the parent is a frame window before enter this 'if'
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
         XCBRect rect = [window windowRect];
@@ -506,11 +506,13 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
-                //[window description];
-                //NSLog(@"Parent from event: %u", anEvent->parent);
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
+                NSLog(@"Parent from event: %u", [[window parentWindow] window]);
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
