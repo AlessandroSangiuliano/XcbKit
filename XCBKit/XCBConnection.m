@@ -360,13 +360,12 @@ ICCCMService *icccmService;
     NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
     [window setIsMapped:YES];
 
-    /*** use this for slower machine?**/
+    /*** use this for slower machines?**/
 
     /*if ([window pixmap] == 0 && [window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]] &&
         [window parentWindow] != [self rootWindowForScreenNumber:0])
         [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];*/
-
 
     window = nil;
 }
@@ -430,7 +429,6 @@ ICCCMService *icccmService;
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
         [window updateAttributes];
-        //XCBReply* reply = [self getAttributesForWindow:window]; //TODO: MOVE THIS METHOD TO XCBWindow class
         XCBAttributesReply *reply = [window attributes];
 
         if ([reply isError])
@@ -508,6 +506,8 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
+                //[window description];
+                //NSLog(@"Parent from event: %u", anEvent->parent);
                 window = nil;
                 ewmhService = nil;
                 name = nil;
@@ -925,6 +925,19 @@ ICCCMService *icccmService;
     window = nil;
 }
 
+- (void) handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
+{
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
+    NSString *testStr = @"_NET_ACTIVE_WINDOW";
+
+    NSString *name = [atomService atomNameFromAtom:anEvent->atom];
+    NSLog(@"Property changed for window: %u, with name: %@", anEvent->window, name);
+    if ([name isEqualToString:testStr])
+        NSLog(@"We got it!");
+
+    return;
+}
+
 - (void)handleClientMessage:(xcb_client_message_event_t *)anEvent
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
@@ -1044,12 +1057,14 @@ ICCCMService *icccmService;
 
 - (void)handleEnterNotify:(xcb_enter_notify_event_t *)anEvent
 {
+    NSLog(@"Enter notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
+    {
         [window grabButton];
-
+    }
 
     if ([window isKindOfClass:[XCBFrame class]])
     {
@@ -1080,11 +1095,14 @@ ICCCMService *icccmService;
 
 - (void)handleLeaveNotify:(xcb_leave_notify_event_t *)anEvent
 {
+    NSLog(@"Leave notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
+    {
         [window ungrabButton];
+    }
 
     if ([window isKindOfClass:[XCBFrame class]])
     {

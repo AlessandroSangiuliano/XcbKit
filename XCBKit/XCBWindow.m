@@ -853,7 +853,7 @@
         return;
     }
 
-    xcb_ungrab_button([connection connection], XCB_BUTTON_INDEX_ANY, window, XCB_BUTTON_MASK_ANY);
+    [self ungrabButton];
 
     xcb_grab_button([connection connection],
                     YES,
