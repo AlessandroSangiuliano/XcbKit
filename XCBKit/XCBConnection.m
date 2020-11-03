@@ -378,7 +378,11 @@ ICCCMService *icccmService;
 
     XCBFrame *frameWindow = (XCBFrame *) [window parentWindow];
 
-    if (frameWindow && ![frameWindow isMinimized]) //FIXME: Check if the parent is a frame window before enter this 'if'
+    XCBScreen *scr = [window onScreen];
+
+    if (frameWindow &&
+        ![frameWindow isMinimized] &&
+        [frameWindow window] != [[scr rootWindow] window])
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
         XCBRect rect = [window windowRect];
@@ -390,6 +394,7 @@ ICCCMService *icccmService;
     window = nil;
     frameWindow = nil;
     frameWindow = nil;
+    scr = nil;
 }
 
 - (void)handleMapRequest:(xcb_map_request_event_t *)anEvent
