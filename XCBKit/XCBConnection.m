@@ -479,9 +479,12 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
@@ -492,9 +495,12 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
