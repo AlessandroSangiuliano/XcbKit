@@ -911,7 +911,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    NSLog(@"Not yet implemented");
+    NSLog(@"Focus Out event for window: %u", anEvent->event);
 
     window = nil;
 }
@@ -920,7 +920,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    NSLog(@"Not yet implemented");
+    NSLog(@"Focus In event for window: %u", anEvent->event);
 
     window = nil;
 }
