@@ -807,7 +807,6 @@ ICCCMService *icccmService;
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
         [clientWindow cairoPreview];
-        //[clientWindow createPixmap];
         [frame minimize];
         frame = nil;
         window = nil;
@@ -835,25 +834,19 @@ ICCCMService *icccmService;
     if ([window isKindOfClass:[XCBFrame class]])
     {
         frame = (XCBFrame *) window;
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-        [clientWindow ungrabButton];
-
-        clientWindow = nil;
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
         frame = (XCBFrame *) [window parentWindow];
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-        [clientWindow ungrabButton];
-
-        clientWindow = nil;
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
     }
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
-        [window ungrabButton];
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         [[window parentWindow] stackAbove]; //FIXME: not necessary
         frame = (XCBFrame *) [window parentWindow];
     }
@@ -897,9 +890,6 @@ ICCCMService *icccmService;
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
 
-        /*if ([frame isAbove])
-            [[frame childWindowForKey:ClientWindow] updatePixmap];*/
-
         frame = nil;
     }
 
@@ -934,6 +924,23 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
     NSLog(@"Focus In event for window: %u", anEvent->event);
+
+    if (anEvent->mode == XCB_NOTIFY_MODE_GRAB || anEvent->mode == XCB_NOTIFY_MODE_UNGRAB)
+        return;
+
+    switch (anEvent->detail)
+    {
+        case XCB_NOTIFY_DETAIL_ANCESTOR:
+        case XCB_NOTIFY_DETAIL_INFERIOR:
+        case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
+        case XCB_NOTIFY_DETAIL_NONLINEAR:
+            [window focus];
+
+            break;
+        default:
+            break;
+    }
+
 
     window = nil;
 }
@@ -1073,6 +1080,7 @@ ICCCMService *icccmService;
     NSLog(@"Enter notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
+
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
@@ -1085,7 +1093,6 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
-
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1110,6 +1117,9 @@ ICCCMService *icccmService;
 {
     NSLog(@"Leave notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+
+    if ([window window] != anEvent->root)
+        return;
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
@@ -1390,6 +1400,7 @@ ICCCMService *icccmService;
     windows = nil;
 }
 
+//FIXME: i have 2 methods that do the samething in a different way. This below and XCBConnection sendEvent
 - (void)sendClientMessageTo:(XCBWindow *)destination message:(Message)message
 {
     xcb_client_message_event_t event;
@@ -1406,7 +1417,7 @@ ICCCMService *icccmService;
                 event.response_type = XCB_CLIENT_MESSAGE;
                 event.window = [destination window];
                 event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
-                event.data.data32[1] = currentTime;
+                event.data.data32[1] = currentTime; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
                 event.data.data32[2] = 0;
                 event.data.data32[3] = 0;
                 event.sequence = 0;
@@ -1415,6 +1426,24 @@ ICCCMService *icccmService;
             }
             /*else
              xcb_kill_client(connection, [destination window]);*/
+            break;
+
+        case WM_TAKE_FOCUS:
+
+            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
+            {
+                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+                event.format = 32;
+                event.response_type = XCB_CLIENT_MESSAGE;
+                event.window = [destination window];
+                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMTakeFocus]];
+                event.data.data32[1] = currentTime; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
+                event.data.data32[2] = 0;
+                event.data.data32[3] = 0;
+                event.sequence = 0;
+
+                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char *) &event);
+            }
 
             break;
 
