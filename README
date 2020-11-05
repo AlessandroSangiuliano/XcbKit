@@ -51,9 +51,6 @@ There are a lot of things to add, for example:
 - Add appropriate event handling.
 
 
-
-Big valgrind session on GNUStep to check memory leaks is the next step for the 0.0.11
-
 ----------------------------------------------------------------------------------
 
 Goal:

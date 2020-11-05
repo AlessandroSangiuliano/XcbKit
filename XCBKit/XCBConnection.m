@@ -935,7 +935,6 @@ ICCCMService *icccmService;
         case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
         case XCB_NOTIFY_DETAIL_NONLINEAR:
             [window focus];
-
             break;
         default:
             break;
