@@ -13,6 +13,7 @@
 
 @property (strong, nonatomic) NSArray* atomsArray;
 @property (strong, nonatomic) NSString* WMDeleteWindow;
+@property (strong, nonatomic) NSString* WMTakeFocus;
 @property (strong, nonatomic) NSString* WMProtocols;
 @property (strong, nonatomic) NSString* WMName;
 @property (strong, nonatomic) NSString* WMNormalHints;

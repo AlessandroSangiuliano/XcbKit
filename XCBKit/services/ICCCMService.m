@@ -16,6 +16,7 @@
 @synthesize WMName;
 @synthesize WMNormalHints;
 @synthesize WMSizeHints;
+@synthesize WMTakeFocus;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -29,6 +30,7 @@
     
     WMDeleteWindow = @"WM_DELETE_WINDOW";
     WMProtocols = @"WM_PROTOCOLS";
+    WMTakeFocus = @"WM_TAKE_FOCUS";
     WMName = @"WM_NAME";
     WMNormalHints = @"WM_NORMAL_HINTS";
     WMSizeHints = @"WM_SIZE_HINS";
@@ -39,7 +41,8 @@
         WMDeleteWindow,
         WMName,
         WMNormalHints,
-        WMSizeHints
+        WMSizeHints,
+        WMTakeFocus
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -141,6 +144,7 @@
     WMProtocols = nil;
     WMName = nil;
     atomsArray = nil;
+    WMTakeFocus = nil;
 }
 
 

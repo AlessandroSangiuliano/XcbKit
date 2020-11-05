@@ -10,7 +10,8 @@
 
 typedef NS_ENUM(NSInteger, Message)
 {
-    WM_DELETE_WINDOW
+    WM_DELETE_WINDOW,
+    WM_TAKE_FOCUS
 };
 
 
