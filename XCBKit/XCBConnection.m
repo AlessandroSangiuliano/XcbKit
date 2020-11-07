@@ -746,6 +746,7 @@ ICCCMService *icccmService;
 
         NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
+        [frame configureClient];
 
         needFlush = YES;
         frame = nil;
@@ -753,10 +754,8 @@ ICCCMService *icccmService;
 
     if (resizeState)
     {
-        //NSLog(@"Resizing");
         XCBFrame *frame;
-
-
+        
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
@@ -939,7 +938,6 @@ ICCCMService *icccmService;
         default:
             break;
     }
-
 
     window = nil;
 }
