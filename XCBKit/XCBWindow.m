@@ -1026,7 +1026,7 @@
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     /*** required by ICCCM compliance ***/
-    
+
     [frame  configureClient];
 
     frame = nil;
