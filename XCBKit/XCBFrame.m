@@ -595,7 +595,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     xcb_configure_notify_event_t event;
     XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
     XCBRect rect = [[self geometries] rect];
-    XCBRect  clientRect = [[clientWindow geometries] rect];
+    XCBRect  clientRect = [clientWindow rectFromGeometries];
 
     NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
 
@@ -612,7 +612,10 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     event.above_sibling = XCB_NONE;
     event.response_type = XCB_CONFIGURE_NOTIFY;
     event.sequence = 0;
+
     [connection sendEvent:(const char*) &event toClient:clientWindow propagate:NO];
+
+    [clientWindow setWindowRect:clientRect];
 
     clientWindow = nil;
 }

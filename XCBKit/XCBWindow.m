@@ -1026,21 +1026,8 @@
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     /*** required by ICCCM compliance ***/
-    xcb_configure_notify_event_t event;
-
-    event.event = window;
-    event.window = window;
-    event.x = frameRect.position.x;
-    event.y = frameRect.position.y;
-    event.border_width = anEvent->border_width;
-    event.width = anEvent->width;
-    event.height = anEvent->height;
-    event.override_redirect = 0;
-    event.above_sibling = anEvent->sibling;
-    event.response_type = XCB_CONFIGURE_NOTIFY;
-    event.sequence = 0;
-
-    [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    
+    [frame  configureClient];
 
     frame = nil;
     titleBar = nil;
@@ -1061,6 +1048,7 @@
     if (icons == nil)
     {
         NSLog(@"No icons. Array nil");
+        drawer = nil;
         return;
     }
 
