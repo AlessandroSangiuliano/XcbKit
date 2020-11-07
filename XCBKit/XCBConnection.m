@@ -779,21 +779,13 @@ ICCCMService *icccmService;
         XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
         NSLog(@"Operations for frame window %u", [frame window]);
 
-        BOOL check = [frame window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
         currentTime = anEvent->time;
 
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
         [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
 
-        if (frame != nil && check) //probably unnecessary check when fixed
-        {
-            /* i was using an artifact with [frame setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
-             an expose event is generated for the frame and close button, so i was calling [frame destroy]
-             in handleExpose method (XCBConnection). I think that is totally wrong and bad */
-
-            [frame setNeedDestroy:YES];
-        }
+        [frame setNeedDestroy:YES];
 
         frame = nil;
         window = nil;
