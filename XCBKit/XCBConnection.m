@@ -756,6 +756,10 @@ ICCCMService *icccmService;
     if (resizeState)
     {
         XCBFrame *frame;
+
+        /*** if already maximized we are not going to resize it more ***/
+        if ([frame isMaximized])
+            return;
         
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
@@ -844,6 +848,7 @@ ICCCMService *icccmService;
     }
 
     [frame stackAbove];
+
     XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
