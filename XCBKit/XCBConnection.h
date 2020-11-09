@@ -118,10 +118,3 @@
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
 
 @end
-
-/**
- * Shared global XCB connection.  Only one connection may exist per process.
- * This variable is invalid before the first call to XCBConnection
- * +sharedConnection.
- */
-extern XCBConnection *XCBConn;

@@ -83,7 +83,6 @@ ICCCMService *icccmService;
     currentTime = XCB_CURRENT_TIME;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
 
-    XCBConn = self;
     resizeState = NO;
     ewmhService = nil;
     [self flush];
@@ -94,13 +93,13 @@ ICCCMService *icccmService;
 {
     static XCBConnection *sharedInstance = nil;
 
-    if (XCBConn == nil)
+    if (sharedInstance == nil)
     {
         NSLog(@"[XCBConnection]: Creating shared connection...");
         sharedInstance = [[self alloc] init];
     }
 
-    return XCBConn;
+    return sharedInstance;
 }
 
 - (xcb_connection_t *)connection
