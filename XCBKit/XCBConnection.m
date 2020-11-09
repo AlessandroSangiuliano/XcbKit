@@ -844,6 +844,7 @@ ICCCMService *icccmService;
     }
 
     [frame stackAbove];
+
     XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
