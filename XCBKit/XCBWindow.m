@@ -476,7 +476,7 @@
 
     /*** restore to the previous dimension and position of the frame ***/
 
-    [frame setWindowRect:[frame originalRect]];
+    [frame setWindowRect:[frame oldRect]];
     [frame setOldRect:XCBInvalidRect];
 
     uint32_t valueList[4] =
@@ -506,7 +506,7 @@
 
     XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
-    [clientWindow setWindowRect:[clientWindow originalRect]];
+    [clientWindow setWindowRect:[clientWindow oldRect]];
     [clientWindow setOldRect:XCBInvalidRect];
     valueList[0] = [clientWindow windowRect].position.x;
     valueList[1] = [clientWindow windowRect].position.y;
@@ -566,7 +566,6 @@
     /*** save previous dimensions and position of the window **/
 
     [frame setOldRect:[frame windowRect]];
-
 
     /*** redraw and resize the frame ***/
 
@@ -1053,8 +1052,8 @@
 
 - (void)description
 {
-    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@", window, [parentWindow window],
-          FnFromXCBRectToString(windowRect));
+    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@; Old Rect: %@", window, [parentWindow window],
+          FnFromXCBRectToString(windowRect), FnFromXCBRectToString(oldRect));
 }
 
 - (void)dealloc

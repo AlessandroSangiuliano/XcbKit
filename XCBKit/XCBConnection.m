@@ -756,10 +756,6 @@ ICCCMService *icccmService;
     if (resizeState)
     {
         XCBFrame *frame;
-
-        /*** if already maximized we are not going to resize it more ***/
-        if ([frame isMaximized])
-            return;
         
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
