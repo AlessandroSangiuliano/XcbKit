@@ -17,6 +17,7 @@
 @synthesize WMNormalHints;
 @synthesize WMSizeHints;
 @synthesize WMTakeFocus;
+@synthesize WMState;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -34,6 +35,7 @@
     WMName = @"WM_NAME";
     WMNormalHints = @"WM_NORMAL_HINTS";
     WMSizeHints = @"WM_SIZE_HINS";
+    WMState = @"WM_STATE";
     
     NSString* icccmAtoms[] =
     {
@@ -42,7 +44,8 @@
         WMName,
         WMNormalHints,
         WMSizeHints,
-        WMTakeFocus
+        WMTakeFocus,
+        WMState
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -136,6 +139,20 @@
         NSLog(@"Error: Can't fill wmHints structure!");
 
     return wmHints;
+}
+
+- (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state
+{
+    xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:WMState];
+    uint32_t data[] = { state, XCB_NONE };
+
+    [super changePropertiesForWindow:aWindow
+                            withMode:XCB_PROP_MODE_REPLACE
+                        withProperty:WMState
+                            withType:atom
+                          withFormat:32
+                      withDataLength:2
+                            withData:data];
 }
 
 - (void) dealloc

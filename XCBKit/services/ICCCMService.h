@@ -18,6 +18,7 @@
 @property (strong, nonatomic) NSString* WMName;
 @property (strong, nonatomic) NSString* WMNormalHints;
 @property (strong, nonatomic) NSString* WMSizeHints;
+@property (strong, nonatomic) NSString* WMState;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
@@ -27,5 +28,6 @@
 - (void)updateWMNormalHints:(xcb_size_hints_t*)sizeHints forWindow:(XCBWindow*)aWindow;
 - (NSString*) getWmNameForWindow:(XCBWindow*)aWindow;
 - (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow;
+- (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state;
 
 @end
