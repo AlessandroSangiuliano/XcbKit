@@ -222,7 +222,7 @@
 
     if (topBorderClicked && !rightBorderClicked && !leftBorderClicked && !bottomBorderClicked)
         resizeFromTopForEvent(anEvent, self, minHeightHint);
-    
+
 
     /** width and height **/
 
