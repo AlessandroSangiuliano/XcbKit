@@ -12,6 +12,7 @@
 #import "utils/CairoDrawer.h"
 #import <xcb/xcb_aux.h>
 #import "enums/EMessage.h"
+#import "services/ICCCMService.h"
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
@@ -720,7 +721,6 @@
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService *atomService = [ewmhService atomService];
-    [atomService cacheAtom:@"WM_STATE"];
 
     xcb_atom_t state[1] = {[atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateHidden]]};
 
@@ -732,15 +732,6 @@
                             withDataLength:1
                                   withData:state];
 
-    state[0] = ICCCM_WM_STATE_ICONIC;
-
-    [ewmhService changePropertiesForWindow:self
-                                  withMode:XCB_PROP_MODE_REPLACE
-                              withProperty:@"WM_STATE"
-                                  withType:XCB_ATOM_ATOM
-                                withFormat:32
-                            withDataLength:1
-                                  withData:state];
 
     atomService = nil;
     ewmhService = nil;
@@ -755,12 +746,6 @@
 {
     windowRect = oldRect;
     XCBFrame *frame;
-
-    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    XCBAtomService *atomService = [ewmhService atomService];
-
-    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
-    [atomService cacheAtom:@"WM_STATE"];
 
     XCBPoint position = windowRect.position;
     XCBSize size = windowRect.size;
@@ -782,37 +767,19 @@
         [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
 
-        [titleBar description];
         [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         [connection mapWindow:clientWindow];
-        [clientWindow setIsMinimized:NO];
 
-        [ewmhService changePropertiesForWindow:clientWindow
-                                      withMode:XCB_PROP_MODE_REPLACE
-                                  withProperty:@"WM_STATE"
-                                      withType:XCB_ATOM_ATOM
-                                    withFormat:32
-                                withDataLength:1
-                                      withData:state];
+        [clientWindow setNormalState];
 
         titleBar = nil;
         clientWindow = nil;
         frame = nil;
     }
 
-    isMinimized = NO;
+    [frame setNormalState];
 
-    [ewmhService changePropertiesForWindow:frame
-                                  withMode:XCB_PROP_MODE_REPLACE
-                              withProperty:@"WM_STATE"
-                                  withType:XCB_ATOM_ATOM
-                                withFormat:32
-                            withDataLength:1
-                                  withData:state];
-
-    ewmhService = nil;
-    atomService = nil;
     frame = nil;
 }
 
@@ -1066,6 +1033,22 @@
                            withVisualType:xcb_aux_find_visual_by_id([screen screen], visualId)];
 
     return visual;
+}
+
+- (void) setIconicState
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    [icccmService setWMStateForWindow:self state:ICCCM_WM_STATE_ICONIC];
+    isMinimized = YES;
+    icccmService = nil;
+}
+
+- (void) setNormalState
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    [icccmService setWMStateForWindow:self state:ICCCM_WM_STATE_NORMAL];
+    isMinimized = NO;
+    icccmService = nil;
 }
 
 - (void)description

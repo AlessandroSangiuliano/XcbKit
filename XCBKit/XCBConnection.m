@@ -386,7 +386,7 @@ ICCCMService *icccmService;
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
         XCBRect rect = [window windowRect];
-        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:rect.position];
+        [self reparentWindow:window toWindow:[[window queryTree] rootWindow] position:rect.position];
         [window setDecorated:NO];
         [frameWindow destroy];
     }
@@ -618,6 +618,7 @@ ICCCMService *icccmService;
     [frame decorateClientWindow];
     [window updateAttributes];
     [frame setScreen:[window screen]];
+    [window setNormalState];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -1013,7 +1014,6 @@ ICCCMService *icccmService;
         }
     }
 
-    //xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
 
     if (anEvent->type == [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"] &&
         anEvent->format == 32 &&
@@ -1026,7 +1026,7 @@ ICCCMService *icccmService;
             [drawer makePreviewImage];
             XCBPoint position = XCBMakePoint(100, 100); //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
-            [frame setIsMinimized:YES];
+            [frame setIconicState];
         }
 
         if (titleBar != nil)
@@ -1036,7 +1036,7 @@ ICCCMService *icccmService;
 
         if (clientWindow)
         {
-            [clientWindow setIsMinimized:YES];
+            [clientWindow setIconicState];
             [self unmapWindow:clientWindow];
             [frame updateAttributes];
             screen = [frame onScreen];
