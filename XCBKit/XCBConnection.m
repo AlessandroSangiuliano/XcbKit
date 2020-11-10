@@ -555,7 +555,7 @@ ICCCMService *icccmService;
                 XCBGeometryReply *geometry = [window geometries];
                 [window setWindowRect:[geometry rect]];
                 [window setDecorated:NO];
-                [window setScreen:[window onScreen]];
+                [window onScreen];
                 [window updateAttributes];
                 //[window drawIcons];
                 [self mapWindow:window];
@@ -576,7 +576,7 @@ ICCCMService *icccmService;
         free(windowTypeReply);
     }
 
-    [window setScreen:[window onScreen]];
+    [window onScreen];
     XCBScreen *screen =  [window screen]; //FIXME: [[window setScreen:[window onScreen]]; [window screen]?? So redundant!!!
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
@@ -1171,7 +1171,7 @@ ICCCMService *icccmService;
 - (void)handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
-    [window setScreen:[window onScreen]];
+    [window onScreen];
     XCBVisual *visual = [window visual];
 
     if ([window isKindOfClass:[XCBTitleBar class]])
@@ -1462,7 +1462,7 @@ ICCCMService *icccmService;
 
 - (void)registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
 {
-    [selectionWindow setScreen:[selectionWindow onScreen]];
+    [selectionWindow onScreen];
     XCBScreen *screen = [selectionWindow screen];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
