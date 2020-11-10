@@ -697,7 +697,6 @@
         XCBTitleBar *titleBar = (XCBTitleBar *) [frameWindow childWindowForKey:TitleBar];
 
         [clientWindow setOldRect:[clientWindow windowRect]];
-        [titleBar description];
         [titleBar setOldRect:[titleBar windowRect]];
 
         frameWindow = nil;
@@ -709,13 +708,6 @@
     uint32_t valueList[4] = {position.x, position.y, newSize.width, newSize.height};
 
     xcb_configure_window([connection connection], window, mask, &valueList);
-
-    if ([self isKindOfClass:[XCBFrame class]])
-    {
-        XCBFrame *frame = (XCBFrame *) self;
-        titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-        [titleBar setOldRect:[titleBar windowRect]];
-    }
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService *atomService = [ewmhService atomService];
@@ -734,8 +726,6 @@
     atomService = nil;
     ewmhService = nil;
     titleBar = nil;
-
-    isMinimized = YES;
 
     return;
 }
@@ -771,12 +761,12 @@
 
         [clientWindow setNormalState];
 
+        [frame setNormalState];
+
         titleBar = nil;
         clientWindow = nil;
         frame = nil;
     }
-
-    [frame setNormalState];
 
     frame = nil;
 }
