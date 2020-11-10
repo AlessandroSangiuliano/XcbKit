@@ -298,13 +298,12 @@
     NSUInteger size = [[connection screens] count];
     XCBQueryTreeReply *queryTreeReply = [self queryTree];
     XCBWindow *rootWindow = [queryTreeReply rootWindow];
-    XCBScreen *scr = nil;
 
     for (int i = 0; i < size; i++)
     {
-        scr = [[connection screens] objectAtIndex:i];
+        screen = [[connection screens] objectAtIndex:i];
 
-        if ([[scr rootWindow] window] == [rootWindow window])
+        if ([[screen rootWindow] window] == [rootWindow window])
         {
             break;
         }
@@ -312,7 +311,7 @@
 
     queryTreeReply = nil;
     rootWindow = nil;
-    return scr;
+    return screen;
 }
 
 - (void)updatePixmap
