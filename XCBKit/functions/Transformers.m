@@ -104,4 +104,9 @@ XCBWindow * FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnect
     return window;
 }
 
+NSString *FnFromNSIntegerToNSString(NSInteger value)
+{
+    return [NSString stringWithFormat:@"%ld", value];
+}
+
 @end
