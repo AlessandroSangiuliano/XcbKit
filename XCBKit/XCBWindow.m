@@ -13,6 +13,8 @@
 #import <xcb/xcb_aux.h>
 #import "enums/EMessage.h"
 #import "services/ICCCMService.h"
+#import "enums/EIcccm.h"
+#import "functions/Transformers.h"
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
@@ -49,6 +51,8 @@
 @synthesize icons;
 @synthesize screen;
 @synthesize attributes;
+@synthesize cachedWMHints;
+@synthesize hasInputHint;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -95,6 +99,8 @@
     canStick = NO;
     canChangeDesktop = NO;
     canClose = NO;
+
+    cachedWMHints = [[NSMutableDictionary alloc] init];
 
     return self;
 }
@@ -441,7 +447,6 @@
     return queryReply;
 }
 
-
 - (uint32_t)windowMask
 {
     return windowMask;
@@ -784,6 +789,31 @@
     [connection setNeedFlush:YES];
 }
 
+- (void) close
+{
+    xcb_client_message_event_t event;
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+
+    if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:self])
+    {
+        event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+        event.format = 32;
+        event.response_type = XCB_CLIENT_MESSAGE;
+        event.window = window;
+        event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+        event.data.data32[1] = [connection currentTime]; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
+        event.data.data32[2] = 0;
+        event.data.data32[3] = 0;
+        event.sequence = 0;
+
+        [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    }
+
+    atomService = nil;
+    icccmService = nil;
+}
+
 - (void)stackAbove
 {
     uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
@@ -863,9 +893,40 @@
     }
 }
 
+- (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp
+{
+    xcb_set_input_focus([connection connection], revertTo, window, timestamp);
+    [connection flush];
+}
+
 - (void) focus
 {
-    [connection sendClientMessageTo:self message:WM_TAKE_FOCUS];
+    xcb_client_message_event_t event;
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+
+    if (hasInputHint)
+        [self setInputFocus:XCB_INPUT_FOCUS_PARENT time:[connection currentTime]];
+
+    /*** check for the WMTakeFocus protocol ***/
+
+    if ([icccmService hasProtocol:[icccmService WMTakeFocus] forWindow:self])
+    {
+        event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+        event.format = 32;
+        event.response_type = XCB_CLIENT_MESSAGE;
+        event.window = window;
+        event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMTakeFocus]];
+        event.data.data32[1] = [connection currentTime]; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
+        event.data.data32[2] = 0;
+        event.data.data32[3] = 0;
+        event.sequence = 0;
+
+        [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    }
+
+    atomService = nil;
+    icccmService = nil;
 }
 
 - (XCBGeometryReply *)geometries
@@ -1039,6 +1100,31 @@
     icccmService = nil;
 }
 
+- (void) refreshCachedWMHints
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    xcb_icccm_wm_hints_t hints = [icccmService wmHintsFromWindow:self];
+
+
+    if ([cachedWMHints count] != 0)
+        [cachedWMHints removeAllObjects];
+
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.input] forKey:FnFromNSIntegerToNSString(ICCCMInputHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_mask] forKey:FnFromNSIntegerToNSString(ICCCMIconMaskHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_pixmap] forKey:FnFromNSIntegerToNSString(ICCCMIconPixmapHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_window] forKey:FnFromNSIntegerToNSString(ICCCMIconWindowHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.window_group] forKey:FnFromNSIntegerToNSString(ICCCMWindowGroupHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.initial_state] forKey:FnFromNSIntegerToNSString(ICCCMStateHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.flags]forKey:FnFromNSIntegerToNSString(ICCCMFlags)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_x] forKey:FnFromNSIntegerToNSString(ICCCMIconPositionHintX)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_y] forKey:FnFromNSIntegerToNSString(ICCCMIconPositionHintY)];
+
+    if ([[cachedWMHints valueForKey:FnFromNSIntegerToNSString(ICCCMFlags)] intValue] & ICCCMInputHint)
+        hasInputHint = YES;
+
+    icccmService = nil;
+}
+
 - (void)description
 {
     NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@; Old Rect: %@", window, [parentWindow window],
@@ -1053,6 +1139,7 @@
     allowedActions = nil;
     screen = nil;
     attributes = nil;
+    cachedWMHints = nil;
 }
 
 @end

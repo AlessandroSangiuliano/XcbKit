@@ -37,4 +37,8 @@ void CsMapXCBWindowToXCBTitleBar(XCBWindow* sourceWindow, XCBTitleBar* titleBar)
 
 XCBWindow* FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnection* connection);
 
+/*** Transform a NSInteger to NSString ***/
+
+NSString *FnFromNSIntegerToNSString(NSInteger value);
+
 @end
