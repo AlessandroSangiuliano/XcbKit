@@ -99,7 +99,6 @@
 
 /*** SENDS EVENTS ***/
 
-- (void) sendClientMessageTo:(XCBWindow*) destination message:(Message) message;
 - (void) sendEvent:(const char*)anEvent toClient:(XCBWindow*)aWindow propagate:(BOOL)propagating;
 
 /*** DEAL WITH WINDOW STUFFS ***/

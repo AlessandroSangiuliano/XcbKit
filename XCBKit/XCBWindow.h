@@ -71,6 +71,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) XCBScreen *screen;
 @property (strong, nonatomic) XCBAttributesReply *attributes;
 @property (nonatomic, assign) BOOL isFocused;
+@property (strong, nonatomic) NSMutableDictionary *cachedWMHints;
+@property (assign, nonatomic) BOOL hasInputHint;
 
 
 /*** ALLOWED ACTIONS ***/
@@ -129,6 +131,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;
 - (void) hide;
+- (void) close;
 - (void) restoreDimensionAndPosition;
 - (void) createMiniWindowAtPosition:(XCBPoint)position;
 - (void) restoreFromIconified;
@@ -149,5 +152,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) focus;
 - (void) setIconicState;
 - (void) setNormalState;
+- (void) refreshCachedWMHints;
+- (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp;
 
 @end

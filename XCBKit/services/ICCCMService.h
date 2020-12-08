@@ -19,6 +19,7 @@
 @property (strong, nonatomic) NSString* WMNormalHints;
 @property (strong, nonatomic) NSString* WMSizeHints;
 @property (strong, nonatomic) NSString* WMState;
+@property (strong, nonatomic) NSString* WMHints;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 

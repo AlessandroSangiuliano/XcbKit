@@ -27,7 +27,6 @@
 @synthesize xfixesInitialized;
 @synthesize resizeState;
 
-XCBConnection *XCBConn;
 ICCCMService *icccmService;
 
 - (id)init
@@ -433,6 +432,7 @@ ICCCMService *icccmService;
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
         [window updateAttributes];
+        [window refreshCachedWMHints];
         XCBAttributesReply *reply = [window attributes];
 
         if ([reply isError])
@@ -783,8 +783,7 @@ ICCCMService *icccmService;
 
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
-        [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
-
+        [clientWindow close];
         [frame setNeedDestroy:YES];
 
         frame = nil;
@@ -1387,60 +1386,6 @@ ICCCMService *icccmService;
     }
 
     windows = nil;
-}
-
-//FIXME: i have 2 methods that do the samething in a different way. This below and XCBConnection sendEvent
-- (void)sendClientMessageTo:(XCBWindow *)destination message:(Message)message
-{
-    xcb_client_message_event_t event;
-    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
-
-    switch (message)
-    {
-        case WM_DELETE_WINDOW:
-
-            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
-            {
-                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
-                event.format = 32;
-                event.response_type = XCB_CLIENT_MESSAGE;
-                event.window = [destination window];
-                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
-                event.data.data32[1] = currentTime; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
-                event.data.data32[2] = 0;
-                event.data.data32[3] = 0;
-                event.sequence = 0;
-
-                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char *) &event);
-            }
-            /*else
-             xcb_kill_client(connection, [destination window]);*/
-            break;
-
-        case WM_TAKE_FOCUS:
-
-            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
-            {
-                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
-                event.format = 32;
-                event.response_type = XCB_CLIENT_MESSAGE;
-                event.window = [destination window];
-                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMTakeFocus]];
-                event.data.data32[1] = currentTime; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
-                event.data.data32[2] = 0;
-                event.data.data32[3] = 0;
-                event.sequence = 0;
-
-                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char *) &event);
-            }
-
-            break;
-
-        default:
-            break;
-    }
-
-    atomService = nil;
 }
 
 - (void) sendEvent:(const char *)anEvent toClient:(XCBWindow*)aWindow propagate:(BOOL)propagating
