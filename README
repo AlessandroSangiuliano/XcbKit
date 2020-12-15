@@ -1,54 +1,26 @@
 XcbKit is a Kit (SDK) for window managers developed in Objective-C.
 
-Version: 0.0.13
+Version: 0.0.14
 
 ----------------------------------------------------------------------------------
 
 
 Actual status:
 
-- It can draw a title bar for a frame
+The actual status of XCBKit starts to be quite good. Time to tome the support for standars is increasing and as a consequence tools and framework like java and its SDK are getting better support.
 
-- It can move a window on the screen.
+Major events are handled and the code is improving in reliability and readability.
 
-- It can maximize a window
+I'm focusing the work on make more generic some classes and removing some hardcoded stuff that i did write at the begin of this adventure, when i had totally no knowledge about x11 programming.
 
-- It can iconify/minimize a window
-
-- It can resize from the right, left, top, bottom borders and bottom-right corner.
-
-- It can restore maximized and iconified windows to the previous status
-
-- It creates a preview of the iconified window
-
-- It decorates a client window
-
-- It handles destroy notify
-
-- It started to handle some client message event (actually iconify)
-
-- It started to be ICCCM and EWMH compliant
-
-- It redraws title bars for unselected windows (below windows) 
-
-- Added supports for a number of events
-
-- Handle “WM_DELETE_WINDOW” client message to quit an App or close a window.
-
-- Support of WM_NORMAL_HINTS
-
-- Support for _NET_WM_ALLOWED_ACTIONS
-
-- GNUstep port completed
+I'm not going any more to update the below section because you can gon guthub projects section to see on what i'm working on actually.
 
 
 There are a lot of things to add, for example:
 
-- Extended the ICCCM and EWHM support (permanent non-blocking feature for all the next releases). 
+- Extended the ICCCM and EWHM support (permanent non-blocking feature for all the next releases, because standards are so many and they come with the time!). 
 
 - Add x, - , and a maximize paint to the three buttons
-
-- Add appropriate event handling.
 
 
 ----------------------------------------------------------------------------------
@@ -62,7 +34,9 @@ Have a complete Object Oriented Window Manger, modern and simple, for Linux/Free
 
 How I'm developing it:
 
-Actually I'm writing the code using Xcode 5.0.2 on OS X 10.9.5, probably the best place to have full compatibility with GNUstep.
+After I did start on Macos 10.9.5 and XCode 5.02, the port on GNUstep was completed. Actually I'm writing the code directily on linux and GNUstep configured with CLion for autocomplete and other features.
+
+This software NEED to be used with ARC enabled + libobjc2 + clang.
 
 ----------------------------------------------------------------------------------
 
