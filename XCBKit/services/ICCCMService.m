@@ -16,6 +16,9 @@
 @synthesize WMName;
 @synthesize WMNormalHints;
 @synthesize WMSizeHints;
+@synthesize WMTakeFocus;
+@synthesize WMState;
+@synthesize WMHints;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -29,9 +32,12 @@
     
     WMDeleteWindow = @"WM_DELETE_WINDOW";
     WMProtocols = @"WM_PROTOCOLS";
+    WMTakeFocus = @"WM_TAKE_FOCUS";
     WMName = @"WM_NAME";
     WMNormalHints = @"WM_NORMAL_HINTS";
     WMSizeHints = @"WM_SIZE_HINS";
+    WMState = @"WM_STATE";
+    WMHints = @"WM_HINTS";
     
     NSString* icccmAtoms[] =
     {
@@ -39,7 +45,10 @@
         WMDeleteWindow,
         WMName,
         WMNormalHints,
-        WMSizeHints
+        WMSizeHints,
+        WMTakeFocus,
+        WMState,
+        WMHints
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -135,12 +144,31 @@
     return wmHints;
 }
 
+- (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state
+{
+    xcb_atom_t atom = [[super atomService] atomFromCachedAtomsWithKey:WMState];
+    uint32_t data[] = { state, XCB_NONE };
+
+    [super changePropertiesForWindow:aWindow
+                            withMode:XCB_PROP_MODE_REPLACE
+                        withProperty:WMState
+                            withType:atom
+                          withFormat:32
+                      withDataLength:2
+                            withData:data];
+}
+
 - (void) dealloc
 {
     WMDeleteWindow = nil;
     WMProtocols = nil;
     WMName = nil;
     atomsArray = nil;
+    WMTakeFocus = nil;
+    WMSizeHints = nil;
+    WMHints = nil;
+    WMState = nil;
+    WMNormalHints = nil;
 }
 
 

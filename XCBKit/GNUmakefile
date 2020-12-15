@@ -2,7 +2,7 @@ PACKAGE_NAME = XCBKit
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.0.13
+VERSION = 0.0.14
 
 FRAMEWORK_NAME = XCBKit
 export FRAMEWORK_NAME
@@ -57,11 +57,11 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
 			functions/Transformers.h \
-			enums/EMessage.h \
 			enums/ETitleBarColor.h \
-			enums/EXErrorMessages.h
+			enums/EXErrorMessages.h \
+			enums/EIcccm.h
 
-ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -Wall #-Wno-unused -Werror -Wall
+ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -fblocks -Wall #-Wno-unused -Werror -Wall
 
 LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes xcb-aux) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 

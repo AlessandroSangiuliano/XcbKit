@@ -27,7 +27,6 @@
 @synthesize xfixesInitialized;
 @synthesize resizeState;
 
-XCBConnection *XCBConn;
 ICCCMService *icccmService;
 
 - (id)init
@@ -83,7 +82,6 @@ ICCCMService *icccmService;
     currentTime = XCB_CURRENT_TIME;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
 
-    XCBConn = self;
     resizeState = NO;
     ewmhService = nil;
     [self flush];
@@ -94,13 +92,13 @@ ICCCMService *icccmService;
 {
     static XCBConnection *sharedInstance = nil;
 
-    if (XCBConn == nil)
+    if (sharedInstance == nil)
     {
         NSLog(@"[XCBConnection]: Creating shared connection...");
         sharedInstance = [[self alloc] init];
     }
 
-    return XCBConn;
+    return sharedInstance;
 }
 
 - (xcb_connection_t *)connection
@@ -378,11 +376,15 @@ ICCCMService *icccmService;
 
     XCBFrame *frameWindow = (XCBFrame *) [window parentWindow];
 
-    if (frameWindow && ![frameWindow isMinimized])
+    XCBScreen *scr = [window onScreen];
+
+    if (frameWindow &&
+        ![frameWindow isMinimized] &&
+        [frameWindow window] != [[scr rootWindow] window])
     {
         NSLog(@"Destroying window %u", [frameWindow window]);
         XCBRect rect = [window windowRect];
-        [self reparentWindow:window toWindow:[self rootWindowForScreenNumber:0] position:rect.position];
+        [self reparentWindow:window toWindow:[[window queryTree] rootWindow] position:rect.position];
         [window setDecorated:NO];
         [frameWindow destroy];
     }
@@ -390,6 +392,7 @@ ICCCMService *icccmService;
     window = nil;
     frameWindow = nil;
     frameWindow = nil;
+    scr = nil;
 }
 
 - (void)handleMapRequest:(xcb_map_request_event_t *)anEvent
@@ -429,6 +432,7 @@ ICCCMService *icccmService;
     {
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
         [window updateAttributes];
+        [window refreshCachedWMHints];
         XCBAttributesReply *reply = [window attributes];
 
         if ([reply isError])
@@ -479,9 +483,12 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
@@ -492,9 +499,12 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
@@ -506,11 +516,13 @@ ICCCMService *icccmService;
                 [self registerWindow:window];
                 [self mapWindow:window];
                 [window setDecorated:NO];
-                //[window description];
-                //NSLog(@"Parent from event: %u", anEvent->parent);
+                XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+                [window setParentWindow:parentWindow];
+                NSLog(@"Parent from event: %u", [[window parentWindow] window]);
                 window = nil;
                 ewmhService = nil;
                 name = nil;
+                parentWindow = nil;
                 free(windowTypeReply);
                 return;
             }
@@ -543,7 +555,7 @@ ICCCMService *icccmService;
                 XCBGeometryReply *geometry = [window geometries];
                 [window setWindowRect:[geometry rect]];
                 [window setDecorated:NO];
-                [window setScreen:[window onScreen]];
+                [window onScreen];
                 [window updateAttributes];
                 //[window drawIcons];
                 [self mapWindow:window];
@@ -564,7 +576,7 @@ ICCCMService *icccmService;
         free(windowTypeReply);
     }
 
-    [window setScreen:[window onScreen]];
+    [window onScreen];
     XCBScreen *screen =  [window screen]; //FIXME: [[window setScreen:[window onScreen]]; [window screen]?? So redundant!!!
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
@@ -605,6 +617,7 @@ ICCCMService *icccmService;
     [frame decorateClientWindow];
     [window updateAttributes];
     [frame setScreen:[window screen]];
+    [window setNormalState];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -733,6 +746,7 @@ ICCCMService *icccmService;
 
         NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
+        [frame configureClient];
 
         needFlush = YES;
         frame = nil;
@@ -740,10 +754,8 @@ ICCCMService *icccmService;
 
     if (resizeState)
     {
-        //NSLog(@"Resizing");
         XCBFrame *frame;
-
-
+        
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
@@ -767,21 +779,12 @@ ICCCMService *icccmService;
         XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
         NSLog(@"Operations for frame window %u", [frame window]);
 
-        BOOL check = [frame window] == [[[window parentWindow] parentWindow] window] ? YES : NO;
         currentTime = anEvent->time;
 
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
-        [self sendClientMessageTo:clientWindow message:WM_DELETE_WINDOW];
-
-        if (frame != nil && check) //probably unnecessary check when fixed
-        {
-            /* i was using an artifact with [frame setNeedDestroy:YES]; to destroy the frame. All the time the client window is destroyed,
-             an expose event is generated for the frame and close button, so i was calling [frame destroy]
-             in handleExpose method (XCBConnection). I think that is totally wrong and bad */
-
-            [frame setNeedDestroy:YES];
-        }
+        [clientWindow close];
+        [frame setNeedDestroy:YES];
 
         frame = nil;
         window = nil;
@@ -794,7 +797,6 @@ ICCCMService *icccmService;
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
         [clientWindow cairoPreview];
-        //[clientWindow createPixmap];
         [frame minimize];
         frame = nil;
         window = nil;
@@ -822,30 +824,25 @@ ICCCMService *icccmService;
     if ([window isKindOfClass:[XCBFrame class]])
     {
         frame = (XCBFrame *) window;
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-        [clientWindow ungrabButton];
-
-        clientWindow = nil;
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
         frame = (XCBFrame *) [window parentWindow];
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-        [clientWindow ungrabButton];
-
-        clientWindow = nil;
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
     }
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
-        [window ungrabButton];
+        xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         [[window parentWindow] stackAbove]; //FIXME: not necessary
         frame = (XCBFrame *) [window parentWindow];
     }
 
     [frame stackAbove];
+
     XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
@@ -884,9 +881,6 @@ ICCCMService *icccmService;
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
 
-        /*if ([frame isAbove])
-            [[frame childWindowForKey:ClientWindow] updatePixmap];*/
-
         frame = nil;
     }
 
@@ -911,7 +905,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    NSLog(@"Not yet implemented");
+    NSLog(@"Focus Out event for window: %u", anEvent->event);
 
     window = nil;
 }
@@ -920,7 +914,22 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    NSLog(@"Not yet implemented");
+    NSLog(@"Focus In event for window: %u", anEvent->event);
+
+    if (anEvent->mode == XCB_NOTIFY_MODE_GRAB || anEvent->mode == XCB_NOTIFY_MODE_UNGRAB)
+        return;
+
+    switch (anEvent->detail)
+    {
+        case XCB_NOTIFY_DETAIL_ANCESTOR:
+        case XCB_NOTIFY_DETAIL_INFERIOR:
+        case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
+        case XCB_NOTIFY_DETAIL_NONLINEAR:
+            [window focus];
+            break;
+        default:
+            break;
+    }
 
     window = nil;
 }
@@ -1004,7 +1013,6 @@ ICCCMService *icccmService;
         }
     }
 
-    //xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
 
     if (anEvent->type == [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"] &&
         anEvent->format == 32 &&
@@ -1017,7 +1025,7 @@ ICCCMService *icccmService;
             [drawer makePreviewImage];
             XCBPoint position = XCBMakePoint(100, 100); //tmp position until i dont have a dock bar
             [frame createMiniWindowAtPosition:position];
-            [frame setIsMinimized:YES];
+            [frame setIconicState];
         }
 
         if (titleBar != nil)
@@ -1027,7 +1035,7 @@ ICCCMService *icccmService;
 
         if (clientWindow)
         {
-            [clientWindow setIsMinimized:YES];
+            [clientWindow setIconicState];
             [self unmapWindow:clientWindow];
             [frame updateAttributes];
             screen = [frame onScreen];
@@ -1060,6 +1068,7 @@ ICCCMService *icccmService;
     NSLog(@"Enter notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
+
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
@@ -1072,7 +1081,6 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
-
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1097,6 +1105,9 @@ ICCCMService *icccmService;
 {
     NSLog(@"Leave notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
+
+    if ([window window] != anEvent->root)
+        return;
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
@@ -1159,7 +1170,7 @@ ICCCMService *icccmService;
 - (void)handleExpose:(xcb_expose_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
-    [window setScreen:[window onScreen]];
+    [window onScreen];
     XCBVisual *visual = [window visual];
 
     if ([window isKindOfClass:[XCBTitleBar class]])
@@ -1377,41 +1388,6 @@ ICCCMService *icccmService;
     windows = nil;
 }
 
-- (void)sendClientMessageTo:(XCBWindow *)destination message:(Message)message
-{
-    xcb_client_message_event_t event;
-    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
-
-    switch (message)
-    {
-        case WM_DELETE_WINDOW:
-
-            if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:destination])
-            {
-                event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
-                event.format = 32;
-                event.response_type = XCB_CLIENT_MESSAGE;
-                event.window = [destination window];
-                event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
-                event.data.data32[1] = currentTime;
-                event.data.data32[2] = 0;
-                event.data.data32[3] = 0;
-                event.sequence = 0;
-
-                xcb_send_event(connection, false, [destination window], XCB_EVENT_MASK_NO_EVENT, (char *) &event);
-            }
-            /*else
-             xcb_kill_client(connection, [destination window]);*/
-
-            break;
-
-        default:
-            break;
-    }
-
-    atomService = nil;
-}
-
 - (void) sendEvent:(const char *)anEvent toClient:(XCBWindow*)aWindow propagate:(BOOL)propagating
 {
     xcb_send_event(connection, propagating, [aWindow window], XCB_EVENT_MASK_STRUCTURE_NOTIFY, anEvent);
@@ -1431,7 +1407,7 @@ ICCCMService *icccmService;
 
 - (void)registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
 {
-    [selectionWindow setScreen:[selectionWindow onScreen]];
+    [selectionWindow onScreen];
     XCBScreen *screen = [selectionWindow screen];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 

@@ -15,6 +15,21 @@
 #import "XCBAttributesReply.h"
 #import "XCBVisual.h"
 
+#define CLIENT_SELECT_INPUT_EVENT_MASK XCB_EVENT_MASK_STRUCTURE_NOTIFY \
+                                        | XCB_EVENT_MASK_PROPERTY_CHANGE \
+                                        | XCB_EVENT_MASK_FOCUS_CHANGE
+
+#define ROOT_WINDOW_EVENT_MASK \
+XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT \
+| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY \
+| XCB_EVENT_MASK_ENTER_WINDOW \
+| XCB_EVENT_MASK_LEAVE_WINDOW \
+| XCB_EVENT_MASK_STRUCTURE_NOTIFY \
+| XCB_EVENT_MASK_BUTTON_PRESS \
+| XCB_EVENT_MASK_BUTTON_RELEASE \
+| XCB_EVENT_MASK_FOCUS_CHANGE \
+| XCB_EVENT_MASK_PROPERTY_CHANGE
+
 @class XCBConnection;
 
 @interface XCBWindow : NSObject
@@ -38,23 +53,26 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBRect windowRect;
 @property (nonatomic) XCBRect oldRect;
 @property (nonatomic) XCBRect originalRect;
-@property (nonatomic) BOOL decorated;
-@property (nonatomic) BOOL isCloseButton;
-@property (nonatomic) BOOL isMinimizeButton;
-@property (nonatomic) BOOL isMaximizeButton;
-@property (nonatomic) BOOL isMaximized;
-@property (nonatomic) BOOL isMinimized;
+@property (nonatomic, assign) BOOL decorated;
+@property (nonatomic, assign) BOOL isCloseButton;
+@property (nonatomic, assign) BOOL isMinimizeButton;
+@property (nonatomic, assign) BOOL isMaximizeButton;
+@property (nonatomic, assign) BOOL isMaximized;
+@property (nonatomic, assign) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
-@property (nonatomic) BOOL needDestroy;
+@property (nonatomic, assign) BOOL needDestroy;
 @property (nonatomic) xcb_pixmap_t pixmap;
-@property (nonatomic) BOOL firstRun; //find a better solution
-@property (nonatomic) BOOL pointerGrabbed;
+@property (nonatomic, assign) BOOL firstRun; //find a better solution
+@property (nonatomic, assign) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
-@property (nonatomic) BOOL isAbove;
+@property (nonatomic, assign) BOOL isAbove;
 @property (nonatomic) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
 @property (strong, nonatomic) XCBAttributesReply *attributes;
+@property (nonatomic, assign) BOOL isFocused;
+@property (strong, nonatomic) NSMutableDictionary *cachedWMHints;
+@property (assign, nonatomic) BOOL hasInputHint;
 
 
 /*** ALLOWED ACTIONS ***/
@@ -113,6 +131,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
 - (void) minimize;
 - (void) hide;
+- (void) close;
 - (void) restoreDimensionAndPosition;
 - (void) createMiniWindowAtPosition:(XCBPoint)position;
 - (void) restoreFromIconified;
@@ -130,6 +149,10 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) configureForEvent:(xcb_configure_request_event_t *)anEvent;
 - (void) drawIcons;
 - (void) cairoPreview;
-
+- (void) focus;
+- (void) setIconicState;
+- (void) setNormalState;
+- (void) refreshCachedWMHints;
+- (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp;
 
 @end

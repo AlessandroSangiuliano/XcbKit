@@ -205,6 +205,7 @@
 
 - (void) resize:(xcb_motion_notify_event_t *)anEvent
 {
+
     /*** width ***/
 
     if (rightBorderClicked && !bottomBorderClicked && !leftBorderClicked && !topBorderClicked)
@@ -214,7 +215,6 @@
         resizeFromLeftForEvent(anEvent, self, minWidthHint);
 
 
-
     /** height **/
 
     if (bottomBorderClicked && !rightBorderClicked && !leftBorderClicked)
@@ -222,7 +222,6 @@
 
     if (topBorderClicked && !rightBorderClicked && !leftBorderClicked && !bottomBorderClicked)
         resizeFromTopForEvent(anEvent, self, minHeightHint);
-
 
 
     /** width and height **/
@@ -255,6 +254,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* windo
         xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH, &values);
         xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
+
         [window setWindowRect:rect];
         [window setOriginalRect:rect];
 
@@ -275,6 +275,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* windo
     xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
     rect.size.width = anEvent->event_x;
+
     [window setWindowRect:rect];
     [window setOriginalRect:rect];
 
@@ -578,7 +579,6 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
 
     /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
     XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
-    [super setOldRect:[super windowRect]];
     [super setWindowRect:newRect];
 
     [super setOriginalRect:XCBMakeRect(XCBMakePoint(x, y),
@@ -595,7 +595,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     xcb_configure_notify_event_t event;
     XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
     XCBRect rect = [[self geometries] rect];
-    XCBRect  clientRect = [[clientWindow geometries] rect];
+    XCBRect  clientRect = [clientWindow rectFromGeometries];
 
     NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
 
@@ -612,7 +612,10 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     event.above_sibling = XCB_NONE;
     event.response_type = XCB_CONFIGURE_NOTIFY;
     event.sequence = 0;
+
     [connection sendEvent:(const char*) &event toClient:clientWindow propagate:NO];
+
+    [clientWindow setWindowRect:clientRect];
 
     clientWindow = nil;
 }

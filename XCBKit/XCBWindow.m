@@ -9,11 +9,11 @@
 #import "XCBWindow.h"
 #import "XCBConnection.h"
 #import "XCBTitleBar.h"
-#import "services/XCBAtomService.h"
-#import "functions/Transformers.h"
 #import "utils/CairoDrawer.h"
-#import "services/EWMHService.h"
 #import <xcb/xcb_aux.h>
+#import "services/ICCCMService.h"
+#import "enums/EIcccm.h"
+#import "functions/Transformers.h"
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
@@ -50,6 +50,8 @@
 @synthesize icons;
 @synthesize screen;
 @synthesize attributes;
+@synthesize cachedWMHints;
+@synthesize hasInputHint;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -96,6 +98,8 @@
     canStick = NO;
     canChangeDesktop = NO;
     canClose = NO;
+
+    cachedWMHints = [[NSMutableDictionary alloc] init];
 
     return self;
 }
@@ -299,13 +303,12 @@
     NSUInteger size = [[connection screens] count];
     XCBQueryTreeReply *queryTreeReply = [self queryTree];
     XCBWindow *rootWindow = [queryTreeReply rootWindow];
-    XCBScreen *scr = nil;
 
     for (int i = 0; i < size; i++)
     {
-        scr = [[connection screens] objectAtIndex:i];
+        screen = [[connection screens] objectAtIndex:i];
 
-        if ([[scr rootWindow] window] == [rootWindow window])
+        if ([[screen rootWindow] window] == [rootWindow window])
         {
             break;
         }
@@ -313,7 +316,7 @@
 
     queryTreeReply = nil;
     rootWindow = nil;
-    return scr;
+    return screen;
 }
 
 - (void)updatePixmap
@@ -443,7 +446,6 @@
     return queryReply;
 }
 
-
 - (uint32_t)windowMask
 {
     return windowMask;
@@ -477,7 +479,7 @@
 
     /*** restore to the previous dimension and position of the frame ***/
 
-    [frame setWindowRect:[frame originalRect]];
+    [frame setWindowRect:[frame oldRect]];
     [frame setOldRect:XCBInvalidRect];
 
     uint32_t valueList[4] =
@@ -507,7 +509,7 @@
 
     XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
-    [clientWindow setWindowRect:[clientWindow originalRect]];
+    [clientWindow setWindowRect:[clientWindow oldRect]];
     [clientWindow setOldRect:XCBInvalidRect];
     valueList[0] = [clientWindow windowRect].position.x;
     valueList[1] = [clientWindow windowRect].position.y;
@@ -567,7 +569,6 @@
     /*** save previous dimensions and position of the window **/
 
     [frame setOldRect:[frame windowRect]];
-
 
     /*** redraw and resize the frame ***/
 
@@ -700,7 +701,6 @@
         XCBTitleBar *titleBar = (XCBTitleBar *) [frameWindow childWindowForKey:TitleBar];
 
         [clientWindow setOldRect:[clientWindow windowRect]];
-        [titleBar description];
         [titleBar setOldRect:[titleBar windowRect]];
 
         frameWindow = nil;
@@ -713,16 +713,8 @@
 
     xcb_configure_window([connection connection], window, mask, &valueList);
 
-    if ([self isKindOfClass:[XCBFrame class]])
-    {
-        XCBFrame *frame = (XCBFrame *) self;
-        titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-        [titleBar setOldRect:[titleBar windowRect]];
-    }
-
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     XCBAtomService *atomService = [ewmhService atomService];
-    [atomService cacheAtom:@"WM_STATE"];
 
     xcb_atom_t state[1] = {[atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateHidden]]};
 
@@ -734,21 +726,10 @@
                             withDataLength:1
                                   withData:state];
 
-    state[0] = ICCCM_WM_STATE_ICONIC;
-
-    [ewmhService changePropertiesForWindow:self
-                                  withMode:XCB_PROP_MODE_REPLACE
-                              withProperty:@"WM_STATE"
-                                  withType:XCB_ATOM_ATOM
-                                withFormat:32
-                            withDataLength:1
-                                  withData:state];
 
     atomService = nil;
     ewmhService = nil;
     titleBar = nil;
-
-    isMinimized = YES;
 
     return;
 }
@@ -757,12 +738,6 @@
 {
     windowRect = oldRect;
     XCBFrame *frame;
-
-    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    XCBAtomService *atomService = [ewmhService atomService];
-
-    xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
-    [atomService cacheAtom:@"WM_STATE"];
 
     XCBPoint position = windowRect.position;
     XCBSize size = windowRect.size;
@@ -784,37 +759,19 @@
         [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
 
-        [titleBar description];
         [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         [connection mapWindow:clientWindow];
-        [clientWindow setIsMinimized:NO];
 
-        [ewmhService changePropertiesForWindow:clientWindow
-                                      withMode:XCB_PROP_MODE_REPLACE
-                                  withProperty:@"WM_STATE"
-                                      withType:XCB_ATOM_ATOM
-                                    withFormat:32
-                                withDataLength:1
-                                      withData:state];
+        [clientWindow setNormalState];
+
+        [frame setNormalState];
 
         titleBar = nil;
         clientWindow = nil;
         frame = nil;
     }
 
-    isMinimized = NO;
-
-    [ewmhService changePropertiesForWindow:frame
-                                  withMode:XCB_PROP_MODE_REPLACE
-                              withProperty:@"WM_STATE"
-                                  withType:XCB_ATOM_ATOM
-                                withFormat:32
-                            withDataLength:1
-                                  withData:state];
-
-    ewmhService = nil;
-    atomService = nil;
     frame = nil;
 }
 
@@ -829,6 +786,31 @@
 {
     [connection unmapWindow:self];
     [connection setNeedFlush:YES];
+}
+
+- (void) close
+{
+    xcb_client_message_event_t event;
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+
+    if ([icccmService hasProtocol:[icccmService WMDeleteWindow] forWindow:self])
+    {
+        event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+        event.format = 32;
+        event.response_type = XCB_CLIENT_MESSAGE;
+        event.window = window;
+        event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMDeleteWindow]];
+        event.data.data32[1] = [connection currentTime]; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
+        event.data.data32[2] = 0;
+        event.data.data32[3] = 0;
+        event.sequence = 0;
+
+        [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    }
+
+    atomService = nil;
+    icccmService = nil;
 }
 
 - (void)stackAbove
@@ -859,7 +841,7 @@
                     YES,
                     window,
                     BUTTONMASK,
-                    XCB_GRAB_MODE_ASYNC,
+                    XCB_GRAB_MODE_SYNC,
                     XCB_GRAB_MODE_ASYNC,
                     XCB_NONE,
                     XCB_NONE,
@@ -908,6 +890,42 @@
         pointerGrabbed = NO;
         //NSLog(@"Pointer ungrabbed");
     }
+}
+
+- (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp
+{
+    xcb_set_input_focus([connection connection], revertTo, window, timestamp);
+    [connection flush];
+}
+
+- (void) focus
+{
+    xcb_client_message_event_t event;
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+
+    if (hasInputHint)
+        [self setInputFocus:XCB_INPUT_FOCUS_PARENT time:[connection currentTime]];
+
+    /*** check for the WMTakeFocus protocol ***/
+
+    if ([icccmService hasProtocol:[icccmService WMTakeFocus] forWindow:self])
+    {
+        event.type = [atomService atomFromCachedAtomsWithKey:[icccmService WMProtocols]];
+        event.format = 32;
+        event.response_type = XCB_CLIENT_MESSAGE;
+        event.window = window;
+        event.data.data32[0] = [atomService atomFromCachedAtomsWithKey:[icccmService WMTakeFocus]];
+        event.data.data32[1] = [connection currentTime]; //FIXME:SET THE TIME OF THE EVENT OR UPDATE LOCALLY THE TIMESTAMP
+        event.data.data32[2] = 0;
+        event.data.data32[3] = 0;
+        event.sequence = 0;
+
+        [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    }
+
+    atomService = nil;
+    icccmService = nil;
 }
 
 - (XCBGeometryReply *)geometries
@@ -1023,21 +1041,8 @@
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     /*** required by ICCCM compliance ***/
-    xcb_configure_notify_event_t event;
 
-    event.event = window;
-    event.window = window;
-    event.x = frameRect.position.x;
-    event.y = frameRect.position.y;
-    event.border_width = anEvent->border_width;
-    event.width = anEvent->width;
-    event.height = anEvent->height;
-    event.override_redirect = 0;
-    event.above_sibling = anEvent->sibling;
-    event.response_type = XCB_CONFIGURE_NOTIFY;
-    event.sequence = 0;
-
-    [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+    [frame  configureClient];
 
     frame = nil;
     titleBar = nil;
@@ -1058,6 +1063,7 @@
     if (icons == nil)
     {
         NSLog(@"No icons. Array nil");
+        drawer = nil;
         return;
     }
 
@@ -1077,10 +1083,51 @@
     return visual;
 }
 
+- (void) setIconicState
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    [icccmService setWMStateForWindow:self state:ICCCM_WM_STATE_ICONIC];
+    isMinimized = YES;
+    icccmService = nil;
+}
+
+- (void) setNormalState
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    [icccmService setWMStateForWindow:self state:ICCCM_WM_STATE_NORMAL];
+    isMinimized = NO;
+    icccmService = nil;
+}
+
+- (void) refreshCachedWMHints
+{
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    xcb_icccm_wm_hints_t hints = [icccmService wmHintsFromWindow:self];
+
+
+    if ([cachedWMHints count] != 0)
+        [cachedWMHints removeAllObjects];
+
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.input] forKey:FnFromNSIntegerToNSString(ICCCMInputHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_mask] forKey:FnFromNSIntegerToNSString(ICCCMIconMaskHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_pixmap] forKey:FnFromNSIntegerToNSString(ICCCMIconPixmapHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_window] forKey:FnFromNSIntegerToNSString(ICCCMIconWindowHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.window_group] forKey:FnFromNSIntegerToNSString(ICCCMWindowGroupHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.initial_state] forKey:FnFromNSIntegerToNSString(ICCCMStateHint)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.flags]forKey:FnFromNSIntegerToNSString(ICCCMFlags)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_x] forKey:FnFromNSIntegerToNSString(ICCCMIconPositionHintX)];
+    [cachedWMHints setValue:[NSNumber numberWithInt:hints.icon_y] forKey:FnFromNSIntegerToNSString(ICCCMIconPositionHintY)];
+
+    if ([[cachedWMHints valueForKey:FnFromNSIntegerToNSString(ICCCMFlags)] intValue] & ICCCMInputHint)
+        hasInputHint = YES;
+
+    icccmService = nil;
+}
+
 - (void)description
 {
-    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@", window, [parentWindow window],
-          FnFromXCBRectToString(windowRect));
+    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@; Old Rect: %@", window, [parentWindow window],
+          FnFromXCBRectToString(windowRect), FnFromXCBRectToString(oldRect));
 }
 
 - (void)dealloc
@@ -1091,6 +1138,7 @@
     allowedActions = nil;
     screen = nil;
     attributes = nil;
+    cachedWMHints = nil;
 }
 
 @end
