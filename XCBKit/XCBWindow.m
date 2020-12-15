@@ -11,7 +11,6 @@
 #import "XCBTitleBar.h"
 #import "utils/CairoDrawer.h"
 #import <xcb/xcb_aux.h>
-#import "enums/EMessage.h"
 #import "services/ICCCMService.h"
 #import "enums/EIcccm.h"
 #import "functions/Transformers.h"

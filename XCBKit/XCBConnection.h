@@ -11,7 +11,6 @@
 #import "XCBVisual.h"
 #import "utils/XCBCreateWindowTypeRequest.h"
 #import "utils/XCBWindowTypeResponse.h"
-#import "enums/EMessage.h"
 #import "XCBReply.h"
 #include <xcb/xcb.h>
 

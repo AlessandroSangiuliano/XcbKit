@@ -57,7 +57,6 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
 			functions/Transformers.h \
-			enums/EMessage.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \
 			enums/EIcccm.h
