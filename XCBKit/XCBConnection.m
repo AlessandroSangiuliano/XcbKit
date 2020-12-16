@@ -326,35 +326,6 @@ ICCCMService *icccmService;
     [aWindow setParentWindow:parentWindow];
 }
 
-- (BOOL)changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow withMask:(uint32_t)aMask checked:(BOOL)check
-{
-    xcb_void_cookie_t cookie;
-
-    BOOL attributesChanged = NO;
-
-    NSLog(@"Changing attributes for window: %u", [aWindow window]);
-
-    if (check)
-    {
-        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], aMask, values);
-    } else
-    {
-        cookie = xcb_change_window_attributes(connection, [aWindow window], aMask, values);
-    }
-
-    xcb_generic_error_t *error = xcb_request_check(connection, cookie);
-
-    if (error != NULL)
-        NSLog(@"Unable to change the attributes for window %u with error code: %d", [aWindow window],
-              error->error_code);
-    else
-        attributesChanged = YES;
-
-    free(error);
-
-    return attributesChanged;
-}
-
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];

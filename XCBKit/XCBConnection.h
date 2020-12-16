@@ -105,7 +105,6 @@
 - (void) reparentWindow: (XCBWindow*) aWindow toWindow:(XCBWindow*)parentWindow position:(XCBPoint)position;
 - (void) mapWindow: (XCBWindow*) aWindow;
 - (void) unmapWindow:(XCBWindow*)aWindow;
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 
