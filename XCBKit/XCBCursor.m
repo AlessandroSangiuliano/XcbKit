@@ -13,6 +13,7 @@
 @synthesize context;
 @synthesize screen;
 @synthesize cursorPath;
+@synthesize cursor;
 
 - (instancetype)initWithConnection:(XCBConnection *)aConnection screen:(XCBScreen*)aScreen
 {
@@ -35,7 +36,7 @@
         return self;
     }
 
-    xcb_cursor_t cursor = xcb_cursor_load_cursor(context, "top_left_arrow");
+    cursor = xcb_cursor_load_cursor(context, "top_left_arrow");
     XCBWindow *rootWindow = [screen rootWindow];
     [rootWindow changeAttributes:&cursor withMask:XCB_CW_CURSOR checked:NO];
     rootWindow = nil;
@@ -49,6 +50,11 @@
     xcb_cursor_context_free(context);
 }
 
+- (void) destroyCursor
+{
+    xcb_free_cursor([connection connection], cursor);
+}
+
 - (void) dealloc
 {
     connection = nil;
@@ -57,6 +63,8 @@
 
     if (context != NULL)
         [self destroyContext];
+
+
 }
 
 @end

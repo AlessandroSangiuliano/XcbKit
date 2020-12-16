@@ -19,8 +19,10 @@
 @property (strong, nonatomic) XCBScreen *screen;
 @property (nonatomic) xcb_cursor_context_t *context;
 @property (strong, nonatomic) NSString *cursorPath;
+@property (nonatomic) xcb_cursor_t cursor;
 
 - (instancetype)initWithConnection:(XCBConnection *)aConnection screen:(XCBScreen*)aScreen;
 - (void) destroyContext;
+- (void) destroyCursor;
 
 @end

@@ -187,6 +187,8 @@ ICCCMService *icccmService;
         [self registerWindow:rootWindow];
         [rootWindow setScreen:screen];
         [rootWindow initCursor];
+        [[rootWindow cursor] destroyCursor];
+
         xcb_screen_next(&iterator);
         rootWindow = nil;
         screen = nil;
