@@ -52,6 +52,7 @@
 @synthesize attributes;
 @synthesize cachedWMHints;
 @synthesize hasInputHint;
+@synthesize cursor;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -119,6 +120,11 @@
 - (void)destroyGraphicsContext
 {
     xcb_free_gc([connection connection], graphicContextId);
+}
+
+- (void) initCursor
+{
+    cursor = [[XCBCursor alloc] initWithConnection:connection screen:[self onScreen]];
 }
 
 - (void)checkNetWMAllowedActions
@@ -425,6 +431,35 @@
     }
 
     attributes = [[XCBAttributesReply alloc] initWithAttributesReply:attr];
+}
+
+- (BOOL) changeAttributes:(uint32_t[])values withMask:(uint32_t)aMask checked:(BOOL)check
+{
+    xcb_void_cookie_t cookie;
+
+    BOOL attributesChanged = NO;
+
+    NSLog(@"Changing attributes for window: %u", window);
+
+    if (check)
+    {
+        cookie = xcb_change_window_attributes_checked([connection connection], window, aMask, values);
+    } else
+    {
+        cookie = xcb_change_window_attributes([connection connection], window, aMask, values);
+    }
+
+    xcb_generic_error_t *error = xcb_request_check([connection connection], cookie);
+
+    if (error != NULL)
+        NSLog(@"Unable to change the attributes for window %u with error code: %d", window,
+              error->error_code);
+    else
+        attributesChanged = YES;
+
+    free(error);
+
+    return attributesChanged;
 }
 
 - (XCBQueryTreeReply*) queryTree

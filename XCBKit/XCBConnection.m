@@ -84,6 +84,7 @@ ICCCMService *icccmService;
 
     resizeState = NO;
     ewmhService = nil;
+
     [self flush];
     return self;
 }
@@ -185,9 +186,11 @@ ICCCMService *icccmService;
 
         [self registerWindow:rootWindow];
         [rootWindow setScreen:screen];
+        [rootWindow initCursor];
         xcb_screen_next(&iterator);
         rootWindow = nil;
         screen = nil;
+
     }
 
     NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
@@ -1417,7 +1420,9 @@ ICCCMService *icccmService;
 
     if (replace)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+        //BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+
+        BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
         {
@@ -1459,7 +1464,8 @@ ICCCMService *icccmService;
 
     if (aquired)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+        //BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+        BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
         {
