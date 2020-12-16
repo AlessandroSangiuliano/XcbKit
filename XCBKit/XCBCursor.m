@@ -36,7 +36,9 @@
     }
 
     xcb_cursor_t cursor = xcb_cursor_load_cursor(context, "top_left_arrow");
-    xcb_change_window_attributes([connection connection], [[screen rootWindow] window], XCB_CW_CURSOR, &cursor);
+    XCBWindow *rootWindow = [screen rootWindow];
+    [rootWindow changeAttributes:&cursor withMask:XCB_CW_CURSOR checked:NO];
+    rootWindow = nil;
 
     return self;
 }
