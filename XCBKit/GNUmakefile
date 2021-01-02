@@ -61,7 +61,8 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			functions/Transformers.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \
-			enums/EIcccm.h
+			enums/EIcccm.h \
+			enums/EMousePosition.h
 
 ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -fblocks -Wall #-Wno-unused -Werror -Wall
 

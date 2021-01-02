@@ -98,7 +98,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (id) initWithXCBWindow:(xcb_window_t) aWindow
            andConnection:(XCBConnection*)aConnection;
 
-
 - (id) initWithXCBWindow:(xcb_window_t) aWindow
 		withParentWindow:(XCBWindow*) aParent
            andConnection:(XCBConnection*) aConnection;
@@ -158,5 +157,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) refreshCachedWMHints;
 - (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp;
 - (void) initCursor;
+- (void) showLeftPointerCursor;
+- (void) showResizeCursorForPosition:(MousePosition)position;
 
 @end

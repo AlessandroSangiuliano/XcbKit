@@ -187,6 +187,7 @@ ICCCMService *icccmService;
         [self registerWindow:rootWindow];
         [rootWindow setScreen:screen];
         [rootWindow initCursor];
+        [rootWindow showLeftPointerCursor];
         [[rootWindow cursor] destroyCursor];
 
         xcb_screen_next(&iterator);
@@ -591,6 +592,7 @@ ICCCMService *icccmService;
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
+    [frame initCursor];
     [window updateAttributes];
     [frame setScreen:[window screen]];
     [window setNormalState];
@@ -702,7 +704,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
-    NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
+   // NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
 
     window = nil;
 
@@ -712,12 +714,13 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBWindow *rootWindow = [self rootWindowForScreenNumber:0];
+    XCBFrame *frame;
 
     if (dragState &&
         ([window window] != [rootWindow window]) &&
         ([[window parentWindow] window] != [rootWindow window]))
     {
-        XCBFrame *frame = (XCBFrame *) [window parentWindow];
+        frame = (XCBFrame *) [window parentWindow];
         [[frame childWindowForKey:(TitleBar)] grabPointer];
 
         NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
@@ -725,23 +728,78 @@ ICCCMService *icccmService;
         [frame configureClient];
 
         needFlush = YES;
-        frame = nil;
     }
+
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame *)window;
+        MousePosition  position = [frame mouseIsOnWindowBorderForEvent:anEvent];
+
+        switch (position)
+        {
+            case RightBorder:
+                if (![[frame cursor] resizeRightSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case LeftBorder:
+                if (![[frame cursor] resizeLeftSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case BottomRightCorner:
+                if (![[frame cursor] resizeBottomRightCornerSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case TopBorder:
+                if (![[frame cursor] resizeTopSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case BottomBorder:
+                if (![[frame cursor] resizeBottomSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            default:
+                if (![[frame cursor] leftPointerSelected])
+                {
+                    NSLog(@"DEFAULT");
+                    [frame showLeftPointerCursor];
+                }
+                break;
+        }
+    }
+    else
+    {
+        if (![[frame cursor] leftPointerSelected])
+        {
+            NSLog(@"CUNNU");
+            [frame showLeftPointerCursor];
+            [window showLeftPointerCursor];
+
+        }
+    }
+
 
     if (resizeState)
     {
-        XCBFrame *frame;
-        
+
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
         [frame resize:anEvent];
-
-        frame = nil;
     }
 
     window = nil;
     rootWindow = nil;
+    frame = nil;
 }
 
 - (void)handleButtonPress:(xcb_button_press_event_t *)anEvent
@@ -856,6 +914,8 @@ ICCCMService *icccmService;
         [frame setRightBorderClicked:NO];
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
+        [frame showLeftPointerCursor];
+        [window showLeftPointerCursor];
 
         frame = nil;
     }
@@ -1082,8 +1142,8 @@ ICCCMService *icccmService;
     NSLog(@"Leave notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    if ([window window] != anEvent->root)
-        return;
+    /*if ([window window] != anEvent->root) //FIXME: WHAT IS THIS???
+        return;*/
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
@@ -1095,6 +1155,13 @@ ICCCMService *icccmService;
     {
         XCBFrame *frameWindow = (XCBFrame *) window;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        NSLog(@"Frame");
+
+        if (![[frameWindow cursor] leftPointerSelected])
+        {
+            [frameWindow description];
+            [frameWindow showLeftPointerCursor];
+        }
 
         [clientWindow ungrabButton];
 
@@ -1303,7 +1370,7 @@ ICCCMService *icccmService;
         [aFrame setRightBorderClicked:YES];
     }
 
-    if (leftBorder == anEvent->root_x || (leftBorder + 1) > anEvent->root_x)
+    if (leftBorder == anEvent->root_x || (leftBorder + 3) > anEvent->root_x)
     {
         if (![aFrame grabPointer])
         {

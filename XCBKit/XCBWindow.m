@@ -73,6 +73,16 @@
                     withConnection:aConnection];
 }
 
+- (id) initWithXcbWindow:(xcb_window_t)aWindow
+        withParentWindow:(XCBWindow*) aParent
+           andConnection:(XCBConnection*) aConnection
+{
+    return [self initWithXCBWindow:aWindow
+                  withParentWindow:aParent
+                   withAboveWindow:XCB_NONE
+                    withConnection:aConnection];
+}
+
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
        withParentWindow:(XCBWindow *)aParent
         withAboveWindow:(XCBWindow *)anAbove
@@ -125,6 +135,20 @@
 - (void) initCursor
 {
     cursor = [[XCBCursor alloc] initWithConnection:connection screen:[self onScreen]];
+}
+
+- (void) showLeftPointerCursor
+{
+    [cursor selectLeftPointerCursor];
+    xcb_cursor_t crs = [cursor cursor];
+    [self changeAttributes:&crs withMask:XCB_CW_CURSOR checked:NO];
+}
+
+- (void) showResizeCursorForPosition:(MousePosition)position
+{
+    [cursor selectResizeCursorForPosition:position];
+    xcb_cursor_t crs = [cursor cursor];
+    [self changeAttributes:&crs withMask:XCB_CW_CURSOR checked:NO];
 }
 
 - (void)checkNetWMAllowedActions
@@ -1169,11 +1193,12 @@
 {
     parentWindow = nil;
     aboveWindow = nil;
-    [allowedActions removeAllObjects];
+    [allowedActions removeAllObjects]; //not needed probably
     allowedActions = nil;
     screen = nil;
     attributes = nil;
     cachedWMHints = nil;
+    cursor = nil;
 }
 
 @end
