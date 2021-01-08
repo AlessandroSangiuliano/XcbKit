@@ -2,7 +2,7 @@ PACKAGE_NAME = XCBKit
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.0.14
+VERSION = 0.0.15
 
 FRAMEWORK_NAME = XCBKit
 export FRAMEWORK_NAME
@@ -14,6 +14,7 @@ XCBKit_INCLUDE_DIRS = -Iservices/ -Ienums/ -Ifunctions/ -Iutils/
 $(FRAMEWORK_NAME)_OBJC_FILES = \
 			XCBKit.m \
 			XCBConnection.m \
+			XCBCursor.m \
 			XCBScreen.m \
 			XCBWindow.m \
 			XCBVisual.m \
@@ -37,6 +38,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBKit.h \
 			XCBConnection.h \
+			XCBCursor.h \
 			XCBScreen.h \
 			XCBWindow.h \
 			XCBVisual.h \
@@ -59,11 +61,12 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			functions/Transformers.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \
-			enums/EIcccm.h
+			enums/EIcccm.h \
+			enums/EMousePosition.h
 
 ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -fblocks -Wall #-Wno-unused -Werror -Wall
 
-LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes xcb-aux) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
+LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes xcb-aux xcb-cursor) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
 
 include $(GNUSTEP_MAKEFILES)/aggregate.make
 include $(GNUSTEP_MAKEFILES)/framework.make

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "XCBWindow.h"
 #import "XCBConnection.h"
+#import "enums/EMousePosition.h"
+
 
 #define WM_MIN_WINDOW_HEIGHT 431
 #define WM_MIN_WINDOW_WIDTH 496
@@ -45,6 +47,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (void) resize:(xcb_motion_notify_event_t *)anEvent;
 - (void) moveTo:(NSPoint)coordinates;
 - (void) configureClient;
+- (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent;
 
 
  /********************************
