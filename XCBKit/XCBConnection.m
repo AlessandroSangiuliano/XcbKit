@@ -1009,8 +1009,6 @@ ICCCMService *icccmService;
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-            //uint32_t values[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
-            //[self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
             [ewmhService handleClientMessage:atomMessageName forWindow:window];
         }
 
@@ -1460,8 +1458,6 @@ ICCCMService *icccmService;
 
     if (replace)
     {
-        //BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
-
         BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
@@ -1504,7 +1500,6 @@ ICCCMService *icccmService;
 
     if (aquired)
     {
-        //BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
         BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
