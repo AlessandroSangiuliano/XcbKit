@@ -84,6 +84,7 @@ ICCCMService *icccmService;
 
     resizeState = NO;
     ewmhService = nil;
+
     [self flush];
     return self;
 }
@@ -185,9 +186,14 @@ ICCCMService *icccmService;
 
         [self registerWindow:rootWindow];
         [rootWindow setScreen:screen];
+        [rootWindow initCursor];
+        [rootWindow showLeftPointerCursor];
+        [[rootWindow cursor] destroyCursor];
+
         xcb_screen_next(&iterator);
         rootWindow = nil;
         screen = nil;
+
     }
 
     NSLog(@"Number of screens: %lu", (unsigned long) [screens count]);
@@ -321,35 +327,6 @@ ICCCMService *icccmService;
     [aWindow setWindowRect:newRect];
     [aWindow setOriginalRect:newRect];
     [aWindow setParentWindow:parentWindow];
-}
-
-- (BOOL)changeAttributes:(uint32_t[])values forWindow:(XCBWindow *)aWindow withMask:(uint32_t)aMask checked:(BOOL)check
-{
-    xcb_void_cookie_t cookie;
-
-    BOOL attributesChanged = NO;
-
-    NSLog(@"Changing attributes for window: %u", [aWindow window]);
-
-    if (check)
-    {
-        cookie = xcb_change_window_attributes_checked(connection, [aWindow window], aMask, values);
-    } else
-    {
-        cookie = xcb_change_window_attributes(connection, [aWindow window], aMask, values);
-    }
-
-    xcb_generic_error_t *error = xcb_request_check(connection, cookie);
-
-    if (error != NULL)
-        NSLog(@"Unable to change the attributes for window %u with error code: %d", [aWindow window],
-              error->error_code);
-    else
-        attributesChanged = YES;
-
-    free(error);
-
-    return attributesChanged;
 }
 
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
@@ -615,6 +592,7 @@ ICCCMService *icccmService;
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
+    [frame initCursor];
     [window updateAttributes];
     [frame setScreen:[window screen]];
     [window setNormalState];
@@ -726,7 +704,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
-    NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
+   // NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
 
     window = nil;
 
@@ -736,12 +714,13 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBWindow *rootWindow = [self rootWindowForScreenNumber:0];
+    XCBFrame *frame;
 
     if (dragState &&
         ([window window] != [rootWindow window]) &&
         ([[window parentWindow] window] != [rootWindow window]))
     {
-        XCBFrame *frame = (XCBFrame *) [window parentWindow];
+        frame = (XCBFrame *) [window parentWindow];
         [[frame childWindowForKey:(TitleBar)] grabPointer];
 
         NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
@@ -749,23 +728,78 @@ ICCCMService *icccmService;
         [frame configureClient];
 
         needFlush = YES;
-        frame = nil;
     }
+
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame *)window;
+        MousePosition  position = [frame mouseIsOnWindowBorderForEvent:anEvent];
+
+        switch (position)
+        {
+            case RightBorder:
+                if (![[frame cursor] resizeRightSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case LeftBorder:
+                if (![[frame cursor] resizeLeftSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case BottomRightCorner:
+                if (![[frame cursor] resizeBottomRightCornerSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case TopBorder:
+                if (![[frame cursor] resizeTopSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            case BottomBorder:
+                if (![[frame cursor] resizeBottomSelected])
+                {
+                    [frame showResizeCursorForPosition:position];
+                }
+                break;
+            default:
+                if (![[frame cursor] leftPointerSelected])
+                {
+                    NSLog(@"DEFAULT");
+                    [frame showLeftPointerCursor];
+                }
+                break;
+        }
+    }
+    else
+    {
+        if (![[frame cursor] leftPointerSelected])
+        {
+            NSLog(@"CUNNU");
+            [frame showLeftPointerCursor];
+            [window showLeftPointerCursor];
+
+        }
+    }
+
 
     if (resizeState)
     {
-        XCBFrame *frame;
-        
+
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
         [frame resize:anEvent];
-
-        frame = nil;
     }
 
     window = nil;
     rootWindow = nil;
+    frame = nil;
 }
 
 - (void)handleButtonPress:(xcb_button_press_event_t *)anEvent
@@ -880,6 +914,8 @@ ICCCMService *icccmService;
         [frame setRightBorderClicked:NO];
         [frame setLeftBorderClicked:NO];
         [frame setTopBorderClicked:NO];
+        [frame showLeftPointerCursor];
+        [window showLeftPointerCursor];
 
         frame = nil;
     }
@@ -973,8 +1009,6 @@ ICCCMService *icccmService;
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-            //uint32_t values[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
-            //[self changeAttributes:values forWindow:window withMask:XCB_CW_EVENT_MASK checked:NO];
             [ewmhService handleClientMessage:atomMessageName forWindow:window];
         }
 
@@ -1106,8 +1140,8 @@ ICCCMService *icccmService;
     NSLog(@"Leave notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    if ([window window] != anEvent->root)
-        return;
+    /*if ([window window] != anEvent->root) //FIXME: WHAT IS THIS???
+        return;*/
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
@@ -1119,6 +1153,13 @@ ICCCMService *icccmService;
     {
         XCBFrame *frameWindow = (XCBFrame *) window;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
+        NSLog(@"Frame");
+
+        if (![[frameWindow cursor] leftPointerSelected])
+        {
+            [frameWindow description];
+            [frameWindow showLeftPointerCursor];
+        }
 
         [clientWindow ungrabButton];
 
@@ -1327,7 +1368,7 @@ ICCCMService *icccmService;
         [aFrame setRightBorderClicked:YES];
     }
 
-    if (leftBorder == anEvent->root_x || (leftBorder + 1) > anEvent->root_x)
+    if (leftBorder == anEvent->root_x || (leftBorder + 3) > anEvent->root_x)
     {
         if (![aFrame grabPointer])
         {
@@ -1417,7 +1458,7 @@ ICCCMService *icccmService;
 
     if (replace)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+        BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
         {
@@ -1459,7 +1500,7 @@ ICCCMService *icccmService;
 
     if (aquired)
     {
-        BOOL attributesChanged = [self changeAttributes:values forWindow:rootWindow withMask:XCB_CW_EVENT_MASK checked:YES];
+        BOOL attributesChanged = [rootWindow changeAttributes:values withMask:XCB_CW_EVENT_MASK checked:YES];
 
         if (!attributesChanged)
         {

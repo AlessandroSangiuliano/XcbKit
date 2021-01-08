@@ -18,8 +18,8 @@
                     XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_KEY_PRESS |\
                     XCB_EVENT_MASK_BUTTON_MOTION | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |\
                     XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |\
-                    XCB_EVENT_MASK_VISIBILITY_CHANGE | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_POINTER_MOTION
-
+                    XCB_EVENT_MASK_VISIBILITY_CHANGE | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_POINTER_MOTION |       \
+                    XCB_CW_CURSOR
 @class XCBWindow;
 @class EWMHService;
 @class XCBAtomService;
@@ -105,7 +105,6 @@
 - (void) reparentWindow: (XCBWindow*) aWindow toWindow:(XCBWindow*)parentWindow position:(XCBPoint)position;
 - (void) mapWindow: (XCBWindow*) aWindow;
 - (void) unmapWindow:(XCBWindow*)aWindow;
-- (BOOL) changeAttributes:(uint32_t[])values forWindow:(XCBWindow*) aWindow withMask:(uint32_t)aMask checked:(BOOL)check;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 

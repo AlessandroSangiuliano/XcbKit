@@ -14,6 +14,7 @@
 #import "XCBScreen.h"
 #import "XCBAttributesReply.h"
 #import "XCBVisual.h"
+#import "XCBCursor.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \
@@ -73,6 +74,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL isFocused;
 @property (strong, nonatomic) NSMutableDictionary *cachedWMHints;
 @property (assign, nonatomic) BOOL hasInputHint;
+@property (strong, nonatomic) XCBCursor *cursor;
 
 
 /*** ALLOWED ACTIONS ***/
@@ -95,7 +97,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 
 - (id) initWithXCBWindow:(xcb_window_t) aWindow
            andConnection:(XCBConnection*)aConnection;
-
 
 - (id) initWithXCBWindow:(xcb_window_t) aWindow
 		withParentWindow:(XCBWindow*) aParent
@@ -120,6 +121,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setIsMapped:(BOOL) mapped;
 - (BOOL) isMapped;
 - (void) updateAttributes;
+- (BOOL) changeAttributes:(uint32_t[])values withMask:(uint32_t)aMask checked:(BOOL)check;
 - (void) setWindowMask:(uint32_t) aMask;
 - (uint32_t) windowMask;
 - (void) setWindowBorderWidth:(uint32_t)border;
@@ -154,5 +156,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) setNormalState;
 - (void) refreshCachedWMHints;
 - (void) setInputFocus:(uint8_t)revertTo time:(xcb_timestamp_t)timestamp;
+- (void) initCursor;
+- (void) showLeftPointerCursor;
+- (void) showResizeCursorForPosition:(MousePosition)position;
 
 @end

@@ -15,6 +15,7 @@
 #import "utils/XCBWindowTypeResponse.h"
 #import "services/ICCCMService.h"
 
+
 @implementation XCBFrame
 
 @synthesize minWidthHint;
@@ -620,6 +621,45 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     clientWindow = nil;
 }
 
+- (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent
+{
+    int rightBorder = [super windowRect].size.width;
+    int bottomBorder = [super windowRect].size.height;
+    int leftBorder = [super windowRect].position.x;
+    int topBorder = [super windowRect].position.y;
+    MousePosition position = None;
+
+    if (rightBorder == anEvent->event_x || (rightBorder - 3) < anEvent->event_x)
+    {
+        position = RightBorder;
+    }
+
+
+    if (bottomBorder == anEvent->event_y || (bottomBorder - 3) < anEvent->event_y)
+    {
+        position = BottomBorder;
+    }
+
+    if ((bottomBorder == anEvent->event_y || (bottomBorder - 3) < anEvent->event_y) &&
+        (rightBorder == anEvent->event_x || (rightBorder - 3) < anEvent->event_x))
+    {
+        position = BottomRightCorner;
+    }
+
+    if (leftBorder == anEvent->root_x || (leftBorder + 3) > anEvent->root_x)
+    {
+        position = LeftBorder;
+    }
+
+    if (topBorder == anEvent->root_y || (topBorder + 3) > anEvent->root_y)
+    {
+        position = TopBorder;
+    }
+
+    return position;
+
+}
+
 
 /********************************
  *                               *
@@ -639,7 +679,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
 
 - (void) dealloc
 {
-    [children removeAllObjects];
+    [children removeAllObjects]; //not needed probably
     children = nil;
 }
 

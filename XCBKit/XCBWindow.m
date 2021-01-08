@@ -52,6 +52,7 @@
 @synthesize attributes;
 @synthesize cachedWMHints;
 @synthesize hasInputHint;
+@synthesize cursor;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -65,6 +66,16 @@
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
        withParentWindow:(XCBWindow *)aParent
           andConnection:(XCBConnection *)aConnection
+{
+    return [self initWithXCBWindow:aWindow
+                  withParentWindow:aParent
+                   withAboveWindow:XCB_NONE
+                    withConnection:aConnection];
+}
+
+- (id) initWithXcbWindow:(xcb_window_t)aWindow
+        withParentWindow:(XCBWindow*) aParent
+           andConnection:(XCBConnection*) aConnection
 {
     return [self initWithXCBWindow:aWindow
                   withParentWindow:aParent
@@ -119,6 +130,25 @@
 - (void)destroyGraphicsContext
 {
     xcb_free_gc([connection connection], graphicContextId);
+}
+
+- (void) initCursor
+{
+    cursor = [[XCBCursor alloc] initWithConnection:connection screen:[self onScreen]];
+}
+
+- (void) showLeftPointerCursor
+{
+    [cursor selectLeftPointerCursor];
+    xcb_cursor_t crs = [cursor cursor];
+    [self changeAttributes:&crs withMask:XCB_CW_CURSOR checked:NO];
+}
+
+- (void) showResizeCursorForPosition:(MousePosition)position
+{
+    [cursor selectResizeCursorForPosition:position];
+    xcb_cursor_t crs = [cursor cursor];
+    [self changeAttributes:&crs withMask:XCB_CW_CURSOR checked:NO];
 }
 
 - (void)checkNetWMAllowedActions
@@ -425,6 +455,35 @@
     }
 
     attributes = [[XCBAttributesReply alloc] initWithAttributesReply:attr];
+}
+
+- (BOOL) changeAttributes:(uint32_t[])values withMask:(uint32_t)aMask checked:(BOOL)check
+{
+    xcb_void_cookie_t cookie;
+
+    BOOL attributesChanged = NO;
+
+    NSLog(@"Changing attributes for window: %u", window);
+
+    if (check)
+    {
+        cookie = xcb_change_window_attributes_checked([connection connection], window, aMask, values);
+    } else
+    {
+        cookie = xcb_change_window_attributes([connection connection], window, aMask, values);
+    }
+
+    xcb_generic_error_t *error = xcb_request_check([connection connection], cookie);
+
+    if (error != NULL)
+        NSLog(@"Unable to change the attributes for window %u with error code: %d", window,
+              error->error_code);
+    else
+        attributesChanged = YES;
+
+    free(error);
+
+    return attributesChanged;
 }
 
 - (XCBQueryTreeReply*) queryTree
@@ -1134,11 +1193,12 @@
 {
     parentWindow = nil;
     aboveWindow = nil;
-    [allowedActions removeAllObjects];
+    [allowedActions removeAllObjects]; //not needed probably
     allowedActions = nil;
     screen = nil;
     attributes = nil;
     cachedWMHints = nil;
+    cursor = nil;
 }
 
 @end
