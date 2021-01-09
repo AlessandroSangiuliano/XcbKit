@@ -190,6 +190,7 @@
 - (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;
 - (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
+- (void) updateNetClientList;
 
 - (void) dealloc;
 

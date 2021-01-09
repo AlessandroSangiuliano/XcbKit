@@ -127,8 +127,12 @@ ICCCMService *icccmService;
     }
 
     [windowsMap setObject:aWindow forKey:key];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+    [ewmhService updateNetClientList];
+
     window = nil;
     key = nil;
+    ewmhService = nil;
 }
 
 - (void)unregisterWindow:(XCBWindow *)aWindow
@@ -136,6 +140,11 @@ ICCCMService *icccmService;
     NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", [aWindow window]);
     NSNumber *key = [[NSNumber alloc] initWithInt:[aWindow window]];
     [windowsMap removeObjectForKey:key];
+
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+    [ewmhService updateNetClientList];
+
+    ewmhService = nil;
     key = nil;
 }
 
@@ -596,6 +605,7 @@ ICCCMService *icccmService;
     [window updateAttributes];
     [frame setScreen:[window screen]];
     [window setNormalState];
+    [frame setNormalState];
 
     [self setNeedFlush:YES];
     window = nil;
