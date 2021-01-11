@@ -962,6 +962,7 @@
     xcb_client_message_event_t event;
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
     if (hasInputHint)
         [self setInputFocus:XCB_INPUT_FOCUS_PARENT time:[connection currentTime]];
@@ -983,8 +984,11 @@
         [connection sendEvent:(const char*) &event toClient:self propagate:NO];
     }
 
+    [ewmhService updateNetActiveWindow:self];
+
     atomService = nil;
     icccmService = nil;
+    ewmhService = nil;
 }
 
 - (XCBGeometryReply *)geometries
