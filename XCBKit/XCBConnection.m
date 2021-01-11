@@ -1031,6 +1031,22 @@ ICCCMService *icccmService;
         window = nil;
         return;
     }
+    else if (window)
+    {
+        if ([ewmhService ewmhClientMessage:atomMessageName])
+        {
+            [ewmhService updateNetActiveWindow:window];
+
+            if ([[window parentWindow] isKindOfClass:[XCBFrame class]])
+            {
+                frame = (XCBFrame *) [window parentWindow];
+                [frame stackAbove];
+                titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar]; //TODO: Can i put all this in a single method?
+                [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+                [self drawAllTitleBarsExcept:titleBar];
+            }
+        }
+    }
 
 
     if ([window isKindOfClass:[XCBFrame class]])
@@ -1103,6 +1119,7 @@ ICCCMService *icccmService;
     visual = nil;
     atomService = nil;
     atomMessageName = nil;
+    ewmhService = nil;
 
     return;
 }

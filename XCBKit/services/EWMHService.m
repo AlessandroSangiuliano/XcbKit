@@ -661,6 +661,23 @@
     managedWindows = nil;
 }
 
+- (void) updateNetActiveWindow:(XCBWindow*)aWindow
+{
+    XCBWindow *rootWindow = [[aWindow onScreen] rootWindow];
+    xcb_window_t win = [aWindow window];
+
+    [self changePropertiesForWindow:rootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHActiveWindow
+                           withType:XCB_ATOM_WINDOW
+                         withFormat:32
+                     withDataLength:1
+                           withData:&win];
+
+    NSLog(@"Active window updated %u", win);
+    rootWindow = nil;
+}
+
 -(void)dealloc
 {
     EWMHSupported = nil;
