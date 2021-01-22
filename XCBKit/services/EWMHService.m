@@ -637,16 +637,8 @@
 
 - (void) updateNetClientList
 {
-    NSArray *managedWindows = [[connection windowsMap] allValues];
-    NSUInteger size = [managedWindows count];
-    xcb_window_t wins[size];
 
-    for (int i = 0; i < size; ++i)
-    {
-        XCBWindow *window = [managedWindows objectAtIndex:i];
-        wins[i] = [window window];
-        window = nil;
-    }
+    uint32_t size = [connection clientListIndex] + 1;
 
     //TODO: with more screens this need to be looped ?
     XCBWindow *rootWindow = [connection rootWindowForScreenNumber:0];
@@ -657,7 +649,7 @@
                            withType:XCB_ATOM_WINDOW
                          withFormat:32
                      withDataLength:size
-                           withData:wins];
+                           withData:[connection clientList]];
 
     [self changePropertiesForWindow:rootWindow
                            withMode:XCB_PROP_MODE_REPLACE
@@ -665,10 +657,9 @@
                            withType:XCB_ATOM_WINDOW
                          withFormat:32
                      withDataLength:size
-                           withData:wins];
+                           withData:[connection clientList]];
 
     rootWindow = nil;
-    managedWindows = nil;
 }
 
 - (void) updateNetActiveWindow:(XCBWindow*)aWindow

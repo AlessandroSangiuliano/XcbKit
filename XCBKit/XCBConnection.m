@@ -26,6 +26,7 @@
 @synthesize damagedRegions;
 @synthesize xfixesInitialized;
 @synthesize resizeState;
+@synthesize clientListIndex;
 
 ICCCMService *icccmService;
 
@@ -82,6 +83,8 @@ ICCCMService *icccmService;
     currentTime = XCB_CURRENT_TIME;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
 
+    clientListIndex = 0;
+
     resizeState = NO;
     ewmhService = nil;
 
@@ -114,9 +117,11 @@ ICCCMService *icccmService;
 
 - (void)registerWindow:(XCBWindow *)aWindow
 {
-    NSLog(@"[XCBConnection] Adding the window %u in the windowsMap", [aWindow window]);
-    NSNumber *key = [[NSNumber alloc] initWithInt:[aWindow window]];
+    xcb_window_t win = [aWindow window];
+    NSLog(@"[XCBConnection] Adding the window %u in the windowsMap", win);
+    NSNumber *key = [[NSNumber alloc] initWithInt:win];
     XCBWindow *window = [windowsMap objectForKey:key];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
 
     if (window != nil)
     {
@@ -126,9 +131,11 @@ ICCCMService *icccmService;
         return;
     }
 
-    [windowsMap setObject:aWindow forKey:key];
-    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+    if (win != 0)
+        clientList[clientListIndex++] = win;
+
     [ewmhService updateNetClientList];
+    [windowsMap setObject:aWindow forKey:key];
 
     window = nil;
     key = nil;
@@ -137,9 +144,21 @@ ICCCMService *icccmService;
 
 - (void)unregisterWindow:(XCBWindow *)aWindow
 {
-    NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", [aWindow window]);
-    NSNumber *key = [[NSNumber alloc] initWithInt:[aWindow window]];
+    xcb_window_t win = [aWindow window];
+    NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", win);
+    NSNumber *key = [[NSNumber alloc] initWithInt:win];
     [windowsMap removeObjectForKey:key];
+
+    for (int i = 0; i < CLIENTLISTSIZE; ++i)
+    {
+        if (clientList[i] == win && win != 0)
+        {
+            clientList[i] = XCB_NONE;
+            clientListIndex--;
+            NSLog(@"Window %u removed form client list", win);
+        }
+    }
+
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     [ewmhService updateNetClientList];
@@ -447,8 +466,7 @@ ICCCMService *icccmService;
         [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
         /** check window type **/
-        NSString *lel = [ewmhService EWMHWMWindowType];
-        NSLog(@"XD %@ and window: %u", lel, [window window]);
+        NSLog(@"Window Type %@ and window: %u", [ewmhService EWMHWMWindowType], [window window]);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
                                             propertyType:XCB_ATOM_ATOM
                                                forWindow:window
@@ -1106,6 +1124,7 @@ ICCCMService *icccmService;
             [drawer setVisual:visual];
             [drawer setWindow:frame];
             [drawer setPreviewImage];
+            //[self unmapWindow:frame];
         }
 
     }
@@ -1563,6 +1582,11 @@ ICCCMService *icccmService;
 
     [damagedRegions unionWithRegion:damagedRegion destination:damagedRegions];
     [self setNeedFlush:YES];
+}
+
+- (xcb_window_t*)clientList
+{
+    return clientList;
 }
 
 - (void)dealloc
