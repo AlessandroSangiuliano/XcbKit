@@ -490,6 +490,8 @@
                         1,
                         &pid);
 
+    [self updateNetSupported:[[atomService cachedAtoms] allValues] forRootWindow:rootWindow];
+
     //TODO: wm-specs says that if the _NET_WM_PID is set the ICCCM WM_CLIENT_MACHINE atom must be set.
 
     rootAtoms = nil;
@@ -657,6 +659,14 @@
                      withDataLength:size
                            withData:wins];
 
+    [self changePropertiesForWindow:rootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHClientListStacking
+                           withType:XCB_ATOM_WINDOW
+                         withFormat:32
+                     withDataLength:size
+                           withData:wins];
+
     rootWindow = nil;
     managedWindows = nil;
 }
@@ -676,6 +686,22 @@
 
     NSLog(@"Active window updated %u", win);
     rootWindow = nil;
+}
+
+- (void) updateNetSupported:(NSArray*)atomsArray forRootWindow:(XCBWindow*)aRootWindow
+{
+    NSUInteger size = [atomsArray count];
+    xcb_atom_t atomList[size];
+
+    for (int i = 0; i < size; ++i)
+        atomList[i] = [[atomsArray objectAtIndex:i] unsignedIntValue];
+
+    [self changePropertiesForWindow:aRootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHSupported
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32 withDataLength:size
+                           withData:atomList];
 }
 
 -(void)dealloc
