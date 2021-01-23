@@ -192,6 +192,7 @@
 - (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
 - (void) updateNetClientList;
 - (void) updateNetActiveWindow:(XCBWindow*)aWindow;
+- (void) updateNetSupported:(NSArray*)atomsArray forRootWindow:(XCBWindow*)aRootWindow;
 
 - (void) dealloc;
 
