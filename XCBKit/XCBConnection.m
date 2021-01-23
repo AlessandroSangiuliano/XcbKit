@@ -149,6 +149,8 @@ ICCCMService *icccmService;
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
     [windowsMap removeObjectForKey:key];
 
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+
     for (int i = 0; i < CLIENTLISTSIZE; ++i)
     {
         if (clientList[i] == win && win != 0)
@@ -159,8 +161,6 @@ ICCCMService *icccmService;
         }
     }
 
-
-    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     [ewmhService updateNetClientList];
 
     ewmhService = nil;
