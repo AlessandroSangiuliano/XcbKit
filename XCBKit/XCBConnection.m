@@ -1019,6 +1019,9 @@ ICCCMService *icccmService;
 
     NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
 
+    if ([atomMessageName isEqualToString:@"WM_CHANGE_STATE"])
+        NSLog(@"Change state type: %d", anEvent->data.data32[0]);
+
     XCBWindow *window;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
