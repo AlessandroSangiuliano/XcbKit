@@ -53,6 +53,9 @@
 @synthesize cachedWMHints;
 @synthesize hasInputHint;
 @synthesize cursor;
+@synthesize windowClass;
+@synthesize windowType;
+@synthesize leaderWindow;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -111,6 +114,7 @@
     canClose = NO;
 
     cachedWMHints = [[NSMutableDictionary alloc] init];
+    windowClass = [[NSMutableArray alloc] initWithCapacity:2];
 
     return self;
 }
@@ -501,6 +505,7 @@
         return queryReply;
     }
     queryReply = [[XCBQueryTreeReply alloc] initWithReply:reply andConnection:connection];
+
 
     return queryReply;
 }
@@ -1203,6 +1208,9 @@
     attributes = nil;
     cachedWMHints = nil;
     cursor = nil;
+    windowClass = nil;
+    windowType = nil;
+    leaderWindow = nil;
 }
 
 @end

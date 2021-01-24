@@ -112,6 +112,7 @@
 - (void) unmapWindow:(XCBWindow*)aWindow;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
+- (void)drawAllTitleBarsExcept:(XCBTitleBar *)aTitileBar;
 
 
 - (xcb_timestamp_t) currentTime;

@@ -11,6 +11,7 @@
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
 #import "../XCBGeometryReply.h"
+#import "../enums/EIcccm.h"
 
 @implementation EWMHService
 
@@ -614,10 +615,52 @@
 
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
 {
-    if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
+    if ([anAtomMessageName isEqualToString:EWMHRequestFrameExtents])
     {
         uint32_t extents[] = {3,3,21,3};
         [self updateNetFrameExtentsForWindow:aWindow andExtents:extents];
+
+        return;
+    }
+
+    if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
+    {
+        [self updateNetActiveWindow:aWindow];
+
+        if ([[aWindow parentWindow] isKindOfClass:[XCBFrame class]])
+        {
+            XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
+            XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
+            [frame stackAbove];
+            [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+            [connection drawAllTitleBarsExcept:titleBar];
+            frame = nil;
+            titleBar = nil;
+        }
+
+        /*XCBWindow *leaderWindow = [aWindow leaderWindow];
+        NSArray *wins = [[connection windowsMap] allValues];
+        NSUInteger len = [wins count];*/
+
+        /*** check the window class and type. If they are GNUstep andd the type is dock or menu, map them **/
+        /*for (int i = 0; i < len; ++i)
+        {
+            XCBWindow *window = [wins objectAtIndex:i];
+            if ([leaderWindow window] == [[window leaderWindow] window] &&
+                ([[window windowType] isEqualToString:EWMHWMWindowTypeMenu] ||
+                 [[window windowType] isEqualToString:EWMHWMWindowTypeDock]) &&
+                [[[window windowClass] objectAtIndex:0] isEqualToString:@"GNUstep"])
+            {
+                NSLog(@"Pene %@", [window windowType]);
+                [window stackAbove];
+                [connection mapWindow:window];
+            }
+            window = nil;
+        }
+
+        leaderWindow = nil;
+        wins = nil;*/
+        return;
     }
 }
 

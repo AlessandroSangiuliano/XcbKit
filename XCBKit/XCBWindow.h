@@ -75,6 +75,9 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) NSMutableDictionary *cachedWMHints;
 @property (assign, nonatomic) BOOL hasInputHint;
 @property (strong, nonatomic) XCBCursor *cursor;
+@property (strong, nonatomic) NSMutableArray *windowClass;
+@property (strong, nonatomic) NSString *windowType;
+@property (strong, nonatomic) XCBWindow *leaderWindow;
 
 
 /*** ALLOWED ACTIONS ***/

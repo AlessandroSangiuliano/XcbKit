@@ -20,5 +20,6 @@
 @property (nonatomic) xcb_query_tree_reply_t *queryReply;
 
 - (id) initWithReply:(xcb_query_tree_reply_t *)aReply andConnection:(XCBConnection*)aConnection;
+- (NSMutableArray*)children;
 
 @end
