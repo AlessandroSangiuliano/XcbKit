@@ -1132,7 +1132,6 @@ ICCCMService *icccmService;
     }
     else if ([frame isMinimized])
     {
-        NSLog(@"Restoring");
         [frame restoreFromIconified];
     }
 
