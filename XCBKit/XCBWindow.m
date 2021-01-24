@@ -715,7 +715,7 @@
 - (void)minimize
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
-    xcb_atom_t changeStateAtom = [atomService cacheAtom:@"WM_CHANGE_STATE"];
+    xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
 
     /*** TODO: check if the if the window is already miniaturized ***/
 

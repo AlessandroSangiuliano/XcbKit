@@ -857,8 +857,6 @@ ICCCMService *icccmService;
     if ([window isMinimizeButton])
     {
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-        [clientWindow cairoPreview];
         [frame minimize];
         frame = nil;
         window = nil;
@@ -1019,6 +1017,9 @@ ICCCMService *icccmService;
 
     NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
 
+    if ([atomMessageName isEqualToString:[icccmService WMChangeState]])
+        NSLog(@"Change state type: %d", anEvent->data.data32[0]);
+
     XCBWindow *window;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
@@ -1092,9 +1093,10 @@ ICCCMService *icccmService;
     }
 
 
-    if (anEvent->type == [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"] &&
+    if (anEvent->type == [atomService atomFromCachedAtomsWithKey:[icccmService WMChangeState]] &&
         anEvent->format == 32 &&
-        anEvent->data.data32[0] == ICCCM_WM_STATE_ICONIC)
+        anEvent->data.data32[0] == ICCCM_WM_STATE_ICONIC &&
+        ![frame isMinimized])
     {
 
         if (frame != nil)
@@ -1127,6 +1129,11 @@ ICCCMService *icccmService;
             //[self unmapWindow:frame];
         }
 
+    }
+    else if ([frame isMinimized])
+    {
+        NSLog(@"Restoring");
+        [frame restoreFromIconified];
     }
 
     window = nil;
