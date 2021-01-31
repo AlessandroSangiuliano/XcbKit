@@ -623,9 +623,11 @@
         return;
     }
 
+    /*** if it is _NET_ACTIVE_WINDOW, focus the window that update the property too. ***/
+
     if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
     {
-        [self updateNetActiveWindow:aWindow];
+        [aWindow focus];
 
         if ([[aWindow parentWindow] isKindOfClass:[XCBFrame class]])
         {
@@ -638,28 +640,6 @@
             titleBar = nil;
         }
 
-        /*XCBWindow *leaderWindow = [aWindow leaderWindow];
-        NSArray *wins = [[connection windowsMap] allValues];
-        NSUInteger len = [wins count];*/
-
-        /*** check the window class and type. If they are GNUstep andd the type is dock or menu, map them **/
-        /*for (int i = 0; i < len; ++i)
-        {
-            XCBWindow *window = [wins objectAtIndex:i];
-            if ([leaderWindow window] == [[window leaderWindow] window] &&
-                ([[window windowType] isEqualToString:EWMHWMWindowTypeMenu] ||
-                 [[window windowType] isEqualToString:EWMHWMWindowTypeDock]) &&
-                [[[window windowClass] objectAtIndex:0] isEqualToString:@"GNUstep"])
-            {
-                NSLog(@"Pene %@", [window windowType]);
-                [window stackAbove];
-                [connection mapWindow:window];
-            }
-            window = nil;
-        }
-
-        leaderWindow = nil;
-        wins = nil;*/
         return;
     }
 }
