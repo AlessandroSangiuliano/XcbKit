@@ -31,5 +31,6 @@
 - (NSString*) getWmNameForWindow:(XCBWindow*)aWindow;
 - (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow;
 - (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state;
+- (void) wmClassForWindow:(XCBWindow*)aWindow;
 
 @end

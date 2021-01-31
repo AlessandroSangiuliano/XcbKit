@@ -11,6 +11,7 @@
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
 #import "../XCBGeometryReply.h"
+#import "../enums/EIcccm.h"
 
 @implementation EWMHService
 
@@ -614,10 +615,32 @@
 
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
 {
-    if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
+    if ([anAtomMessageName isEqualToString:EWMHRequestFrameExtents])
     {
         uint32_t extents[] = {3,3,21,3};
         [self updateNetFrameExtentsForWindow:aWindow andExtents:extents];
+
+        return;
+    }
+
+    /*** if it is _NET_ACTIVE_WINDOW, focus the window that update the property too. ***/
+
+    if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
+    {
+        [aWindow focus];
+
+        if ([[aWindow parentWindow] isKindOfClass:[XCBFrame class]])
+        {
+            XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
+            XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
+            [frame stackAbove];
+            [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+            [connection drawAllTitleBarsExcept:titleBar];
+            frame = nil;
+            titleBar = nil;
+        }
+
+        return;
     }
 }
 

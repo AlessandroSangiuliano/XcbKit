@@ -18,7 +18,9 @@
 #import "XCBGeometryReply.h"
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
+#import <enums/EIcccm.h>
 #import "XCBAttributesReply.h"
+#import "enums/ETitleBarColor.h"
 
 @implementation XCBConnection
 
@@ -438,6 +440,12 @@ ICCCMService *icccmService;
         window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
         [window updateAttributes];
         [window refreshCachedWMHints];
+
+        xcb_window_t leader = [[[window cachedWMHints] valueForKey:FnFromNSIntegerToNSString(ICCCMWindowGroupHint)] unsignedIntValue];
+        XCBWindow *leaderWindow = [[XCBWindow alloc] initWithXCBWindow:leader andConnection:self];
+        [window setLeaderWindow:leaderWindow];
+        leaderWindow = nil;
+
         XCBAttributesReply *reply = [window attributes];
 
         if ([reply isError])
@@ -465,7 +473,7 @@ ICCCMService *icccmService;
         /** check allowed actions **/
         [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
-        /** check window type **/
+        /** check window type. Switch to the xcb_ewmh_wm_get_window_type for better handling of strings **/
         NSLog(@"Window Type %@ and window: %u", [ewmhService EWMHWMWindowType], [window window]);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
                                             propertyType:XCB_ATOM_ATOM
@@ -473,12 +481,13 @@ ICCCMService *icccmService;
                                                   delete:NO
                                                   length:UINT32_MAX];
 
+        NSString *name;
         if (windowTypeReply)
         {
             xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
 
             XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
-            NSString *name = [atomService atomNameFromAtom:*atom];
+            name = [atomService atomNameFromAtom:*atom];
             NSLog(@"Name: %@", name);
 
             if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
@@ -489,6 +498,9 @@ ICCCMService *icccmService;
                 [window setDecorated:NO];
                 XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
                 [window setParentWindow:parentWindow];
+                [icccmService wmClassForWindow:window];
+                [window setWindowType:[ewmhService EWMHWMWindowTypeDock]];
+
                 window = nil;
                 ewmhService = nil;
                 name = nil;
@@ -505,6 +517,9 @@ ICCCMService *icccmService;
                 [window setDecorated:NO];
                 XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
                 [window setParentWindow:parentWindow];
+                [icccmService wmClassForWindow:window];
+                [window setWindowType:[ewmhService EWMHWMWindowTypeMenu]];
+
                 window = nil;
                 ewmhService = nil;
                 name = nil;
@@ -522,7 +537,9 @@ ICCCMService *icccmService;
                 [window setDecorated:NO];
                 XCBWindow *parentWindow = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
                 [window setParentWindow:parentWindow];
-                NSLog(@"Parent from event: %u", [[window parentWindow] window]);
+                [icccmService wmClassForWindow:window];
+                [window setWindowType:[ewmhService EWMHWMWindowTypeDialog]];
+
                 window = nil;
                 ewmhService = nil;
                 name = nil;
@@ -531,8 +548,7 @@ ICCCMService *icccmService;
                 return;
             }
 
-            atom = NULL;
-            name = nil;
+            atom = NULL; //FIXME:is this malloc'd?
         }
 
         /** check motif hints  **/
@@ -564,10 +580,13 @@ ICCCMService *icccmService;
                 //[window drawIcons];
                 [self mapWindow:window];
                 [self registerWindow:window];
+                [icccmService wmClassForWindow:window];
+
                 window = nil;
                 cairoSet = nil;
                 ewmhService = nil;
                 geometry = nil;
+                name = nil;
                 free(reply);
                 return;
             }
@@ -577,11 +596,13 @@ ICCCMService *icccmService;
         [window updateRectsFromGeometries];
         [self registerWindow:window];
         [window setFirstRun:YES];
+        [window setWindowType:name];
         free(windowTypeReply);
+        name = nil;
     }
 
     [window onScreen];
-    XCBScreen *screen =  [window screen]; //FIXME: [[window setScreen:[window onScreen]]; [window screen]?? So redundant!!!
+    XCBScreen *screen =  [window screen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
@@ -624,6 +645,7 @@ ICCCMService *icccmService;
     [frame setScreen:[window screen]];
     [window setNormalState];
     [frame setNormalState];
+    [icccmService wmClassForWindow:window];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -1054,7 +1076,7 @@ ICCCMService *icccmService;
     {
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
-            [ewmhService updateNetActiveWindow:window];
+            [ewmhService handleClientMessage:atomMessageName forWindow:window];
 
             if ([[window parentWindow] isKindOfClass:[XCBFrame class]])
             {
@@ -1604,6 +1626,7 @@ ICCCMService *icccmService;
     displayName = nil;
     damagedRegions = nil;
     xcb_disconnect(connection);
+    icccmService = nil;
 }
 
 
