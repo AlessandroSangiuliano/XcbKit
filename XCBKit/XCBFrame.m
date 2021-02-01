@@ -7,12 +7,7 @@
 //
 
 #import "XCBFrame.h"
-#import "XCBVisual.h"
 #import "functions/Transformers.h"
-#import "XCBTitleBar.h"
-#import "services/EWMHService.h"
-#import "utils/XCBCreateWindowTypeRequest.h"
-#import "utils/XCBWindowTypeResponse.h"
 #import "services/ICCCMService.h"
 
 
