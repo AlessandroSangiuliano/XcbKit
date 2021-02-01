@@ -473,7 +473,7 @@ ICCCMService *icccmService;
         /** check allowed actions **/
         [NSThread detachNewThreadSelector:@selector(checkNetWMAllowedActions) toTarget:window withObject:nil];
 
-        /** check window type. Switch to the xcb_ewmh_wm_get_window_type for better handling of strings **/
+
         NSLog(@"Window Type %@ and window: %u", [ewmhService EWMHWMWindowType], [window window]);
         void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
                                             propertyType:XCB_ATOM_ATOM
@@ -487,6 +487,7 @@ ICCCMService *icccmService;
             xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
 
             XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:self];
+
             name = [atomService atomNameFromAtom:*atom];
             NSLog(@"Name: %@", name);
 
