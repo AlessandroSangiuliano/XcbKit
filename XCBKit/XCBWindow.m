@@ -53,6 +53,9 @@
 @synthesize cachedWMHints;
 @synthesize hasInputHint;
 @synthesize cursor;
+@synthesize windowClass;
+@synthesize windowType;
+@synthesize leaderWindow;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -111,6 +114,7 @@
     canClose = NO;
 
     cachedWMHints = [[NSMutableDictionary alloc] init];
+    windowClass = [[NSMutableArray alloc] initWithCapacity:2];
 
     return self;
 }
@@ -502,6 +506,7 @@
     }
     queryReply = [[XCBQueryTreeReply alloc] initWithReply:reply andConnection:connection];
 
+
     return queryReply;
 }
 
@@ -715,7 +720,7 @@
 - (void)minimize
 {
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
-    xcb_atom_t changeStateAtom = [atomService cacheAtom:@"WM_CHANGE_STATE"];
+    xcb_atom_t changeStateAtom = [atomService atomFromCachedAtomsWithKey:@"WM_CHANGE_STATE"];
 
     /*** TODO: check if the if the window is already miniaturized ***/
 
@@ -962,6 +967,7 @@
     xcb_client_message_event_t event;
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
     ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
     if (hasInputHint)
         [self setInputFocus:XCB_INPUT_FOCUS_PARENT time:[connection currentTime]];
@@ -983,8 +989,11 @@
         [connection sendEvent:(const char*) &event toClient:self propagate:NO];
     }
 
+    [ewmhService updateNetActiveWindow:self];
+
     atomService = nil;
     icccmService = nil;
+    ewmhService = nil;
 }
 
 - (XCBGeometryReply *)geometries
@@ -1199,6 +1208,9 @@
     attributes = nil;
     cachedWMHints = nil;
     cursor = nil;
+    windowClass = nil;
+    windowType = nil;
+    leaderWindow = nil;
 }
 
 @end

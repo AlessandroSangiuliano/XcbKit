@@ -20,6 +20,7 @@
 @property (strong, nonatomic) NSString* WMSizeHints;
 @property (strong, nonatomic) NSString* WMState;
 @property (strong, nonatomic) NSString* WMHints;
+@property (strong, nonatomic) NSString* WMChangeState;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
@@ -30,5 +31,6 @@
 - (NSString*) getWmNameForWindow:(XCBWindow*)aWindow;
 - (xcb_icccm_wm_hints_t) wmHintsFromWindow:(XCBWindow*)aWindow;
 - (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state;
+- (void) wmClassForWindow:(XCBWindow*)aWindow;
 
 @end

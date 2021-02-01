@@ -20,6 +20,9 @@
                     XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |\
                     XCB_EVENT_MASK_VISIBILITY_CHANGE | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_POINTER_MOTION |       \
                     XCB_CW_CURSOR
+
+#define CLIENTLISTSIZE 1000
+
 @class XCBWindow;
 @class EWMHService;
 @class XCBAtomService;
@@ -33,12 +36,14 @@
 	NSMutableArray *screens;
 	BOOL needFlush;
     xcb_timestamp_t currentTime;
+    xcb_window_t clientList[CLIENTLISTSIZE];
 }
 
-@property (nonatomic) BOOL dragState;
+@property (nonatomic, assign) BOOL dragState;
 @property (strong, nonatomic) XCBRegion* damagedRegions;
-@property (nonatomic) BOOL xfixesInitialized;
-@property (nonatomic) BOOL resizeState;
+@property (nonatomic, assign) BOOL xfixesInitialized;
+@property (nonatomic, assign) BOOL resizeState;
+@property (nonatomic) NSInteger clientListIndex;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
@@ -107,11 +112,13 @@
 - (void) unmapWindow:(XCBWindow*)aWindow;
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
+- (void)drawAllTitleBarsExcept:(XCBTitleBar *)aTitileBar;
 
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
 - (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
+- (xcb_window_t*) clientList;
 
 @end

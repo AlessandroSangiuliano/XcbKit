@@ -19,6 +19,7 @@
 @synthesize WMTakeFocus;
 @synthesize WMState;
 @synthesize WMHints;
+@synthesize WMChangeState;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -38,6 +39,7 @@
     WMSizeHints = @"WM_SIZE_HINS";
     WMState = @"WM_STATE";
     WMHints = @"WM_HINTS";
+    WMChangeState = @"WM_CHANGE_STATE";
     
     NSString* icccmAtoms[] =
     {
@@ -48,7 +50,8 @@
         WMSizeHints,
         WMTakeFocus,
         WMState,
-        WMHints
+        WMHints,
+        WMChangeState
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -156,6 +159,25 @@
                           withFormat:32
                       withDataLength:2
                             withData:data];
+}
+
+- (void) wmClassForWindow:(XCBWindow*)aWindow
+{
+    xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_class_unchecked([[super connection] connection], [aWindow window]);
+    xcb_icccm_get_wm_class_reply_t reply;
+
+    if (!xcb_icccm_get_wm_class_reply([[super connection] connection],
+                                      cookie,
+                                      &reply, NULL))
+    {
+        NSLog(@"Error while checking WM_CLASS");
+        return;
+    }
+
+    [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.class_name]];
+    [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.instance_name]];
+
+    xcb_icccm_get_wm_class_reply_wipe(&reply);
 }
 
 - (void) dealloc

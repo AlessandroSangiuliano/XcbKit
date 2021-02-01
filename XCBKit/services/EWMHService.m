@@ -11,6 +11,7 @@
 #import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
 #import "../XCBGeometryReply.h"
+#import "../enums/EIcccm.h"
 
 @implementation EWMHService
 
@@ -490,6 +491,8 @@
                         1,
                         &pid);
 
+    [self updateNetSupported:[[atomService cachedAtoms] allValues] forRootWindow:rootWindow];
+
     //TODO: wm-specs says that if the _NET_WM_PID is set the ICCCM WM_CLIENT_MACHINE atom must be set.
 
     rootAtoms = nil;
@@ -612,10 +615,32 @@
 
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
 {
-    if ([anAtomMessageName isEqualToString:[self EWMHRequestFrameExtents]])
+    if ([anAtomMessageName isEqualToString:EWMHRequestFrameExtents])
     {
         uint32_t extents[] = {3,3,21,3};
         [self updateNetFrameExtentsForWindow:aWindow andExtents:extents];
+
+        return;
+    }
+
+    /*** if it is _NET_ACTIVE_WINDOW, focus the window that update the property too. ***/
+
+    if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
+    {
+        [aWindow focus];
+
+        if ([[aWindow parentWindow] isKindOfClass:[XCBFrame class]])
+        {
+            XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
+            XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
+            [frame stackAbove];
+            [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+            [connection drawAllTitleBarsExcept:titleBar];
+            frame = nil;
+            titleBar = nil;
+        }
+
+        return;
     }
 }
 
@@ -631,6 +656,66 @@
 
     xcb_get_property_reply_t *reply = xcb_get_property_reply([connection connection], cookie, NULL);
     return reply;
+}
+
+- (void) updateNetClientList
+{
+
+    uint32_t size = [connection clientListIndex] + 1;
+
+    //TODO: with more screens this need to be looped ?
+    XCBWindow *rootWindow = [connection rootWindowForScreenNumber:0];
+
+    [self changePropertiesForWindow:rootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHClientList
+                           withType:XCB_ATOM_WINDOW
+                         withFormat:32
+                     withDataLength:size
+                           withData:[connection clientList]];
+
+    [self changePropertiesForWindow:rootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHClientListStacking
+                           withType:XCB_ATOM_WINDOW
+                         withFormat:32
+                     withDataLength:size
+                           withData:[connection clientList]];
+
+    rootWindow = nil;
+}
+
+- (void) updateNetActiveWindow:(XCBWindow*)aWindow
+{
+    XCBWindow *rootWindow = [[aWindow onScreen] rootWindow];
+    xcb_window_t win = [aWindow window];
+
+    [self changePropertiesForWindow:rootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHActiveWindow
+                           withType:XCB_ATOM_WINDOW
+                         withFormat:32
+                     withDataLength:1
+                           withData:&win];
+
+    NSLog(@"Active window updated %u", win);
+    rootWindow = nil;
+}
+
+- (void) updateNetSupported:(NSArray*)atomsArray forRootWindow:(XCBWindow*)aRootWindow
+{
+    NSUInteger size = [atomsArray count];
+    xcb_atom_t atomList[size];
+
+    for (int i = 0; i < size; ++i)
+        atomList[i] = [[atomsArray objectAtIndex:i] unsignedIntValue];
+
+    [self changePropertiesForWindow:aRootWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHSupported
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32 withDataLength:size
+                           withData:atomList];
 }
 
 -(void)dealloc
