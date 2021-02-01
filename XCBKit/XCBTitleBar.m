@@ -7,14 +7,7 @@
 //
 
 #import "XCBTitleBar.h"
-#import "XCBConnection.h"
-#import "XCBFrame.h"
-#import <cairo/cairo.h>
-#import <cairo/cairo-xcb.h>
 #import "utils/CairoDrawer.h"
-#import "utils/XCBCreateWindowTypeRequest.h"
-#import "utils/XCBWindowTypeResponse.h"
-#import "functions/Transformers.h"
 
 @implementation XCBTitleBar
 

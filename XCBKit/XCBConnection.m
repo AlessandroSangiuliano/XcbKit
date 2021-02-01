@@ -15,12 +15,9 @@
 #import "utils/CairoDrawer.h"
 #import "services/ICCCMService.h"
 #import "XCBRegion.h"
-#import "XCBGeometryReply.h"
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
 #import <enums/EIcccm.h>
-#import "XCBAttributesReply.h"
-#import "enums/ETitleBarColor.h"
 
 @implementation XCBConnection
 
