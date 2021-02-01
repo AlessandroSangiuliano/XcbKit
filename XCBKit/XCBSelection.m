@@ -8,7 +8,6 @@
 
 #import "XCBSelection.h"
 #import "services/EWMHService.h"
-#import "services/XCBAtomService.h"
 
 @implementation XCBSelection
 

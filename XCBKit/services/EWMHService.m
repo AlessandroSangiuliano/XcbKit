@@ -7,11 +7,7 @@
 //
 
 #import "EWMHService.h"
-#import <xcb/xcb.h>
-#import <xcb/xcb_atom.h>
 #import "../functions/Transformers.h"
-#import "../XCBGeometryReply.h"
-#import "../enums/EIcccm.h"
 
 @implementation EWMHService
 
