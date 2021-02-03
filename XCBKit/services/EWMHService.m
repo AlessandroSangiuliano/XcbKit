@@ -609,7 +609,7 @@
     return ewmh;
 }
 
-- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow data:(xcb_client_message_data_t)someData
 {
     if ([anAtomMessageName isEqualToString:EWMHRequestFrameExtents])
     {
@@ -619,7 +619,7 @@
         return;
     }
 
-    /*** if it is _NET_ACTIVE_WINDOW, focus the window that update the property too. ***/
+    /*** if it is _NET_ACTIVE_WINDOW, focus the window that updates the property too. ***/
 
     if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
     {
@@ -638,6 +638,42 @@
 
         return;
     }
+
+    if ([anAtomMessageName isEqualToString:EWMHWMState])
+    {
+        Action action = someData.data32[0];
+        xcb_atom_t firstProp = someData.data32[1];
+        xcb_atom_t secondProp = someData.data32[2];
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar])
+        {
+            BOOL skipTaskBar = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow skipTaskBar]);
+            [aWindow setSkipTaskBar:skipTaskBar];
+            [self updateNetWmState:aWindow];
+        }
+
+    }
+
+}
+
+- (void) updateNetWmState:(XCBWindow*)aWindow
+{
+    int i = 0;
+    xcb_atom_t props[12];
+
+    if ([aWindow skipTaskBar])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar];
+    }
+
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMState
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32
+                     withDataLength:i
+                           withData:props];
 }
 
 - (xcb_get_property_reply_t*) netWmIconFromWindow:(XCBWindow*)aWindow
@@ -713,6 +749,7 @@
                          withFormat:32 withDataLength:size
                            withData:atomList];
 }
+
 
 -(void)dealloc
 {

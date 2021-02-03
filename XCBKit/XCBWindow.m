@@ -57,6 +57,10 @@
 @synthesize windowType;
 @synthesize leaderWindow;
 
+/*** _NET_WM_STATE ***/
+
+@synthesize skipTaskBar;
+
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
 {

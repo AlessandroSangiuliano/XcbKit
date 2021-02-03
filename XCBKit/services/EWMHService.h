@@ -10,6 +10,7 @@
 #import "../XCBConnection.h"
 #import "../XCBWindow.h"
 #import "XCBAtomService.h"
+#import "enums/EEwmh.h"
 
 /*** define motif stuff in this class ***/
 
@@ -188,11 +189,12 @@
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[])extents;
 
 - (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
-- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow;
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow data:(xcb_client_message_data_t)someData;
 - (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
 - (void) updateNetClientList;
 - (void) updateNetActiveWindow:(XCBWindow*)aWindow;
 - (void) updateNetSupported:(NSArray*)atomsArray forRootWindow:(XCBWindow*)aRootWindow;
+- (void) updateNetWmState:(XCBWindow*) aWindow;
 
 - (void) dealloc;
 

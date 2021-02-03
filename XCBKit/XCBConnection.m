@@ -1058,7 +1058,8 @@ ICCCMService *icccmService;
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
-            [ewmhService handleClientMessage:atomMessageName forWindow:window];
+            [ewmhService handleClientMessage:atomMessageName forWindow:window data:anEvent->data];
+
         }
 
 
@@ -1074,7 +1075,7 @@ ICCCMService *icccmService;
     {
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
-            [ewmhService handleClientMessage:atomMessageName forWindow:window];
+            [ewmhService handleClientMessage:atomMessageName forWindow:window data:anEvent->data];
 
             if ([[window parentWindow] isKindOfClass:[XCBFrame class]])
             {
