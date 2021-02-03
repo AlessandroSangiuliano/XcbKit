@@ -115,7 +115,7 @@
     }
     
     if (!isError)
-        NSLog(@"Reply address: %d", (int)&reply);
+        NSLog(@"Reply address: %ld", (long)&reply);
     
 }
 

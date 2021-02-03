@@ -649,6 +649,7 @@
             secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar])
         {
             BOOL skipTaskBar = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow skipTaskBar]);
+            NSLog(@"Updating skip taskbar %d for window %u", skipTaskBar, [aWindow window]);
             [aWindow setSkipTaskBar:skipTaskBar];
             [self updateNetWmState:aWindow];
         }
