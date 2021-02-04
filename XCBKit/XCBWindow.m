@@ -45,7 +45,6 @@
 @synthesize canClose;
 @synthesize canShade;
 @synthesize canStick;
-@synthesize isAbove;
 @synthesize pixmapSize;
 @synthesize icons;
 @synthesize screen;
@@ -61,6 +60,8 @@
 
 @synthesize skipTaskBar;
 @synthesize skipPager;
+@synthesize isAbove;
+@synthesize isBelow;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -887,6 +888,7 @@
     uint32_t values[1] = {XCB_STACK_MODE_ABOVE};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
     isAbove = YES;
+    isBelow = NO;
 }
 
 - (void)stackBelow
@@ -894,6 +896,7 @@
     uint32_t values[1] = {XCB_STACK_MODE_BELOW};
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_STACK_MODE, &values);
     isAbove = NO;
+    isBelow = YES;
 }
 
 - (void)grabButton

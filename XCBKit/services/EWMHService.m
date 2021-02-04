@@ -661,6 +661,28 @@
             [self updateNetWmState:aWindow];
         }
 
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove])
+        {
+            BOOL above = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isAbove]);
+
+            if (above)
+                [aWindow stackAbove];
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow])
+        {
+            BOOL below = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isBelow]);
+
+            if (below)
+                [aWindow stackBelow];
+
+            [self updateNetWmState:aWindow];
+        }
+
     }
 
 }
@@ -678,6 +700,16 @@
     if ([aWindow skipPager])
     {
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager];
+    }
+
+    if ([aWindow isAbove])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove];
+    }
+
+    if ([aWindow isBelow])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow];
     }
 
     [self changePropertiesForWindow:aWindow

@@ -66,7 +66,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL firstRun; //find a better solution
 @property (nonatomic, assign) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
-@property (nonatomic, assign) BOOL isAbove;
 @property (nonatomic) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
@@ -83,6 +82,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 
 @property (nonatomic, assign) BOOL skipTaskBar;
 @property (nonatomic, assign) BOOL skipPager;
+@property (nonatomic, assign) BOOL isAbove;
+@property (nonatomic, assign) BOOL isBelow;
 
 
 /*** ALLOWED ACTIONS ***/
