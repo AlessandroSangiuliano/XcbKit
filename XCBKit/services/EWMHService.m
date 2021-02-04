@@ -653,6 +653,14 @@
             [self updateNetWmState:aWindow];
         }
 
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager])
+        {
+            BOOL skipPager = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow skipTaskBar]);
+            [aWindow setSkipPager:skipPager];
+            [self updateNetWmState:aWindow];
+        }
+
     }
 
 }
@@ -665,6 +673,11 @@
     if ([aWindow skipTaskBar])
     {
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar];
+    }
+
+    if ([aWindow skipPager])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager];
     }
 
     [self changePropertiesForWindow:aWindow

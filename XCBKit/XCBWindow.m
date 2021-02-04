@@ -60,6 +60,7 @@
 /*** _NET_WM_STATE ***/
 
 @synthesize skipTaskBar;
+@synthesize skipPager;
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
