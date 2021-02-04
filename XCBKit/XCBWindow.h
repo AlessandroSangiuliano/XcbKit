@@ -84,6 +84,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL skipPager;
 @property (nonatomic, assign) BOOL isAbove;
 @property (nonatomic, assign) BOOL isBelow;
+@property (nonatomic, assign) BOOL maximizedVertically;
+@property (nonatomic, assign) BOOL maximizedHorizontally;
 
 
 /*** ALLOWED ACTIONS ***/

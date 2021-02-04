@@ -55,6 +55,8 @@
 @synthesize windowClass;
 @synthesize windowType;
 @synthesize leaderWindow;
+@synthesize maximizedHorizontally;
+@synthesize maximizedVertically;
 
 /*** _NET_WM_STATE ***/
 

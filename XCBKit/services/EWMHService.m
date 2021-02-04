@@ -683,6 +683,40 @@
             [self updateNetWmState:aWindow];
         }
 
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz])
+        {
+            BOOL maxHorz = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedHorizontally]);
+
+            if (maxHorz)
+            {
+                XCBScreen *screen = [aWindow screen];
+                XCBSize size = [aWindow windowRect].size;
+                [aWindow maximizeToWidth:[screen width] andHeight:size.height];
+                [aWindow setMaximizedHorizontally:maxHorz];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert])
+        {
+            BOOL maxVert = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedVertically]);
+
+            if (maxVert)
+            {
+                XCBScreen *screen = [aWindow screen];
+                XCBSize size = [aWindow windowRect].size;
+                [aWindow maximizeToWidth:size.width andHeight:[screen height]];
+                [aWindow setMaximizedVertically:maxVert];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
     }
 
 }
@@ -710,6 +744,16 @@
     if ([aWindow isBelow])
     {
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow];
+    }
+
+    if ([aWindow maximizedHorizontally])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz];
+    }
+
+    if ([aWindow maximizedVertically])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert];
     }
 
     [self changePropertiesForWindow:aWindow
