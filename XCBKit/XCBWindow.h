@@ -79,19 +79,23 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) NSString *windowType;
 @property (strong, nonatomic) XCBWindow *leaderWindow;
 
+/*** _NET_WM_STATE ***/
+
+@property (nonatomic, assign) BOOL skipTaskBar;
+
 
 /*** ALLOWED ACTIONS ***/
 
-@property (nonatomic) BOOL canMove;
-@property (nonatomic) BOOL canResize;
-@property (nonatomic) BOOL canMinimize;
-@property (nonatomic) BOOL canMaximizeVert;
-@property (nonatomic) BOOL canMaximizeHorz;
-@property (nonatomic) BOOL canFullscreen;
-@property (nonatomic) BOOL canChangeDesktop;
-@property (nonatomic) BOOL canClose;
-@property (nonatomic) BOOL canShade;
-@property (nonatomic) BOOL canStick;
+@property (nonatomic, assign) BOOL canMove;
+@property (nonatomic, assign) BOOL canResize;
+@property (nonatomic, assign) BOOL canMinimize;
+@property (nonatomic, assign) BOOL canMaximizeVert;
+@property (nonatomic, assign) BOOL canMaximizeHorz;
+@property (nonatomic, assign) BOOL canFullscreen;
+@property (nonatomic, assign) BOOL canChangeDesktop;
+@property (nonatomic, assign) BOOL canClose;
+@property (nonatomic, assign) BOOL canShade;
+@property (nonatomic, assign) BOOL canStick;
 
 
 - (xcb_window_t) window;
