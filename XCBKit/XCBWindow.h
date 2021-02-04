@@ -82,6 +82,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 /*** _NET_WM_STATE ***/
 
 @property (nonatomic, assign) BOOL skipTaskBar;
+@property (nonatomic, assign) BOOL skipPager;
 
 
 /*** ALLOWED ACTIONS ***/
