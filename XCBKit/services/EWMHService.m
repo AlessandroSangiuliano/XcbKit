@@ -690,6 +690,9 @@
 
             if (maxHorz)
             {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+                
                 XCBScreen *screen = [aWindow screen];
                 XCBSize size = [aWindow windowRect].size;
                 [aWindow maximizeToWidth:[screen width] andHeight:size.height];
@@ -707,6 +710,9 @@
 
             if (maxVert)
             {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
                 XCBScreen *screen = [aWindow screen];
                 XCBSize size = [aWindow windowRect].size;
                 [aWindow maximizeToWidth:size.width andHeight:[screen height]];
