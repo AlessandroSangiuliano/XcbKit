@@ -102,6 +102,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL canClose;
 @property (nonatomic, assign) BOOL canShade;
 @property (nonatomic, assign) BOOL canStick;
+@property (nonatomic, assign) BOOL alwaysOnTop;
 
 
 - (xcb_window_t) window;

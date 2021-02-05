@@ -1478,6 +1478,7 @@ ICCCMService *icccmService;
     for (int i = 0; i < size; i++)
     {
         XCBWindow *tmp = [windows objectAtIndex:i];
+
         if ([tmp isKindOfClass:[XCBTitleBar class]])
         {
             XCBTitleBar *titleBar = (XCBTitleBar *) tmp;
@@ -1485,6 +1486,17 @@ ICCCMService *icccmService;
             if (titleBar != aTitileBar)
             {
                 XCBFrame *frame = (XCBFrame *) [titleBar parentWindow];
+                XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+
+                if ([clientWindow alwaysOnTop])
+                {
+                    windows = nil;
+                    tmp = nil;
+                    frame = nil;
+                    clientWindow = nil;
+                    return;
+                }
+
                 [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
                 [frame setIsAbove:NO];
                 //[[frame childWindowForKey:ClientWindow] createPixmap];

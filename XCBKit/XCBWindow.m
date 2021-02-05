@@ -67,6 +67,7 @@
 @synthesize isMinimized;
 @synthesize fullScreen;
 @synthesize gotAttention;
+@synthesize alwaysOnTop;
 
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
