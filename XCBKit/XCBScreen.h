@@ -17,9 +17,9 @@
 	XCBWindow *rootWindow;
 }
 
-@property (nonatomic) uint16_t height;
-@property (nonatomic) uint16_t width;
-@property (nonatomic) short screenNumber;
+@property (nonatomic, assign) uint16_t height;
+@property (nonatomic, assign) uint16_t width;
+@property (nonatomic, assign) short screenNumber;
 
 - (xcb_screen_t *) screen;
 - (void) setScreen: (xcb_screen_t *) aScreen;

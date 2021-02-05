@@ -683,6 +683,131 @@
             [self updateNetWmState:aWindow];
         }
 
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz])
+        {
+            BOOL maxHorz = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedHorizontally]);
+
+            if (maxHorz)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                XCBScreen *screen = [aWindow screen];
+                XCBSize size = [aWindow windowRect].size;
+                [aWindow maximizeToWidth:[screen width] andHeight:size.height];
+                [aWindow setMaximizedHorizontally:maxHorz];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert])
+        {
+            BOOL maxVert = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedVertically]);
+
+            if (maxVert)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                XCBScreen *screen = [aWindow screen];
+                XCBSize size = [aWindow windowRect].size;
+                [aWindow maximizeToWidth:size.width andHeight:[screen height]];
+                [aWindow setMaximizedVertically:maxVert];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test and complete it, but shading support has really low priority ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded])
+        {
+            BOOL shaded = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow shaded]);
+
+            if (shaded)
+            {
+                if ([aWindow isMinimized])
+                    return;
+
+                [aWindow shade];
+                [aWindow setShaded:shaded];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden])
+        {
+            BOOL minimize = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMinimized]);
+
+            if (minimize)
+            {
+                [aWindow minimize];
+                [aWindow setIsMinimized:minimize];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen])
+        {
+            BOOL fullscr = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMaximized]);
+
+            if (fullscr)
+            {
+
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                XCBScreen *screen = [aWindow screen];
+                [aWindow maximizeToWidth:[screen width] andHeight:[screen height]];
+                [aWindow setFullScreen:fullscr];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test it. for now just focus the window and set it active ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention])
+        {
+            BOOL attention = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow gotAttention]);
+
+            if (attention)
+            {
+                [aWindow focus];
+                [aWindow setGotAttention:attention];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky])
+        {
+            BOOL always = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow alwaysOnTop]);
+
+            if (always)
+            {
+                [aWindow stackAbove];
+                [aWindow setAlwaysOnTop:always];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
     }
 
 }
@@ -694,22 +819,68 @@
 
     if ([aWindow skipTaskBar])
     {
+        NSLog(@"Skip taskbar for window %u", [aWindow window]);
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar];
     }
 
     if ([aWindow skipPager])
     {
+        NSLog(@"Skip Pager for window %u", [aWindow window]);
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager];
     }
 
     if ([aWindow isAbove])
     {
+        NSLog(@"Above for window %u", [aWindow window]);
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove];
     }
 
     if ([aWindow isBelow])
     {
+        NSLog(@"Below for window %u", [aWindow window]);
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow];
+    }
+
+    if ([aWindow maximizedHorizontally])
+    {
+        NSLog(@"Maximize horizotally for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz];
+    }
+
+    if ([aWindow maximizedVertically])
+    {
+        NSLog(@"Maximize vertically for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert];
+    }
+
+    if ([aWindow shaded])
+    {
+        NSLog(@"Shaded for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded];
+    }
+
+    if ([aWindow isMinimized])
+    {
+        NSLog(@"Hidden for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden];
+    }
+
+    if ([aWindow fullScreen])
+    {
+        NSLog(@"Full screen for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen];
+    }
+
+    if ([aWindow gotAttention])
+    {
+        NSLog(@"Demands attention for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention];
+    }
+
+    if ([aWindow alwaysOnTop])
+    {
+        NSLog(@"Sticky for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky];
     }
 
     [self changePropertiesForWindow:aWindow
