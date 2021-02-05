@@ -33,6 +33,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
+			utils/TitleBarSettings.m \
 			functions/Transformers.m
 
 $(FRAMEWORK_NAME)_HEADER_FILES = \
@@ -58,6 +59,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/XCBCreateWindowTypeRequest.h \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
+			utils/TitleBarSettings.h \
 			functions/Transformers.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \
