@@ -612,7 +612,7 @@ ICCCMService *icccmService;
     [request setXPosition:[window windowRect].position.x];
     [request setYPosition:[window windowRect].position.y];
     [request setWidth:[window windowRect].size.width + 1];
-    [request setHeight:[window windowRect].size.height + 22];
+    [request setHeight:[window windowRect].size.height + 22]; //FIX: height of titlebar hard coded for now
     [request setBorderWidth:3];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
     [request setVisual:visual];
