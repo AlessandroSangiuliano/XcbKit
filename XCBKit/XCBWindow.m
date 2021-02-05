@@ -27,8 +27,6 @@
 @synthesize isMinimizeButton;
 @synthesize isMaximizeButton;
 @synthesize oldRect;
-@synthesize isMaximized;
-@synthesize isMinimized;
 @synthesize connection;
 @synthesize needDestroy;
 @synthesize pixmap;
@@ -64,6 +62,12 @@
 @synthesize skipPager;
 @synthesize isAbove;
 @synthesize isBelow;
+@synthesize shaded;
+@synthesize isMaximized;
+@synthesize isMinimized;
+@synthesize fullScreen;
+@synthesize gotAttention;
+
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
           andConnection:(XCBConnection *)aConnection
@@ -1200,6 +1204,11 @@
         hasInputHint = YES;
 
     icccmService = nil;
+}
+
+- (void) shade
+{
+    [connection unmapWindow:self];
 }
 
 - (void)description

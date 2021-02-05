@@ -58,8 +58,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL isCloseButton;
 @property (nonatomic, assign) BOOL isMinimizeButton;
 @property (nonatomic, assign) BOOL isMaximizeButton;
-@property (nonatomic, assign) BOOL isMaximized;
-@property (nonatomic, assign) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic, assign) BOOL needDestroy;
 @property (nonatomic) xcb_pixmap_t pixmap;
@@ -86,7 +84,11 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL isBelow;
 @property (nonatomic, assign) BOOL maximizedVertically;
 @property (nonatomic, assign) BOOL maximizedHorizontally;
-
+@property (nonatomic, assign) BOOL shaded;
+@property (nonatomic, assign) BOOL isMaximized;
+@property (nonatomic, assign) BOOL isMinimized;
+@property (nonatomic, assign) BOOL fullScreen;
+@property (nonatomic, assign) BOOL gotAttention;
 
 /*** ALLOWED ACTIONS ***/
 
@@ -170,5 +172,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) initCursor;
 - (void) showLeftPointerCursor;
 - (void) showResizeCursorForPosition:(MousePosition)position;
+- (void) shade;
 
 @end

@@ -723,6 +723,77 @@
             [self updateNetWmState:aWindow];
         }
 
+        /*** TODO: test and complete it, but shading support has really low priority ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded])
+        {
+            BOOL shaded = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow shaded]);
+
+            if (shaded)
+            {
+                if ([aWindow isMinimized])
+                    return;
+
+                [aWindow shade];
+                [aWindow setShaded:shaded];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden])
+        {
+            BOOL minimize = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMinimized]);
+
+            if (minimize)
+            {
+                [aWindow minimize];
+                [aWindow setIsMinimized:minimize];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen])
+        {
+            BOOL fullscr = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMaximized]);
+
+            if (fullscr)
+            {
+
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                XCBScreen *screen = [aWindow screen];
+                [aWindow maximizeToWidth:[screen width] andHeight:[screen height]];
+                [aWindow setFullScreen:fullscr];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test it. for now just focus the window and set it active ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention])
+        {
+            BOOL attention = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow gotAttention]);
+
+            if (attention)
+            {
+                [aWindow focus];
+                [aWindow setGotAttention:attention];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
     }
 
 }
@@ -760,6 +831,26 @@
     if ([aWindow maximizedVertically])
     {
         props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert];
+    }
+
+    if ([aWindow shaded])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded];
+    }
+
+    if ([aWindow isMinimized])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden];
+    }
+
+    if ([aWindow fullScreen])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen];
+    }
+
+    if ([aWindow fullScreen])
+    {
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention];
     }
 
     [self changePropertiesForWindow:aWindow

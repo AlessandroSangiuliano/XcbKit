@@ -1059,9 +1059,7 @@ ICCCMService *icccmService;
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
             [ewmhService handleClientMessage:atomMessageName forWindow:window data:anEvent->data];
-
         }
-
 
         screen = nil;
         visual = nil;
