@@ -1,5 +1,5 @@
 //
-// TitleBarSettings.h
+// TitleBarSettingsService.h
 // XCBKit
 //
 // Created by slex on 05/02/21.
@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface TitleBarSettings : NSObject
+@interface TitleBarSettingsService : NSObject
 {
     uint16_t height;
     uint16_t defaultHeight;
@@ -16,9 +16,7 @@
 @property (nonatomic, assign) BOOL heightDefined;
 
 - (id) init;
-- (id) initWithHeight:(uint16_t) aHeight;
 + (id) sharedInstance;
-+ (id) sharedInstanceWithHeight:(uint16_t)aHeight;
 
 /*** ACCESSORS ***/
 

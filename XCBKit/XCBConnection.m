@@ -842,7 +842,7 @@ ICCCMService *icccmService;
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
-        [frame resize:anEvent];
+        [frame resize:anEvent xcbConnection:connection];
     }
 
     window = nil;

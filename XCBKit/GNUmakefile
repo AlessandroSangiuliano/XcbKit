@@ -29,11 +29,11 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			services/EWMHService.m \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
+			services/TitleBarSettingsService.m \
 			utils/CairoDrawer.m \
 			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
-			utils/TitleBarSettings.m \
 			functions/Transformers.m
 
 $(FRAMEWORK_NAME)_HEADER_FILES = \
@@ -54,12 +54,12 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			services/EWMHService.h \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \
+			services/TitleBarSettingsService.h \
 			utils/CairoDrawer.h \
 			utils/CairoSurfacesSet.h \
 			utils/XCBCreateWindowTypeRequest.h \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
-			utils/TitleBarSettings.h \
 			functions/Transformers.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \

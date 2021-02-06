@@ -8,6 +8,7 @@
 
 #import "EWMHService.h"
 #import "../functions/Transformers.h"
+#import "../enums/EEwmh.h"
 
 @implementation EWMHService
 

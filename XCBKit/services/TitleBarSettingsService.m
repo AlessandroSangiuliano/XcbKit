@@ -1,23 +1,18 @@
 //
-// TitleBarSettings.m
+// TitleBarSettingsService.m
 // XCBKit
 //
 // Created by slex on 05/02/21.
 
-#import "TitleBarSettings.h"
+#import "TitleBarSettingsService.h"
 
 #define HEIGHT 22
 
-@implementation TitleBarSettings
+@implementation TitleBarSettingsService
 
 @synthesize heightDefined;
 
 - (id) init
-{
-    return [self initWithHeight:-1];
-}
-
-- (id) initWithHeight:(uint16_t)aHeight
 {
     self = [super init];
 
@@ -28,29 +23,17 @@
     }
 
     defaultHeight = HEIGHT;
-
-    if (aHeight != -1)
-        height = aHeight;
+    height = -1;
 
     return self;
 }
 
 + (id) sharedInstance
 {
-    static TitleBarSettings *sharedInstance = nil;
+    static TitleBarSettingsService *sharedInstance = nil;
 
     if (sharedInstance == nil)
         sharedInstance = [[self alloc] init];
-
-    return sharedInstance;
-}
-
-+ (id) sharedInstanceWithHeight:(uint16_t)aHeight
-{
-    static TitleBarSettings *sharedInstance = nil;
-
-    if (sharedInstance == nil)
-        sharedInstance = [[self alloc] initWithHeight:aHeight];
 
     return sharedInstance;
 }
