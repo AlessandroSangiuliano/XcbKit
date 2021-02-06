@@ -17,6 +17,8 @@
 
 - (id) init;
 - (id) initWithHeight:(uint16_t) aHeight;
++ (id) sharedInstance;
++ (id) sharedInstanceWithHeight:(uint16_t)aHeight;
 
 /*** ACCESSORS ***/
 

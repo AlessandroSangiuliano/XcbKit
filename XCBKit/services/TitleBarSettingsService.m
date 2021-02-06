@@ -35,6 +35,26 @@
     return self;
 }
 
++ (id) sharedInstance
+{
+    static TitleBarSettings *sharedInstance = nil;
+
+    if (sharedInstance == nil)
+        sharedInstance = [[self alloc] init];
+
+    return sharedInstance;
+}
+
++ (id) sharedInstanceWithHeight:(uint16_t)aHeight
+{
+    static TitleBarSettings *sharedInstance = nil;
+
+    if (sharedInstance == nil)
+        sharedInstance = [[self alloc] initWithHeight:aHeight];
+
+    return sharedInstance;
+}
+
 - (void) setHeight:(uint16_t)aHeight
 {
     height = aHeight;
