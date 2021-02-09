@@ -26,14 +26,15 @@ typedef NS_ENUM(NSInteger, childrenMask)
     NSMutableDictionary *children;
 }
 
-@property (nonatomic) int minHeightHint;
-@property (nonatomic) int minWidthHint;
+@property (nonatomic, assign) int minHeightHint;
+@property (nonatomic, assign) int minWidthHint;
+@property (nonatomic, assign) uint16_t titleHeight;
 @property (strong, nonatomic) XCBConnection *connection;
-@property (nonatomic) BOOL rightBorderClicked;
-@property (nonatomic) BOOL bottomBorderClicked;
-@property (nonatomic) BOOL leftBorderClicked;
-@property (nonatomic) BOOL topBorderClicked;
-@property (nonatomic) XCBPoint offset;
+@property (nonatomic, assign) BOOL rightBorderClicked;
+@property (nonatomic, assign) BOOL bottomBorderClicked;
+@property (nonatomic, assign) BOOL leftBorderClicked;
+@property (nonatomic, assign) BOOL topBorderClicked;
+@property (nonatomic, assign) XCBPoint offset;
 
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow withConnection:(XCBConnection*) aConnection;
 - (id) initWithClientWindow:(XCBWindow*) aClientWindow
@@ -44,7 +45,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (void) addChildWindow:(XCBWindow*) aChild withKey:(childrenMask) keyMask;
 - (XCBWindow*) childWindowForKey:(childrenMask) key;
 - (void) removeChild:(childrenMask) frameChild;
-- (void) resize:(xcb_motion_notify_event_t *)anEvent;
+- (void) resize:(xcb_motion_notify_event_t *)anEvent xcbConnection:(xcb_connection_t*)aXcbConnection;
 - (void) moveTo:(NSPoint)coordinates;
 - (void) configureClient;
 - (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent;

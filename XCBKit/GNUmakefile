@@ -29,6 +29,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			services/EWMHService.m \
 			services/XCBAtomService.m \
 			services/ICCCMService.m \
+			services/TitleBarSettingsService.m \
 			utils/CairoDrawer.m \
 			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
@@ -53,6 +54,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			services/EWMHService.h \
 			services/XCBAtomService.h \
 			services/ICCCMService.h \
+			services/TitleBarSettingsService.h \
 			utils/CairoDrawer.h \
 			utils/CairoSurfacesSet.h \
 			utils/XCBCreateWindowTypeRequest.h \

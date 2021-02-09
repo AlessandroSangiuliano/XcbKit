@@ -18,6 +18,7 @@
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
 #import <enums/EIcccm.h>
+#import "services/TitleBarSettingsService.h"
 
 @implementation XCBConnection
 
@@ -605,6 +606,8 @@ ICCCMService *icccmService;
     [visual setVisualTypeForScreen:screen];
 
     uint32_t values[2] = {[screen screen]->white_pixel, FRAMEMASK};
+    TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
+    uint16_t titleHeight = [settings heightDefined] ? [settings height] : [settings defaultHeight];
 
     XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBFrameRequest];
     [request setDepth:[screen screen]->root_depth];
@@ -612,7 +615,7 @@ ICCCMService *icccmService;
     [request setXPosition:[window windowRect].position.x];
     [request setYPosition:[window windowRect].position.y];
     [request setWidth:[window windowRect].size.width + 1];
-    [request setHeight:[window windowRect].size.height + 22];
+    [request setHeight:[window windowRect].size.height + titleHeight];
     [request setBorderWidth:3];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
     [request setVisual:visual];
@@ -653,6 +656,7 @@ ICCCMService *icccmService;
     ewmhService = nil;
     screen = nil;
     visual = nil;
+    settings = nil;
 }
 
 - (void)handleUnmapRequest:(xcb_unmap_window_request_t *)anEvent
@@ -842,7 +846,7 @@ ICCCMService *icccmService;
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
-        [frame resize:anEvent];
+        [frame resize:anEvent xcbConnection:connection];
     }
 
     window = nil;

@@ -10,7 +10,6 @@
 #import "../XCBConnection.h"
 #import "../XCBWindow.h"
 #import "XCBAtomService.h"
-#import "enums/EEwmh.h"
 
 /*** define motif stuff in this class ***/
 

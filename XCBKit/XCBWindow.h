@@ -50,21 +50,21 @@ typedef NS_ENUM(NSInteger, WindowState)
     ICCCM_WM_STATE_ICONIC = 3
 };
 
-@property (nonatomic) xcb_gcontext_t graphicContextId;
-@property (nonatomic) XCBRect windowRect;
-@property (nonatomic) XCBRect oldRect;
-@property (nonatomic) XCBRect originalRect;
+@property (nonatomic, assign) xcb_gcontext_t graphicContextId;
+@property (nonatomic, assign) XCBRect windowRect;
+@property (nonatomic, assign) XCBRect oldRect;
+@property (nonatomic, assign) XCBRect originalRect;
 @property (nonatomic, assign) BOOL decorated;
 @property (nonatomic, assign) BOOL isCloseButton;
 @property (nonatomic, assign) BOOL isMinimizeButton;
 @property (nonatomic, assign) BOOL isMaximizeButton;
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic, assign) BOOL needDestroy;
-@property (nonatomic) xcb_pixmap_t pixmap;
+@property (nonatomic, assign) xcb_pixmap_t pixmap;
 @property (nonatomic, assign) BOOL firstRun; //find a better solution
 @property (nonatomic, assign) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
-@property (nonatomic) XCBSize pixmapSize;
+@property (nonatomic, assign) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
 @property (strong, nonatomic) XCBAttributesReply *attributes;
