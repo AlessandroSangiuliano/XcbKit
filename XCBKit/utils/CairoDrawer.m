@@ -287,6 +287,32 @@ static inline void free_callback(void *data)
     cairo_destroy(cr);
 }
 
+- (void) putImage:(NSString*)aPath
+{
+    XCBSize size = [window windowRect].size;
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+    cr = cairo_create(cairoSurface);
+
+    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png([aPath cString]);
+    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, size.width, size.height);
+    cairo_t* similarCtx = cairo_create(similar);
+
+    cairo_set_source_surface(similarCtx, imageSurface, 0, 0);
+    cairo_set_operator(similarCtx, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(similarCtx);
+
+    cairo_set_source_surface(cr, similar, 3, 3);
+    cairo_paint(cr);
+
+    cairo_surface_destroy(cairoSurface);
+    cairo_surface_destroy(imageSurface);
+    cairo_surface_destroy(similar);
+    cairo_destroy(cr);
+    cairo_destroy(similarCtx);
+
+    return;
+}
+
 - (void)setPreviewImage
 {
     XCBSize size = [window windowRect].size;

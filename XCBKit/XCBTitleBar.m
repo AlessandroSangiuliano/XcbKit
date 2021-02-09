@@ -45,40 +45,52 @@
     XCBWindow *rootWindow = [parentWindow parentWindow];
     XCBScreen *scr = [rootWindow screen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
+    NSBundle *thisBundle = [NSBundle bundleForClass:[self class]];
     [visual setVisualTypeForScreen:scr];
 
     CairoDrawer *drawer = nil;
     
     if (hideWindowButton != nil)
     {
+        NSString* path = [thisBundle pathForResource:@"close" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
         
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
+        [drawer putImage:path];
         
         drawer = nil;
+        path= nil;
     }
     
     if (minimizeWindowButton != nil)
     {
+        NSString* path = [thisBundle pathForResource:@"min" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
         
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        [drawer putImage:path];
         
         drawer = nil;
+        path = nil;
     }
     
     if (maximizeWindowButton != nil)
     {
+        NSString* path = [thisBundle pathForResource:@"max" ofType:@"png"];
+
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
         
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        
+        [drawer putImage:path];
+
+        path = nil;
         drawer = nil;
     }
     
     scr = nil;
     visual = nil;
     rootWindow = nil;
+    thisBundle = nil;
 }
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor
