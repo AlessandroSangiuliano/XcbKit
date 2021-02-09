@@ -87,8 +87,8 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarButtonWithColor:(XCBColor)buttonColor withStopColor:(XCBColor)stopColor
 {
-    height = height - 2;
-    width = width - 2;
+    //height = height - 2;
+    //width = width - 2;
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
     
@@ -118,9 +118,9 @@ static inline void free_callback(void *data)
     cairo_fill(cr);
     
     cairo_surface_flush(cairoSurface);
-    
-    cairo_set_line_width (cr, 0.2);
-    
+
+    cairo_set_line_width (cr, 0.3);
+
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
     XCBColor black = XCBMakeColor(0,0,0,1);
