@@ -14,9 +14,6 @@
 @synthesize closePosition;
 @synthesize minimizePosition;
 @synthesize maximizePosition;
-@synthesize closePathName;
-@synthesize maximizePathName;
-@synthesize minimizePathName;
 
 - (id) init
 {
