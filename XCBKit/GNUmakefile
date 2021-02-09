@@ -67,6 +67,11 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			enums/EMousePosition.h \
 			enums/EEwmh.h
 
+$(FRAMEWORK_NAME)_RESOURCE_FILES = \
+			Resources/max.png \
+			Resources/close.png \
+			Resources/min.png
+
 ADDITIONAL_OBJCFLAGS = -std=c99 -g -O0 -fobjc-arc -fblocks -Wall #-Wno-unused -Werror -Wall
 
 LIBRARIES_DEPEND_UPON += $(shell pkg-config --libs xcb xcb-icccm cairo xcb-xfixes xcb-aux xcb-cursor) $(FND_LIBS) $(OBJC_LIBS) $(SYSTEM_LIBS)
