@@ -7,6 +7,7 @@
 //
 
 #import "CairoDrawer.h"
+#import "../services/TitleBarSettingsService.h"
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -289,7 +290,9 @@ static inline void free_callback(void *data)
 
 - (void) putImage:(NSString*)aPath
 {
+    TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
     XCBSize size = [window windowRect].size;
+    XCBPoint position;
     cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
     cr = cairo_create(cairoSurface);
 
@@ -301,7 +304,15 @@ static inline void free_callback(void *data)
     cairo_set_operator(similarCtx, CAIRO_OPERATOR_SOURCE);
     cairo_paint(similarCtx);
 
-    cairo_set_source_surface(cr, similar, 3, 3);
+    if ([window isCloseButton])
+        position = [settingsService closePosition];
+    else if ([window isMaximizeButton])
+        position = [settingsService maximizePosition];
+    else if ([window isMinimizeButton])
+        position = [settingsService minimizePosition];
+    /*** TODO: else the window is not one of the 3 title button... add a geneneric settings for windows? or something else ***/
+
+    cairo_set_source_surface(cr, similar, position.x, position.y);
     cairo_paint(cr);
 
     cairo_surface_destroy(cairoSurface);
@@ -309,6 +320,7 @@ static inline void free_callback(void *data)
     cairo_surface_destroy(similar);
     cairo_destroy(cr);
     cairo_destroy(similarCtx);
+    settingsService = nil;
 
     return;
 }

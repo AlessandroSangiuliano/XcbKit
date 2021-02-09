@@ -18,9 +18,6 @@
 @property (nonatomic, assign) XCBPoint closePosition;
 @property (nonatomic, assign) XCBPoint minimizePosition;
 @property (nonatomic, assign) XCBPoint maximizePosition;
-@property (strong, nonatomic) NSString *closePathName;
-@property (strong, nonatomic) NSString *minimizePathName;
-@property (strong, nonatomic) NSString *maximizePathName;
 
 - (id) init;
 + (id) sharedInstance;
