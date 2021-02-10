@@ -628,8 +628,6 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
     TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
     uint16_t height = [settings heightDefined] ? [settings height] : [settings defaultHeight];
 
-    NSLog(@"Frame rect: %f, %f", rect.position.x, rect.position.y);
-
     /*** synthetic event: coordinates must be in root space. ***/
 
     event.event = [clientWindow window];
