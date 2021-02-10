@@ -14,6 +14,7 @@
 #import "services/ICCCMService.h"
 #import "enums/EIcccm.h"
 #import "functions/Transformers.h"
+#import "services/TitleBarSettingsService.h"
 
 #define BUTTONMASK  (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
@@ -628,6 +629,9 @@
 {
     XCBFrame *frame = (XCBFrame *) [parentWindow parentWindow];
     XCBTitleBar *titleBar;
+    TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+    uint16_t hgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+
 
     if ([frame isMaximized])
     {
@@ -687,7 +691,7 @@
     [clientWindow setOldRect:[clientWindow windowRect]];
 
     valueList[0] = 0;
-    valueList[1] = 21;
+    valueList[1] = hgt - 1;
     valueList[2] = width - 2;
     valueList[3] = height - 2;
 
@@ -696,7 +700,7 @@
     /*** set the new position and dimensions of the client window ***/
 
     newSize = XCBMakeSize(width - 2, height - 2);
-    newPoint = XCBMakePoint(0, 21);
+    newPoint = XCBMakePoint(0, hgt - 1);
     newRect = XCBMakeRect(newPoint, newSize);
 
     [clientWindow setWindowRect:newRect];
@@ -726,6 +730,7 @@
     frame = nil;
     atomService = nil;
     ewmhService = nil;
+    settingsService = nil;
 
     return;
 }
