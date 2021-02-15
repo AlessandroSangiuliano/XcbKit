@@ -776,7 +776,7 @@
 
     windowRect = newRect;
 
-    if ([self isKindOfClass:[XCBFrame class]])
+    if ([self isKindOfClass:[XCBFrame class]]) //FIXME: ????
     {
         XCBFrame *frameWindow = (XCBFrame *) self;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
@@ -831,7 +831,7 @@
 
     // TODO: ripristinate eventual mask values
 
-    if ([self isKindOfClass:[XCBFrame class]])
+    if ([self isKindOfClass:[XCBFrame class]]) //FIXME: ??
     {
         frame = (XCBFrame *) self;
         XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
