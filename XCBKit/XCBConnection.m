@@ -890,11 +890,53 @@ ICCCMService *icccmService;
     if ([window isMaximizeButton])
     {
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
+        XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+
+        if ([frame isMaximized])
+        {
+            NSLog(@"Maximized!");
+            [frame restoreDimensionAndPosition];
+
+            clientWindow = nil;
+            titleBar = nil;
+            frame = nil;
+            return;
+        }
+
         XCBScreen *screen = [frame screen];
-        [window maximizeToWidth:[screen width] andHeight:[screen height]];
+        TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+        uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+        //[window maximizeToWidth:[screen width] andHeight:[screen height]];
+
+        /*** frame **/
+        XCBSize size = XCBMakeSize([screen width], [screen height]);
+        XCBPoint position = XCBMakePoint(0.0,0.0);
+        [frame maximizeToSize:size andPosition:position];
+        [frame setFullScreen:YES];
+
+
+        /*** title bar ***/
+        size = XCBMakeSize([frame windowRect].size.width, titleHgt);
+        position = XCBMakePoint(0.0,0.0);
+        [titleBar maximizeToSize:size andPosition:position];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [titleBar setFullScreen:YES];
+
+        /***client window **/
+        size = XCBMakeSize([frame windowRect].size.width, [frame windowRect].size.height - titleHgt);
+        position = XCBMakePoint(0.0, titleHgt - 1);
+        [clientWindow maximizeToSize:size andPosition:position];
+        [clientWindow setFullScreen:YES];
+        EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+        [ewmhService updateNetWmState:clientWindow];
+
         screen = nil;
         window = nil;
         frame = nil;
+        clientWindow = nil;
+        settingsService = nil;
+        ewmhService = nil;
         return;
     }
 
@@ -1094,18 +1136,18 @@ ICCCMService *icccmService;
     if ([window isKindOfClass:[XCBFrame class]])
     {
         frame = (XCBFrame *) [self windowForXCBId:anEvent->window];
-        titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
+        titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar]; //FIXME: just cast!
         clientWindow = [frame childWindowForKey:ClientWindow];
     }
     else if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        titleBar = (XCBTitleBar *) [self windowForXCBId:anEvent->window];
+        titleBar = (XCBTitleBar *) [self windowForXCBId:anEvent->window]; //FIXME: just cast!
         frame = (XCBFrame *) [titleBar parentWindow];
         clientWindow = [frame childWindowForKey:ClientWindow];
     }
     else if ([window isKindOfClass:[XCBWindow class]])
     {
-        window = [self windowForXCBId:anEvent->window];
+        window = [self windowForXCBId:anEvent->window]; // FIXME: ??????
 
         if ([window decorated])
         {

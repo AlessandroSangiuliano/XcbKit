@@ -544,14 +544,8 @@
 
 - (void)restoreDimensionAndPosition
 {
-    XCBFrame *frame = (XCBFrame *) [parentWindow parentWindow];
-    XCBTitleBar *titleBar;
-
-    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
-    {
-        titleBar = (XCBTitleBar *) parentWindow;
-    }
-
+    XCBFrame *frame = (XCBFrame *) self;
+    XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
 
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
 
@@ -625,112 +619,35 @@
     return;
 }
 
-- (void)maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height
+- (void)maximizeToSize:(XCBSize)aSize andPosition:(XCBPoint)aPosition
 {
-    XCBFrame *frame = (XCBFrame *) [parentWindow parentWindow];
-    XCBTitleBar *titleBar;
-    TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
-    uint16_t hgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
-
-
-    if ([frame isMaximized])
-    {
-        [self restoreDimensionAndPosition];
-        return;
-    }
-
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
 
 
-    if ([parentWindow isKindOfClass:[XCBTitleBar class]])
-    {
-        titleBar = (XCBTitleBar *) parentWindow;
-    }
-
     /*** save previous dimensions and position of the window **/
 
-    [frame setOldRect:[frame windowRect]];
+    [self setOldRect:[self windowRect]];
 
     /*** redraw and resize the frame ***/
 
-    uint32_t valueList[4] = {0, 0, width - 2, height - 2};
-
-    xcb_configure_window([connection connection], [frame window], mask, &valueList);
+    uint32_t valueList[4];
 
     /*** set the new position and window rect dimension for the frame ***/
 
-    XCBSize newSize = XCBMakeSize(width - 2, height - 2);
-    XCBPoint newPoint = XCBMakePoint(0, 0);
+    XCBSize newSize = aSize;
+    XCBPoint newPoint = XCBMakePoint(aPosition.x, aPosition.y);
     XCBRect newRect = XCBMakeRect(newPoint, newSize);
-    [frame setWindowRect:newRect];
-
-    /*** resize the title bar and save the old rect ***/
-
-    [titleBar setOldRect:[titleBar windowRect]];
-
-    uint16_t oldHeight = [titleBar windowRect].size.height;
-
-    newSize = XCBMakeSize(width - 2, oldHeight);
-    newPoint = XCBMakePoint(0, 0);
-    newRect = XCBMakeRect(newPoint, newSize);
-
-    valueList[3] = [titleBar windowRect].size.height;
-
-    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
-
-    /*** set the new title bar rect and redraw it ***/
-
-    [titleBar setWindowRect:newRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [self setWindowRect:newRect];
 
 
-    /*** resize the client window and save the old rect ***/
+    valueList[0] = aPosition.x;
+    valueList[1] = aPosition.y;
+    valueList[2] = aSize.width;
+    valueList[3] = aSize.height;
 
-    XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+    xcb_configure_window([connection connection], [self window], mask, &valueList);
 
-    [clientWindow setOldRect:[clientWindow windowRect]];
-
-    valueList[0] = 0;
-    valueList[1] = hgt - 1;
-    valueList[2] = width - 2;
-    valueList[3] = height - 2;
-
-    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
-
-    /*** set the new position and dimensions of the client window ***/
-
-    newSize = XCBMakeSize(width - 2, height - 2);
-    newPoint = XCBMakePoint(0, hgt - 1);
-    newRect = XCBMakeRect(newPoint, newSize);
-
-    [clientWindow setWindowRect:newRect];
-
-    [frame setIsMaximized:YES];
-
-    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    XCBAtomService *atomService = [ewmhService atomService];
-
-    xcb_atom_t state[3] =
-            {
-                    [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateMaximizedVert]],
-                    [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateMaximizedHorz]],
-                    [atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateFullscreen]]
-            };
-
-    [ewmhService changePropertiesForWindow:frame
-                                  withMode:XCB_PROP_MODE_REPLACE
-                              withProperty:[ewmhService EWMHWMState]
-                                  withType:XCB_ATOM_ATOM
-                                withFormat:32
-                            withDataLength:2
-                                  withData:state];
-
-    titleBar = nil;
-    clientWindow = nil;
-    frame = nil;
-    atomService = nil;
-    ewmhService = nil;
-    settingsService = nil;
+    [self setIsMaximized:YES];
 
     return;
 }
