@@ -1330,6 +1330,7 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
     [window onScreen];
     XCBVisual *visual = [window visual];
+    NSLog(@"Expose window %ud x: %d, y:%d, width: %d, height: %d", anEvent->window, anEvent->x, anEvent->y, anEvent->width, anEvent->height);
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {

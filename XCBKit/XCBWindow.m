@@ -628,7 +628,7 @@
 
     [self setOldRect:[self windowRect]];
 
-    /*** redraw and resize the frame ***/
+    /*** redraw and resize the window ***/
 
     uint32_t valueList[4];
 
