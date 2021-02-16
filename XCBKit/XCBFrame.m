@@ -276,7 +276,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent,
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -299,7 +299,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.width = anEvent->event_x;
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
@@ -349,7 +349,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent,
         clientRect.size.width = values[1];
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -377,7 +377,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.width = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
@@ -558,7 +558,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         titleBar = nil;
         clientWindow = nil;
@@ -586,7 +586,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.height = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     titleBar = nil;
     clientWindow = nil;
