@@ -144,7 +144,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (XCBScreen*) onScreen;
 - (XCBVisual*) visual;
 
-- (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
+- (void) maximizeToSize:(XCBSize)aSize andPosition:(XCBPoint)aPosition;
 - (void) minimize;
 - (void) hide;
 - (void) close;
