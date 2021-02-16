@@ -689,6 +689,20 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
 
 }
 
+- (void) restoreDimensionAndPosition
+{
+    XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar *titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+
+    [super restoreDimensionAndPosition];
+    [clientWindow restoreDimensionAndPosition];
+    [titleBar restoreDimensionAndPosition];
+    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+
+    clientWindow = nil;
+    titleBar = nil;
+}
+
 
 /********************************
  *                               *
