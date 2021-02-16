@@ -895,7 +895,6 @@ ICCCMService *icccmService;
 
         if ([frame isMaximized])
         {
-            NSLog(@"Maximized!");
             [frame restoreDimensionAndPosition];
 
             clientWindow = nil;

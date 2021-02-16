@@ -49,6 +49,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (void) moveTo:(NSPoint)coordinates;
 - (void) configureClient;
 - (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent;
+- (void) restoreDimensionAndPosition;
 
 
  /********************************

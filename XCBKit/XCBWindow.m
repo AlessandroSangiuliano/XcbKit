@@ -544,61 +544,30 @@
 
 - (void)restoreDimensionAndPosition
 {
-    XCBFrame *frame = (XCBFrame *) self;
-    XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-
     uint16_t mask = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
 
-    /*** restore to the previous dimension and position of the frame ***/
+    /*** restore to the previous dimension and position of the window ***/
 
-    [frame setWindowRect:[frame oldRect]];
-    [frame setOldRect:XCBInvalidRect];
+    [self setWindowRect:[self oldRect]];
+    [self setOldRect:XCBInvalidRect];
 
     uint32_t valueList[4] =
             {
-                    [frame windowRect].position.x,
-                    [frame windowRect].position.y,
-                    [frame windowRect].size.width,
-                    [frame windowRect].size.height
+                    [self windowRect].position.x,
+                    [self windowRect].position.y,
+                    [self windowRect].size.width,
+                    [self windowRect].size.height
             };
 
-    xcb_configure_window([connection connection], [frame window], mask, &valueList);
+    xcb_configure_window([connection connection], window, mask, &valueList);
 
-    /*** restore the title bar pos and dim ***/
-
-    [titleBar setWindowRect:[titleBar oldRect]];
-    [titleBar setOldRect:XCBInvalidRect];
-    valueList[0] = [titleBar windowRect].position.x;
-    valueList[1] = [titleBar windowRect].position.y;
-    valueList[2] = [titleBar windowRect].size.width;
-    valueList[3] = [titleBar windowRect].size.height;
-
-    xcb_configure_window([connection connection], [titleBar window], mask, &valueList);
-
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-
-    /*** restore dim and pos of the client window ***/
-
-    XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
-
-    [clientWindow setWindowRect:[clientWindow oldRect]];
-    [clientWindow setOldRect:XCBInvalidRect];
-    valueList[0] = [clientWindow windowRect].position.x;
-    valueList[1] = [clientWindow windowRect].position.y;
-    valueList[2] = [clientWindow windowRect].size.width;
-    valueList[3] = [clientWindow windowRect].size.height;
-
-    xcb_configure_window([connection connection], [clientWindow window], mask, &valueList);
-
-    [frame setIsMaximized:NO];
+    [self setIsMaximized:NO];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    XCBAtomService *atomService = [ewmhService atomService];
 
     xcb_atom_t state[1] = {ICCCM_WM_STATE_NORMAL};
-    [atomService cacheAtom:@"WM_STATE"];
 
-    [ewmhService changePropertiesForWindow:frame
+    [ewmhService changePropertiesForWindow:self
                                   withMode:XCB_PROP_MODE_REPLACE
                               withProperty:@"WM_STATE"
                                   withType:XCB_ATOM_ATOM
@@ -610,11 +579,7 @@
      The docs are not saying what I should set after restoring a window from iconified for EWMH,
      but the ICCCM says I have to set WM_STATE to NormalState as I do above ****/
 
-    titleBar = nil;
-    clientWindow = nil;
-    frame = nil;
     ewmhService = nil;
-    atomService = nil;
 
     return;
 }
