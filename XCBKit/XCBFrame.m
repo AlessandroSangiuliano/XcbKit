@@ -10,6 +10,7 @@
 #import "functions/Transformers.h"
 #import "services/ICCCMService.h"
 #import "services/TitleBarSettingsService.h"
+#import "utils/CairoDrawer.h"
 
 
 @implementation XCBFrame
@@ -185,14 +186,19 @@
         icccmService = nil;
     }
 
+    [titleBar onScreen];
+    [titleBar updateAttributes];
+    [titleBar setIsMapped:YES];
+    [titleBar createPixmap];
+    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [titleBar generateButtons];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-    [titleBar setWindowTitle:windowTitle];
-
-    [connection mapWindow:titleBar];
-    [titleBar setIsMapped:YES];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
+    [connection mapWindow:titleBar];
+    [titleBar setWindowTitle:windowTitle];
+
+
 
     XCBPoint position = XCBMakePoint(0, height-1);
     [connection reparentWindow:clientWindow toWindow:self position:position];
@@ -593,30 +599,24 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
     connection = NULL;
 }
 
-- (void) moveTo:(NSPoint)coordinates
+- (void) moveTo:(XCBPoint)coordinates
 {
     XCBPoint pos = [super windowRect].position;
 
-    int16_t x =  pos.x;
-    int16_t y =  pos.y;
+    pos.x = pos.x + coordinates.x - offset.x;
+    pos.y = pos.y + coordinates.y - offset.y;
 
-    x = x + coordinates.x - offset.x;
-    y = y + coordinates.y - offset.y;
+    int32_t values[] = {pos.x, pos.y};
 
-    pos.x = x;
-    pos.y = y;
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
 
     /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
     XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
     [super setWindowRect:newRect];
 
-    [super setOriginalRect:XCBMakeRect(XCBMakePoint(x, y),
+    [super setOriginalRect:XCBMakeRect(XCBMakePoint(pos.x, pos.y),
                                        XCBMakeSize([super originalRect].size.width,
                                                    [super originalRect].size.height))];
-
-    int32_t values[] = {pos.x, pos.y};
-
-    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
 }
 
 - (void) configureClient

@@ -309,13 +309,13 @@
 
     pixmapSize = XCBMakeSize(windowRect.size.width, windowRect.size.height);
 
-    xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(windowRect);
+    /*xcb_rectangle_t expose_rectangle = FnFromXCBRectToXcbRectangle(windowRect);
 
     xcb_rectangle_t rectangles[] = {expose_rectangle};
 
-    xcb_poly_fill_rectangle([connection connection], pixmap, graphicContextId, 1, rectangles);
+    xcb_poly_fill_rectangle([connection connection], pixmap, graphicContextId, 1, rectangles);*/
 
-    xcb_copy_area([connection connection],
+    /*xcb_copy_area([connection connection],
                   window,
                   pixmap,
                   graphicContextId,
@@ -324,7 +324,7 @@
                   0,
                   0,
                   windowRect.size.width,
-                  windowRect.size.height);
+                  windowRect.size.height);*/
 
     /*CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
      * [drawer drawContent];*/
@@ -1105,6 +1105,14 @@
           FnFromXCBRectToString(windowRect), FnFromXCBRectToString(oldRect));
 }
 
+- (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap
+{
+    uint32_t mask = XCB_CW_BACK_PIXMAP;
+    uint32_t values[] = {aPixmap};
+
+    [self changeAttributes:values withMask:mask checked:NO];
+}
+
 - (void)dealloc
 {
     parentWindow = nil;
@@ -1118,6 +1126,12 @@
     windowClass = nil;
     windowType = nil;
     leaderWindow = nil;
+
+    if (pixmap != 0)
+        xcb_free_pixmap([connection connection], pixmap);
+
+    if (graphicContextId != 0)
+        xcb_free_gc([connection connection], graphicContextId);
 }
 
 @end

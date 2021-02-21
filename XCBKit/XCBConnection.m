@@ -360,8 +360,18 @@ ICCCMService *icccmService;
 - (void)handleMapNotify:(xcb_map_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
+    XCBTitleBar *titleBar;
     NSLog(@"[%@] The window %u is mapped!", NSStringFromClass([self class]), [window window]);
     [window setIsMapped:YES];
+    CairoDrawer *cairoDrawer;
+
+    /*** FIXME: This code is just for testing ***/
+    /*if ([window isKindOfClass:[XCBTitleBar class]])
+    {
+        titleBar = (XCBTitleBar*)window;
+        cairoDrawer = [[CairoDrawer alloc] initWithConnection:self window:titleBar];
+        [cairoDrawer drawContent];
+    }*/
 
     /*** use this for slower machines?**/
 
@@ -371,6 +381,7 @@ ICCCMService *icccmService;
         [NSThread detachNewThreadSelector:@selector(createPixmapDelayed) toTarget:window withObject:nil];*/
 
     window = nil;
+    cairoDrawer = nil;
 }
 
 - (void)handleUnMapNotify:(xcb_unmap_notify_event_t *)anEvent
@@ -775,7 +786,7 @@ ICCCMService *icccmService;
         frame = (XCBFrame *) [window parentWindow];
         [[frame childWindowForKey:(TitleBar)] grabPointer];
 
-        NSPoint destPoint = NSMakePoint(anEvent->event_x, anEvent->event_y);
+        XCBPoint destPoint = XCBMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
         [frame configureClient];
 
@@ -832,7 +843,6 @@ ICCCMService *icccmService;
     {
         if (![[frame cursor] leftPointerSelected])
         {
-            NSLog(@"CUNNU");
             [frame showLeftPointerCursor];
             [window showLeftPointerCursor];
 
@@ -842,7 +852,6 @@ ICCCMService *icccmService;
 
     if (resizeState)
     {
-
         if ([window isKindOfClass:[XCBFrame class]])
             frame = (XCBFrame *) window;
 
@@ -1328,22 +1337,37 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
     [window onScreen];
-    XCBVisual *visual = [window visual];
-    NSLog(@"Expose window %ud x: %d, y:%d, width: %d, height: %d", anEvent->window, anEvent->x, anEvent->y, anEvent->width, anEvent->height);
+    XCBTitleBar *titleBar;
+    XCBFrame *frame;
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        XCBTitleBar *titleBar = (XCBTitleBar *) window;
-        XCBFrame *frame = (XCBFrame *) [titleBar parentWindow];
-        [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
+        titleBar = (XCBTitleBar *) window;
+        frame = (XCBFrame *) [titleBar parentWindow];
 
-        titleBar = nil;
-        frame = nil;
+        if (!resizeState)
+            [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
+        else if (resizeState && anEvent->count == 0)
+        {
+            /*xcb_copy_area(connection,
+                          [titleBar pixmap],
+                          [titleBar window],
+                          [titleBar graphicContextId],
+                          0,
+                          0,
+                          anEvent->x,
+                          anEvent->y,
+                          anEvent->width,
+                          anEvent->height);*/
+            [titleBar setTitleIsSet:NO];
+            [titleBar setWindowTitle:[titleBar windowTitle]];
+        }
+
     }
 
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        XCBFrame *frame = (XCBFrame *) window;
+        frame = (XCBFrame *) window;
 
         /*if ([frame isMinimized])
         {
@@ -1351,12 +1375,11 @@ ICCCMService *icccmService;
 
         }*/
 
-        frame = nil;
-
     }
 
     window = nil;
-    visual = nil;
+    titleBar = nil;
+    frame = nil;
 }
 
 - (void)handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent

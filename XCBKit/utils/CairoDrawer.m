@@ -8,6 +8,7 @@
 
 #import "CairoDrawer.h"
 #import "../services/TitleBarSettingsService.h"
+#import <xcb/xcb_aux.h>
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -57,6 +58,11 @@ static inline void free_callback(void *data)
     
     if (visual != nil)
         [visual setVisualTypeForScreen:screen];
+    else if (window != nil)
+    {
+        xcb_visualid_t visualid = [[window attributes] visualId];
+        visual = [[XCBVisual alloc] initWithVisualId:visualid withVisualType:xcb_aux_find_visual_by_id([screen screen], visualid)];
+    }
     
     screen = nil;
     alreadyScaled = NO;
@@ -120,7 +126,7 @@ static inline void free_callback(void *data)
     
     cairo_surface_flush(cairoSurface);
 
-    cairo_set_line_width (cr, 0.3);
+    cairo_set_line_width (cr, 0.1);
 
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
@@ -138,7 +144,7 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
 {
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height-1);
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
