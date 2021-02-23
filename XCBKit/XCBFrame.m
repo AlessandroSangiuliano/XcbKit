@@ -610,7 +610,6 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
 
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
 
-    /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
     XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
     [super setWindowRect:newRect];
 
