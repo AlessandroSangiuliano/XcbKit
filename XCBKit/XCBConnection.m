@@ -915,7 +915,6 @@ ICCCMService *icccmService;
         XCBScreen *screen = [frame screen];
         TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
         uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
-        //[window maximizeToWidth:[screen width] andHeight:[screen height]];
 
         /*** frame **/
         XCBSize size = XCBMakeSize([screen width], [screen height]);
