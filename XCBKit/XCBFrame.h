@@ -46,7 +46,7 @@ typedef NS_ENUM(NSInteger, childrenMask)
 - (XCBWindow*) childWindowForKey:(childrenMask) key;
 - (void) removeChild:(childrenMask) frameChild;
 - (void) resize:(xcb_motion_notify_event_t *)anEvent xcbConnection:(xcb_connection_t*)aXcbConnection;
-- (void) moveTo:(NSPoint)coordinates;
+- (void) moveTo:(XCBPoint)coordinates;
 - (void) configureClient;
 - (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent;
 - (void) restoreDimensionAndPosition;

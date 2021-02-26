@@ -101,9 +101,10 @@
         return @"No atom name!";
 
     char* n = xcb_get_atom_name_name(reply);
+    NSString *name = [NSString stringWithUTF8String:n];
 
     free(reply);
-    return [NSString stringWithUTF8String:n];
+    return name;
 }
 
 - (void) dealloc

@@ -21,6 +21,7 @@
 @synthesize titleBarUpColor;
 @synthesize titleBarDownColor;
 @synthesize ewmhService;
+@synthesize titleIsSet;
 
 
 - (id) initWithFrame:(XCBFrame *)aFrame withConnection:(XCBConnection *)aConnection
@@ -35,6 +36,7 @@
     [super setConnection:aConnection];
 
     ewmhService = [EWMHService sharedInstanceWithConnection:[super connection]];
+    titleIsSet = NO;
     
     return self;
 }
@@ -77,7 +79,6 @@
     if (maximizeWindowButton != nil)
     {
         NSString* path = [thisBundle pathForResource:@"max" ofType:@"png"];
-
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
         
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
@@ -103,8 +104,7 @@
     if (aColor == TitleBarDownColor)
         aux = titleBarDownColor;
     
-    XCBWindow *rootWindow = [parentWindow parentWindow];
-    XCBScreen *screen = [rootWindow screen];
+    XCBScreen *screen = [self onScreen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
     
@@ -121,7 +121,7 @@
         [drawer setWindow:hideWindowButton];
         [drawer setHeight:[hideWindowButton windowRect].size.height];
         [drawer setWidth:[hideWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:stopColor];
+        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     if (minimizeWindowButton != nil)
@@ -129,7 +129,7 @@
         [drawer setWindow:minimizeWindowButton];
         [drawer setHeight:[minimizeWindowButton windowRect].size.height];
         [drawer setWidth:[minimizeWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:stopColor];
+        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     if (maximizeWindowButton != nil)
@@ -137,13 +137,12 @@
         [drawer setWindow:maximizeWindowButton];
         [drawer setHeight:[maximizeWindowButton windowRect].size.height];
         [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-        [drawer drawWindowWithColor:aux andStopColor:stopColor];
+        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     drawer = nil;
     screen = nil;
     visual = nil;
-    rootWindow = nil;
 }
 
 - (void) generateButtons
@@ -153,9 +152,9 @@
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
 
     [rootVisual setVisualTypeForScreen:screen];
-    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    uint32_t mask = XCB_CW_BACK_PIXMAP | XCB_CW_EVENT_MASK;
     uint32_t values[2];
-    values[0] = [screen screen]->white_pixel;
+    values[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
     values[1] = XCB_EVENT_MASK_EXPOSURE |  XCB_EVENT_MASK_BUTTON_PRESS;
 
     XCBFrame* frame = (XCBFrame*)parentWindow;
@@ -242,7 +241,11 @@
 
 - (void) setWindowTitle:(NSString *) title
 {
+    if (titleIsSet)
+        return;
+
     windowTitle = title;
+
     if ([title length] == 0)
     {
         NSLog(@"No title to set to the window.");
@@ -257,11 +260,17 @@
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:self visual:visual];
     XCBColor black = XCBMakeColor(0,0,0,1);
     [drawer drawText:windowTitle withColor:black];
+    titleIsSet = YES;
     
     drawer = nil;
     screen = nil;
     visual = nil;
     rootWindow = nil;
+}
+
+- (NSString*) windowTitle
+{
+    return windowTitle;
 }
 
 - (xcb_arc_t*) arcs

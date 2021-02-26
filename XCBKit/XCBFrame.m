@@ -10,6 +10,7 @@
 #import "functions/Transformers.h"
 #import "services/ICCCMService.h"
 #import "services/TitleBarSettingsService.h"
+#import "utils/CairoDrawer.h"
 
 
 @implementation XCBFrame
@@ -185,14 +186,19 @@
         icccmService = nil;
     }
 
+    [titleBar onScreen];
+    [titleBar updateAttributes];
+    [titleBar setIsMapped:YES];
+    [titleBar createPixmap];
+    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [titleBar generateButtons];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-    [titleBar setWindowTitle:windowTitle];
-
-    [connection mapWindow:titleBar];
-    [titleBar setIsMapped:YES];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
+    [connection mapWindow:titleBar];
+    [titleBar setWindowTitle:windowTitle];
+
+
 
     XCBPoint position = XCBMakePoint(0, height-1);
     [connection reparentWindow:clientWindow toWindow:self position:position];
@@ -276,7 +282,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent,
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -299,7 +305,7 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.width = anEvent->event_x;
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
@@ -349,7 +355,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent,
         clientRect.size.width = values[1];
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -377,7 +383,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.width = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
@@ -558,7 +564,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         titleBar = nil;
         clientWindow = nil;
@@ -586,37 +592,30 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
     clientRect.size.height = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     titleBar = nil;
     clientWindow = nil;
     connection = NULL;
 }
 
-- (void) moveTo:(NSPoint)coordinates
+- (void) moveTo:(XCBPoint)coordinates
 {
     XCBPoint pos = [super windowRect].position;
 
-    int16_t x =  pos.x;
-    int16_t y =  pos.y;
-
-    x = x + coordinates.x - offset.x;
-    y = y + coordinates.y - offset.y;
-
-    pos.x = x;
-    pos.y = y;
-
-    /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
-    XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
-    [super setWindowRect:newRect];
-
-    [super setOriginalRect:XCBMakeRect(XCBMakePoint(x, y),
-                                       XCBMakeSize([super originalRect].size.width,
-                                                   [super originalRect].size.height))];
+    pos.x = pos.x + coordinates.x - offset.x;
+    pos.y = pos.y + coordinates.y - offset.y;
 
     int32_t values[] = {pos.x, pos.y};
 
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+
+    XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
+    [super setWindowRect:newRect];
+
+    [super setOriginalRect:XCBMakeRect(XCBMakePoint(pos.x, pos.y),
+                                       XCBMakeSize([super originalRect].size.width,
+                                                   [super originalRect].size.height))];
 }
 
 - (void) configureClient

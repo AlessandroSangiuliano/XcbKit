@@ -174,5 +174,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) showLeftPointerCursor;
 - (void) showResizeCursorForPosition:(MousePosition)position;
 - (void) shade;
+- (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap;
 
 @end
