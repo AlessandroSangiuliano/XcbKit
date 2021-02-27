@@ -786,6 +786,7 @@ ICCCMService *icccmService;
         frame = (XCBFrame *) [window parentWindow];
         [[frame childWindowForKey:(TitleBar)] grabPointer];
 
+        NSLog(@"Moving with x: %d and y: %d", anEvent->event_x, anEvent->event_y);
         XCBPoint destPoint = XCBMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
         [frame configureClient];
@@ -1277,11 +1278,9 @@ ICCCMService *icccmService;
     {
         XCBFrame *frameWindow = (XCBFrame *) window;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
-        NSLog(@"Frame");
 
         if (![[frameWindow cursor] leftPointerSelected])
         {
-            [frameWindow description];
             [frameWindow showLeftPointerCursor];
         }
 
