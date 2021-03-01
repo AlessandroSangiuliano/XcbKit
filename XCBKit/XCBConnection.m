@@ -791,7 +791,12 @@ ICCCMService *icccmService;
         [frame moveTo:destPoint];
         [frame configureClient];
 
+        window = nil;
+        frame = nil;
+        rootWindow = nil;
         needFlush = YES;
+
+        return;
     }
 
     if ([window isKindOfClass:[XCBFrame class]])
