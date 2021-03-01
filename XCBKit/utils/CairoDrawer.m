@@ -103,7 +103,7 @@ static inline void free_callback(void *data)
     
     CGFloat startXPosition = 2;
     CGFloat endXPosition = 2;
-    CGFloat startYPosition = 1;
+    CGFloat startYPosition = 2; /// it was 1 previously, just try it for a bit!
     CGFloat endYPosition = height + 2;
     
     CGFloat stopGradientOffset = 0.9;
@@ -126,12 +126,12 @@ static inline void free_callback(void *data)
     
     cairo_surface_flush(cairoSurface);
 
-    cairo_set_line_width (cr, 0.1);
+    cairo_set_line_width (cr, 0.2);
 
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
     XCBColor black = XCBMakeColor(0,0,0,1);
-    cairo_set_source_rgb(cr, black.redComponent, black.greenComponent, black.blueComponent);
+    cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
     cairo_stroke(cr);
     cairo_surface_flush(cairoSurface);
     
