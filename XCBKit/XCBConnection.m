@@ -873,6 +873,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
+    NSLog(@"Button press!!!");
 
 
     if ([window isCloseButton])
@@ -1245,6 +1246,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
+        [clientWindow focus]; // giving the focus here will remove prev focus
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1256,6 +1258,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
+        [clientWindow focus]; // giving the focus here will remove prev focus. example: writing a text in a window and tring to scrolldown another will not work.
 
         titleBar = nil;
         frameWindow = nil;
