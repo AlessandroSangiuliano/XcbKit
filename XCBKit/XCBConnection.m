@@ -918,7 +918,7 @@ ICCCMService *icccmService;
             return;
         }
 
-        XCBScreen *screen = [frame screen];
+        XCBScreen *screen = [frame onScreen];
         TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
         uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
 
@@ -941,15 +941,15 @@ ICCCMService *icccmService;
         position = XCBMakePoint(0.0, titleHgt - 1);
         [clientWindow maximizeToSize:size andPosition:position];
         [clientWindow setFullScreen:YES];
-        EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
-        [ewmhService updateNetWmState:clientWindow];
+        /*EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self]; TODO: THIS IS BROING MAXIMIZATION ON GTK WINDOWS. INVESTIGATE
+        [ewmhService updateNetWmState:clientWindow];*/
 
         screen = nil;
         window = nil;
         frame = nil;
         clientWindow = nil;
         settingsService = nil;
-        ewmhService = nil;
+        //ewmhService = nil;
         return;
     }
 
@@ -1343,7 +1343,7 @@ ICCCMService *icccmService;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
 
-    if ([window isKindOfClass:[XCBTitleBar class]])
+    /*if ([window isKindOfClass:[XCBTitleBar class]])
     {
         titleBar = (XCBTitleBar *) window;
         frame = (XCBFrame *) [titleBar parentWindow];
@@ -1351,7 +1351,7 @@ ICCCMService *icccmService;
         if (!resizeState)
             [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
         else if (resizeState && anEvent->count == 0)
-        {
+        {*/
             /*xcb_copy_area(connection,
                           [titleBar pixmap],
                           [titleBar window],
@@ -1362,11 +1362,11 @@ ICCCMService *icccmService;
                           anEvent->y,
                           anEvent->width,
                           anEvent->height);*/
-            [titleBar setTitleIsSet:NO];
+           /* [titleBar setTitleIsSet:NO];
             [titleBar setWindowTitle:[titleBar windowTitle]];
         }
 
-    }
+    }*/
 
     if ([window isKindOfClass:[XCBFrame class]])
     {

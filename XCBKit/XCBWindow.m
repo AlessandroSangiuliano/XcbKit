@@ -548,15 +548,15 @@
 
     /*** restore to the previous dimension and position of the window ***/
 
-    [self setWindowRect:[self oldRect]];
+    [self setWindowRect: oldRect];
     [self setOldRect:XCBInvalidRect];
 
     uint32_t valueList[4] =
             {
-                    [self windowRect].position.x,
-                    [self windowRect].position.y,
-                    [self windowRect].size.width,
-                    [self windowRect].size.height
+                    windowRect.position.x,
+                    windowRect.position.y,
+                    windowRect.size.width,
+                    windowRect.size.height
             };
 
     xcb_configure_window([connection connection], window, mask, &valueList);
@@ -591,7 +591,7 @@
 
     /*** save previous dimensions and position of the window **/
 
-    [self setOldRect:[self windowRect]];
+    [self setOldRect:windowRect];
 
     /*** redraw and resize the window ***/
 
@@ -612,7 +612,10 @@
 
     xcb_configure_window([connection connection], [self window], mask, &valueList);
 
-    [self setIsMaximized:YES];
+    isMaximized = YES;
+    maximizedVertically = YES;
+    maximizedHorizontally = YES;
+    fullScreen = YES;
 
     return;
 }
