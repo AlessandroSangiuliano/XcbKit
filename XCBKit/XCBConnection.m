@@ -799,7 +799,7 @@ ICCCMService *icccmService;
         return;
     }
 
-    if ([window isKindOfClass:[XCBFrame class]])
+    if ([window isKindOfClass:[XCBFrame class]] && !dragState)
     {
         frame = (XCBFrame *)window;
         MousePosition  position = [frame mouseIsOnWindowBorderForEvent:anEvent];
@@ -1362,23 +1362,11 @@ ICCCMService *icccmService;
                           anEvent->y,
                           anEvent->width,
                           anEvent->height);*/
-           /* [titleBar setTitleIsSet:NO];
+            /*[titleBar setTitleIsSet:NO];
             [titleBar setWindowTitle:[titleBar windowTitle]];
         }
 
     }*/
-
-    if ([window isKindOfClass:[XCBFrame class]])
-    {
-        frame = (XCBFrame *) window;
-
-        /*if ([frame isMinimized])
-        {
-            [frame createPixmap];
-
-        }*/
-
-    }
 
     window = nil;
     titleBar = nil;
