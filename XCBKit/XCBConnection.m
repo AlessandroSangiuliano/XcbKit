@@ -791,10 +791,11 @@ ICCCMService *icccmService;
         [frame moveTo:destPoint];
         [frame configureClient];
 
-        needFlush = YES;
         window = nil;
         frame = nil;
         rootWindow = nil;
+        needFlush = YES;
+
         return;
     }
 
