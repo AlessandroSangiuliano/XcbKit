@@ -873,6 +873,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
+    NSLog(@"Button press!!!");
 
 
     if ([window isCloseButton])
@@ -918,7 +919,7 @@ ICCCMService *icccmService;
             return;
         }
 
-        XCBScreen *screen = [frame screen];
+        XCBScreen *screen = [frame onScreen];
         TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
         uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
 
@@ -941,15 +942,15 @@ ICCCMService *icccmService;
         position = XCBMakePoint(0.0, titleHgt - 1);
         [clientWindow maximizeToSize:size andPosition:position];
         [clientWindow setFullScreen:YES];
-        EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
-        [ewmhService updateNetWmState:clientWindow];
+        /*EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self]; TODO: THIS IS BROING MAXIMIZATION ON GTK WINDOWS. INVESTIGATE
+        [ewmhService updateNetWmState:clientWindow];*/
 
         screen = nil;
         window = nil;
         frame = nil;
         clientWindow = nil;
         settingsService = nil;
-        ewmhService = nil;
+        //ewmhService = nil;
         return;
     }
 
@@ -1245,6 +1246,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
+        [clientWindow focus]; // giving the focus here will remove prev focus
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1256,6 +1258,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
+        [clientWindow focus]; // giving the focus here will remove prev focus. example: writing a text in a window and tring to scrolldown another will not work.
 
         titleBar = nil;
         frameWindow = nil;
