@@ -1343,7 +1343,7 @@ ICCCMService *icccmService;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
 
-    if ([window isKindOfClass:[XCBTitleBar class]])
+    /*if ([window isKindOfClass:[XCBTitleBar class]])
     {
         titleBar = (XCBTitleBar *) window;
         frame = (XCBFrame *) [titleBar parentWindow];
@@ -1351,7 +1351,7 @@ ICCCMService *icccmService;
         if (!resizeState)
             [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
         else if (resizeState && anEvent->count == 0)
-        {
+        {*/
             /*xcb_copy_area(connection,
                           [titleBar pixmap],
                           [titleBar window],
@@ -1362,23 +1362,11 @@ ICCCMService *icccmService;
                           anEvent->y,
                           anEvent->width,
                           anEvent->height);*/
-            [titleBar setTitleIsSet:NO];
+            /*[titleBar setTitleIsSet:NO];
             [titleBar setWindowTitle:[titleBar windowTitle]];
         }
 
-    }
-
-    if ([window isKindOfClass:[XCBFrame class]])
-    {
-        frame = (XCBFrame *) window;
-
-        /*if ([frame isMinimized])
-        {
-            [frame createPixmap];
-
-        }*/
-
-    }
+    }*/
 
     window = nil;
     titleBar = nil;
