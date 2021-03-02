@@ -792,9 +792,13 @@ ICCCMService *icccmService;
         [frame configureClient];
 
         needFlush = YES;
+        window = nil;
+        frame = nil;
+        rootWindow = nil;
+        return;
     }
 
-    if ([window isKindOfClass:[XCBFrame class]])
+    if ([window isKindOfClass:[XCBFrame class]] && !dragState)
     {
         frame = (XCBFrame *)window;
         MousePosition  position = [frame mouseIsOnWindowBorderForEvent:anEvent];
