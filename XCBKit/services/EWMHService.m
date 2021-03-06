@@ -552,8 +552,6 @@
         return NULL;
     }
 
-
-    //void* value = xcb_get_property_value(reply);
     free(error);
     return reply;
 }
@@ -774,7 +772,7 @@
                     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
                     /*** client window size and position ***/
-                    size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2);
+                    size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2); //TODO:why - 2?
                     position = XCBMakePoint(0.0, titleHgt - 1);
                     frame = nil;
                     titleBar = nil;
@@ -811,7 +809,6 @@
 
             if (fullscr)
             {
-
                 if ([aWindow isMinimized])
                     [aWindow restoreFromIconified];
 
