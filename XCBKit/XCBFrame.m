@@ -517,7 +517,7 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent,
     values[1] = rect.size.height - titleBarHeight;
 
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
-    clientRect.size.height = values[1] ;
+    clientRect.size.height = values[1];
 
     [frame setWindowRect:rect];
     [frame setOriginalRect:rect];
