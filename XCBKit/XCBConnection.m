@@ -470,7 +470,6 @@ ICCCMService *icccmService;
         {
             if ([reply overrideRedirect] == YES)
             {
-                NSLog(@"Override redirect detected"); //useless log
                 window = nil;
                 reply = nil;
                 ewmhService = nil;
@@ -921,7 +920,6 @@ ICCCMService *icccmService;
         [frame maximizeToSize:size andPosition:position];
         [frame setFullScreen:YES];
 
-
         /*** title bar ***/
         size = XCBMakeSize([frame windowRect].size.width, titleHgt);
         position = XCBMakePoint(0.0,0.0);
@@ -934,15 +932,12 @@ ICCCMService *icccmService;
         position = XCBMakePoint(0.0, titleHgt - 1);
         [clientWindow maximizeToSize:size andPosition:position];
         [clientWindow setFullScreen:YES];
-        /*EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self]; TODO: THIS IS BROING MAXIMIZATION ON GTK WINDOWS. INVESTIGATE
-        [ewmhService updateNetWmState:clientWindow];*/
 
         screen = nil;
         window = nil;
         frame = nil;
         clientWindow = nil;
         settingsService = nil;
-        //ewmhService = nil;
         return;
     }
 
