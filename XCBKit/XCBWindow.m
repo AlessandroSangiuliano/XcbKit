@@ -548,15 +548,15 @@
 
     /*** restore to the previous dimension and position of the window ***/
 
-    [self setWindowRect:[self oldRect]];
+    [self setWindowRect: oldRect];
     [self setOldRect:XCBInvalidRect];
 
     uint32_t valueList[4] =
             {
-                    [self windowRect].position.x,
-                    [self windowRect].position.y,
-                    [self windowRect].size.width,
-                    [self windowRect].size.height
+                    windowRect.position.x,
+                    windowRect.position.y,
+                    windowRect.size.width,
+                    windowRect.size.height
             };
 
     xcb_configure_window([connection connection], window, mask, &valueList);
@@ -591,7 +591,7 @@
 
     /*** save previous dimensions and position of the window **/
 
-    [self setOldRect:[self windowRect]];
+    [self setOldRect:windowRect];
 
     /*** redraw and resize the window ***/
 
@@ -612,7 +612,10 @@
 
     xcb_configure_window([connection connection], [self window], mask, &valueList);
 
-    [self setIsMaximized:YES];
+    isMaximized = YES;
+    maximizedVertically = YES;
+    maximizedHorizontally = YES;
+    fullScreen = YES;
 
     return;
 }
@@ -924,6 +927,13 @@
     return geometry;
 }
 
+- (void) refreshBorder
+{
+    NSLog(@"Refreshing borders");
+    uint32_t values[] = {3};
+    xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_BORDER_WIDTH, values);
+}
+
 - (XCBRect)rectFromGeometries
 {
     XCBGeometryReply *geo = [self geometries];
@@ -945,7 +955,9 @@
     unsigned short title_i = 0;
 
     XCBFrame *frame = (XCBFrame*)parentWindow;
-    XCBRect frameRect = [[frame geometries] rect];
+    XCBRect frameRect = [frame windowRect];//[[frame geometries] rect];
+    TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+    int titleHeight = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
 
     /*** Handle windows we manage ***/
 
@@ -955,13 +967,15 @@
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_X)
     {
         config_frame_mask |= XCB_CONFIG_WINDOW_X;
-        config_frame_vals[frame_i++] = frameRect.position.x;
+        config_frame_vals[frame_i++] = anEvent->x;//frameRect.position.x;
+        frameRect.position.x = anEvent->x;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_Y)
     {
         config_frame_mask |= XCB_CONFIG_WINDOW_Y;
-        config_frame_vals[frame_i++] = frameRect.position.y;
+        config_frame_vals[frame_i++] = anEvent->y;//frameRect.position.y;
+        frameRect.position.y = anEvent->y;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_WIDTH)
@@ -972,14 +986,16 @@
         config_frame_vals[frame_i++] = anEvent->width;
         config_win_vals[win_i++] = anEvent->width;
         config_title_vals[title_i++] = anEvent->width;
+        frameRect.size.width = anEvent->width;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
     {
         config_frame_mask |= XCB_CONFIG_WINDOW_HEIGHT;
         config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
-        config_frame_vals[frame_i++] = anEvent->height + 21;
+        config_frame_vals[frame_i++] = anEvent->height + titleHeight;
         config_win_vals[win_i++] = anEvent->height;
+        frameRect.size.height = anEvent->height + titleHeight;
     }
 
     if (anEvent->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
@@ -1009,10 +1025,11 @@
 
     [titleBar updateRectsFromGeometries];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [frame setWindowRect:frameRect];
 
     /*** required by ICCCM compliance ***/
 
-    [frame  configureClient];
+    //[frame configureClient];
 
     frame = nil;
     titleBar = nil;
@@ -1101,8 +1118,8 @@
 
 - (void)description
 {
-    NSLog(@" Window id: %u. Parent window id: %u.\nWindow %@; Old Rect: %@", window, [parentWindow window],
-          FnFromXCBRectToString(windowRect), FnFromXCBRectToString(oldRect));
+    NSLog(@"WINDOW DESCRIPTION:\nWindow id: %u.\nParent window id: %u.\nWindow rect: %@;\nOld Rect: %@;\nWindow class: %@",
+          window, [parentWindow window], FnFromXCBRectToString(windowRect), FnFromXCBRectToString(oldRect), NSStringFromClass([self class]));
 }
 
 - (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap

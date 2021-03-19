@@ -552,8 +552,6 @@
         return NULL;
     }
 
-
-    //void* value = xcb_get_property_value(reply);
     free(error);
     return reply;
 }
@@ -707,12 +705,10 @@
                 {
                     frame = (XCBFrame*)[aWindow parentWindow];
                     titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-                    //[frame maximizeToWidth:[screen width] andHeight:[screen height]];
-                    //[titleBar maximizeToWidth:[screen width] andHeight:[screen height]];
+
                     /*** frame size and position ***/
                     size = XCBMakeSize([screen width], [frame windowRect].size.height);
                     [frame maximizeToSize:size andPosition:[frame windowRect].position];
-                    size = XCBMakeSize([frame windowRect].size.width - 2, titleHgt);
 
                     /*** titlebar size and position ***/
                     size = XCBMakeSize([frame windowRect].size.width, titleHgt);
@@ -733,7 +729,6 @@
                     position = XCBMakePoint([aWindow windowRect].position.x, [aWindow windowRect].position.y);
                 }
 
-                //[aWindow maximizeToWidth:[screen width] andHeight:size.height];
                 [aWindow maximizeToSize:size andPosition:position];
                 [aWindow setMaximizedHorizontally:maxHorz];
                 screen = nil;
@@ -765,8 +760,7 @@
                 {
                     frame = (XCBFrame*)[aWindow parentWindow];
                     titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-                    //[frame maximizeToWidth:[screen width] andHeight:[screen height]];
-                    //[titleBar maximizeToWidth:[screen width] andHeight:[screen height]];
+
                     /*** frame size and position ***/
                     size = XCBMakeSize([frame windowRect].size.width, [screen height]);
                     [frame maximizeToSize:size andPosition:[frame windowRect].position];
@@ -778,7 +772,7 @@
                     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
                     /*** client window size and position ***/
-                    size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2);
+                    size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2); //TODO:why - 2?
                     position = XCBMakePoint(0.0, titleHgt - 1);
                     frame = nil;
                     titleBar = nil;
@@ -789,10 +783,66 @@
                     position = XCBMakePoint([aWindow windowRect].position.x, [aWindow windowRect].position.y);
                 }
 
-
-                //[aWindow maximizeToWidth:size.width andHeight:[screen height]];
                 [aWindow maximizeToSize:size andPosition:position];
                 [aWindow setMaximizedVertically:maxVert];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+            settingsService = nil;
+        }
+
+        /***TODO: test it ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen])
+        {
+            BOOL fullscr = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMaximized]);
+            XCBScreen *screen = [aWindow screen];
+            TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+            XCBFrame *frame;
+            XCBTitleBar *titleBar;
+            XCBSize size;
+            XCBPoint position;
+
+            uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+
+            if (fullscr)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                if ([aWindow decorated])
+                {
+                    frame = (XCBFrame*)[aWindow parentWindow];
+                    titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+
+                    /*** frame size and position ***/
+                    size = XCBMakeSize([screen width], [screen height]);
+                    position = XCBMakePoint(0.0,0.0);
+                    [frame maximizeToSize:size andPosition:position];
+
+                    /*** titlebar size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width, titleHgt);
+                    [titleBar maximizeToSize:size andPosition:position];
+                    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+
+                    /*** client window size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - 2);
+                    position = XCBMakePoint(0, titleHgt - 1);
+
+                    frame = nil;
+                    titleBar = nil;
+                }
+                else
+                {
+                    size = XCBMakeSize([screen width], [screen height]);
+                    position = XCBMakePoint(0, 0);
+                }
+
+
+                [aWindow maximizeToSize:size andPosition:position];
+                [aWindow setFullScreen:fullscr];
                 screen = nil;
             }
 
@@ -832,66 +882,6 @@
             }
 
             [self updateNetWmState:aWindow];
-        }
-
-        /*** TODO: test ***/
-
-        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen] ||
-            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen])
-        {
-            BOOL fullscr = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMaximized]);
-            XCBScreen *screen = [aWindow screen];
-            TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
-            XCBFrame *frame;
-            XCBTitleBar *titleBar;
-            XCBSize size;
-            XCBPoint position;
-
-            uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
-
-            if (fullscr)
-            {
-
-                if ([aWindow isMinimized])
-                    [aWindow restoreFromIconified];
-
-                if ([aWindow decorated])
-                {
-                    frame = (XCBFrame*)[aWindow parentWindow];
-                    titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-                    //[frame maximizeToWidth:[screen width] andHeight:[screen height]];
-                    //[titleBar maximizeToWidth:[screen width] andHeight:[screen height]];
-                    /*** frame size and position ***/
-                    size = XCBMakeSize([screen width], [screen height]);
-                    position = XCBMakePoint(0.0,0.0);
-                    [frame maximizeToSize:size andPosition:position];
-
-                    /*** titlebar size and position ***/
-                    size = XCBMakeSize([frame windowRect].size.width, titleHgt);
-                    [titleBar maximizeToSize:size andPosition:position];
-                    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-
-                    /*** client window size and position ***/
-                    size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - 2);
-                    position = XCBMakePoint(0, titleHgt - 1);
-
-                    frame = nil;
-                    titleBar = nil;
-                }
-                else
-                {
-                    size = XCBMakeSize([screen width], [screen height]);
-                    position = XCBMakePoint(0, 0);
-                }
-
-
-                [aWindow maximizeToSize:size andPosition:position];
-                [aWindow setFullScreen:fullscr];
-                screen = nil;
-            }
-
-            [self updateNetWmState:aWindow];
-            settingsService = nil;
         }
 
         /*** TODO: test it. for now just focus the window and set it active ***/
