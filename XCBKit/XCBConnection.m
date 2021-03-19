@@ -470,7 +470,6 @@ ICCCMService *icccmService;
         {
             if ([reply overrideRedirect] == YES)
             {
-                NSLog(@"Override redirect detected"); //useless log
                 window = nil;
                 reply = nil;
                 ewmhService = nil;
@@ -616,7 +615,7 @@ ICCCMService *icccmService;
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-    uint32_t values[2] = {[screen screen]->white_pixel, FRAMEMASK};
+    uint32_t values[] = {[screen screen]->white_pixel, XCB_BACKING_STORE_WHEN_MAPPED, FRAMEMASK};
     TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
     uint16_t titleHeight = [settings heightDefined] ? [settings height] : [settings defaultHeight];
 
@@ -630,7 +629,7 @@ ICCCMService *icccmService;
     [request setBorderWidth:3];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
     [request setVisual:visual];
-    [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
+    [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_BACKING_STORE | XCB_CW_EVENT_MASK];
     [request setValueList:values];
     [request setClientWindow:window];
 
@@ -776,24 +775,21 @@ ICCCMService *icccmService;
 - (void)handleMotionNotify:(xcb_motion_notify_event_t *)anEvent
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
-    XCBWindow *rootWindow = [self rootWindowForScreenNumber:0];
     XCBFrame *frame;
 
-    if (dragState &&
-        ([window window] != [rootWindow window]) &&
-        ([[window parentWindow] window] != [rootWindow window]))
+    if (dragState && [window isKindOfClass:[XCBTitleBar class]]
+        /*([window window] != [rootWindow window]) &&
+        ([[window parentWindow] window] != [rootWindow window])*/)
     {
         frame = (XCBFrame *) [window parentWindow];
-        [[frame childWindowForKey:(TitleBar)] grabPointer];
+        [window grabPointer];
 
-        NSLog(@"Moving with x: %d and y: %d", anEvent->event_x, anEvent->event_y);
         XCBPoint destPoint = XCBMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
-        [frame configureClient];
+        //[frame configureClient];
 
         window = nil;
         frame = nil;
-        rootWindow = nil;
         needFlush = YES;
 
         return;
@@ -865,7 +861,6 @@ ICCCMService *icccmService;
     }
 
     window = nil;
-    rootWindow = nil;
     frame = nil;
 }
 
@@ -873,14 +868,10 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
-    NSLog(@"Button press!!!");
-
 
     if ([window isCloseButton])
     {
         XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
-        NSLog(@"Operations for frame window %u", [frame window]);
-
         currentTime = anEvent->time;
 
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
@@ -929,7 +920,6 @@ ICCCMService *icccmService;
         [frame maximizeToSize:size andPosition:position];
         [frame setFullScreen:YES];
 
-
         /*** title bar ***/
         size = XCBMakeSize([frame windowRect].size.width, titleHgt);
         position = XCBMakePoint(0.0,0.0);
@@ -942,15 +932,12 @@ ICCCMService *icccmService;
         position = XCBMakePoint(0.0, titleHgt - 1);
         [clientWindow maximizeToSize:size andPosition:position];
         [clientWindow setFullScreen:YES];
-        /*EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self]; TODO: THIS IS BROING MAXIMIZATION ON GTK WINDOWS. INVESTIGATE
-        [ewmhService updateNetWmState:clientWindow];*/
 
         screen = nil;
         window = nil;
         frame = nil;
         clientWindow = nil;
         settingsService = nil;
-        //ewmhService = nil;
         return;
     }
 
@@ -1007,9 +994,6 @@ ICCCMService *icccmService;
 
 - (void)handleButtonRelease:(xcb_button_release_event_t *)anEvent
 {
-    dragState = NO;
-    resizeState = NO;
-
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
 
@@ -1023,24 +1007,30 @@ ICCCMService *icccmService;
         [frame showLeftPointerCursor];
         [window showLeftPointerCursor];
 
-        frame = nil;
+        if (resizeState)
+        {
+            [frame refreshBorder];
+            [frame configureClient];
+        }
     }
 
-    //TODO: FOR NOW JUST DISABLE THIS CODE AND DRAW EVER THE PIXMAP WHEN ICONIFY IN CAIRO DRAWER
-    /*if ([window isKindOfClass:[XCBTitleBar class]])
+    /*if (resizeState && [window isKindOfClass:[XCBFrame class]])
     {
-        XCBTitleBar* titleBar = (XCBTitleBar*)window;
-        frame = (XCBFrame*)[titleBar parentWindow];
+        frame = (XCBFrame*) window;
+        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+        [frame description];
+        [clientWindow description];
+        [frame refreshBorder];
+        [frame configureClient];
 
-        if ([frame isAbove])
-            [[frame childWindowForKey:ClientWindow] updatePixmap];
-
-        frame = nil;
-        titleBar = nil;
+        clientWindow = nil;
     }*/
 
     [window ungrabPointer];
+    dragState = NO;
+    resizeState = NO;
     window = nil;
+    frame = nil;
 }
 
 - (void)handleFocusOut:(xcb_focus_out_event_t *)anEvent
@@ -1097,9 +1087,6 @@ ICCCMService *icccmService;
 
     NSLog(@"Atom name: %@, for atom id: %u", atomMessageName, anEvent->type);
 
-    if ([atomMessageName isEqualToString:[icccmService WMChangeState]])
-        NSLog(@"Change state type: %d", anEvent->data.data32[0]);
-
     XCBWindow *window;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
@@ -1113,8 +1100,6 @@ ICCCMService *icccmService;
 
     if (window == nil && frame == nil && titleBar == nil)
     {
-        //NSLog(@"No existing window for id: %u", anEvent->window);
-
         if ([ewmhService ewmhClientMessage:atomMessageName])
         {
             window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:self];
@@ -1346,15 +1331,17 @@ ICCCMService *icccmService;
     XCBTitleBar *titleBar;
     XCBFrame *frame;
 
-    /*if ([window isKindOfClass:[XCBTitleBar class]])
+    //NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
+
+    if ([window isKindOfClass:[XCBTitleBar class]])
     {
         titleBar = (XCBTitleBar *) window;
-        frame = (XCBFrame *) [titleBar parentWindow];
+        frame = (XCBFrame*)[titleBar parentWindow];
 
         if (!resizeState)
-            [titleBar drawTitleBarComponentsForColor:[frame isAbove] ? TitleBarUpColor : TitleBarDownColor];
+            [titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor : TitleBarDownColor];
         else if (resizeState && anEvent->count == 0)
-        {*/
+        {
             /*xcb_copy_area(connection,
                           [titleBar pixmap],
                           [titleBar window],
@@ -1365,11 +1352,11 @@ ICCCMService *icccmService;
                           anEvent->y,
                           anEvent->width,
                           anEvent->height);*/
-            /*[titleBar setTitleIsSet:NO];
-            [titleBar setWindowTitle:[titleBar windowTitle]];
+            //[titleBar setTitleIsSet:NO];
+            //[titleBar setWindowTitle:[titleBar windowTitle]];
         }
 
-    }*/
+    }
 
     window = nil;
     titleBar = nil;
@@ -1687,6 +1674,16 @@ ICCCMService *icccmService;
 - (xcb_window_t*)clientList
 {
     return clientList;
+}
+
+- (void) grabServer
+{
+    xcb_grab_server(connection);
+}
+
+- (void) ungrabServer
+{
+    xcb_ungrab_server(connection);
 }
 
 - (void)dealloc

@@ -74,6 +74,8 @@
 - (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
 - (void) checkScreens;
 - (NSMutableArray*) screens;
+- (void) grabServer;
+- (void) ungrabServer;
 
 /*** HANDLE EVENTS ***/
 
