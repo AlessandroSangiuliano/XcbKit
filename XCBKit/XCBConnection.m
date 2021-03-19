@@ -873,8 +873,6 @@ ICCCMService *icccmService;
     if ([window isCloseButton])
     {
         XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
-        NSLog(@"Operations for frame window %u", [frame window]);
-
         currentTime = anEvent->time;
 
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
