@@ -471,19 +471,8 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent,
     XCBRect titleBarRect = [titleBar windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
-    int yDelta = 0;
-
-    if (anEvent->root_y < rect.position.y)
-    {
-        yDelta = rect.position.y - anEvent->root_y;
-        NSLog(@"Deltav minore: %d", yDelta);
-    }
-    else if (anEvent->root_y > rect.position.y)
-    {
-        yDelta = rect.position.y - anEvent->root_y;
-        NSLog(@"Delta maggiore: %d", yDelta);
-    }
-
+    int yDelta = rect.position.y - anEvent->root_y;
+    
     uint32_t values[] = {anEvent->root_y, yDelta + rect.size.height};
 
     if (rect.size.height <= minH + titleBarHeight && anEvent->root_y > rect.position.y)
