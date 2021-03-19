@@ -869,8 +869,6 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
-    NSLog(@"Button press!!!");
-
 
     if ([window isCloseButton])
     {

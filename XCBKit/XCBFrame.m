@@ -472,7 +472,7 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent,
     XCBRect clientRect = [clientWindow windowRect];
 
     int yDelta = rect.position.y - anEvent->root_y;
-    
+
     uint32_t values[] = {anEvent->root_y, yDelta + rect.size.height};
 
     if (rect.size.height <= minH + titleBarHeight && anEvent->root_y > rect.position.y)
