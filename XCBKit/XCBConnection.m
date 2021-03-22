@@ -1339,7 +1339,10 @@ ICCCMService *icccmService;
         frame = (XCBFrame*)[titleBar parentWindow];
 
         if (!resizeState)
-            [titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor : TitleBarDownColor];
+        {
+            [titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                                       : TitleBarDownColor];
+        }
         else if (resizeState && anEvent->count == 0)
         {
             /*xcb_copy_area(connection,
@@ -1354,6 +1357,8 @@ ICCCMService *icccmService;
                           anEvent->height);*/
             //[titleBar setTitleIsSet:NO];
             //[titleBar setWindowTitle:[titleBar windowTitle]];
+            [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                        : TitleBarDownColor];
         }
 
     }
