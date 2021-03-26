@@ -157,6 +157,8 @@
     values[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
     values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
+    BOOL shapeExtensionSupported;
+
     XCBFrame* frame = (XCBFrame*)parentWindow;
 
     if ([[frame childWindowForKey:ClientWindow] canClose])
@@ -178,6 +180,18 @@
         [hideWindowButton setIsCloseButton:YES];
 
         hideButtonColor = XCBMakeColor(0.411, 0.176, 0.673, 1); //original: 0.7 0.427 1 1
+
+        shapeExtensionSupported = [[hideWindowButton shape] checkSupported];
+        [[hideWindowButton shape] calculateDimensionsFromGeometries:[hideWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[hideWindowButton shape] createPixmapsAndGCs];
+            [[hideWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [hideWindowButton window]);
+
     }
 
     if ([[frame childWindowForKey:ClientWindow] canMinimize])
@@ -199,6 +213,18 @@
         [minimizeWindowButton setIsMinimizeButton:YES];
 
         minimizeButtonColor = XCBMakeColor(0.9,0.7,0.3,1);
+
+        shapeExtensionSupported = [[minimizeWindowButton shape] checkSupported];
+        [[minimizeWindowButton shape] calculateDimensionsFromGeometries:[minimizeWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[minimizeWindowButton shape] createPixmapsAndGCs];
+            [[minimizeWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [minimizeWindowButton window]);
+
     }
 
     if ([[frame childWindowForKey:ClientWindow] canFullscreen])
@@ -220,6 +246,17 @@
         [maximizeWindowButton setIsMaximizeButton:YES];
 
         maximizeButtonColor = XCBMakeColor(0,0.74,1,1);
+
+        shapeExtensionSupported = [[maximizeWindowButton shape] checkSupported];
+        [[maximizeWindowButton shape] calculateDimensionsFromGeometries:[maximizeWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[maximizeWindowButton shape] createPixmapsAndGCs];
+            [[maximizeWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [maximizeWindowButton window]);
     }
 
     [[super connection] mapWindow:hideWindowButton];
@@ -235,7 +272,7 @@
 - (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
 {
     [self drawTitleBarForColor:aColor];
-    [self drawArcsForColor:aColor];
+    //[self drawArcsForColor:aColor];
     [self setWindowTitle:windowTitle];
 }
 

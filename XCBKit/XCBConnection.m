@@ -1338,8 +1338,8 @@ ICCCMService *icccmService;
     if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
     {
         titleBar = (XCBTitleBar*) [window parentWindow];
-        [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                     : TitleBarDownColor];
+        /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];*/
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])

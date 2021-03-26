@@ -131,7 +131,7 @@
     cachedWMHints = [[NSMutableDictionary alloc] init];
     windowClass = [[NSMutableArray alloc] initWithCapacity:2];
 
-    shape = [[XCBShape alloc] initWithConnection:connection];
+    shape = [[XCBShape alloc] initWithConnection:connection withWinId:window];
 
     return self;
 }
