@@ -1305,12 +1305,13 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
     XCBFrame *frame;
     XCBWindow *clientWindow;
+    XCBTitleBar* titleBar;
 
-    if ([window isKindOfClass:[XCBFrame class]])
+    /*if ([window isKindOfClass:[XCBFrame class]])
     {
         frame = (XCBFrame *) window;
         clientWindow = [frame childWindowForKey:ClientWindow];
-    }
+    }*/
 
     /*if (anEvent->state == XCB_VISIBILITY_UNOBSCURED &&
         anEvent->window == [frame window] &&
@@ -1322,6 +1323,7 @@ ICCCMService *icccmService;
 
     window = nil;
     clientWindow = nil;
+    titleBar = nil;
 }
 
 - (void)handleExpose:(xcb_expose_event_t *)anEvent
@@ -1332,6 +1334,13 @@ ICCCMService *icccmService;
     XCBFrame *frame;
 
     //NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
+
+    if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
+    {
+        titleBar = (XCBTitleBar*) [window parentWindow];
+        [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];
+    }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
