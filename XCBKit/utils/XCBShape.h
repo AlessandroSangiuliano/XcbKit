@@ -97,8 +97,3 @@ static inline NSString* FnFromXCBRectToString(XCBRect rect)
             rect.position.x, rect.position.y, rect.size.width, rect.size.height];
 }
 
-@interface XCBShape : NSObject
-
-
-
-@end

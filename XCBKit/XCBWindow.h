@@ -15,6 +15,7 @@
 #import "XCBAttributesReply.h"
 #import "XCBVisual.h"
 #import "XCBCursor.h"
+#import "XCBShape.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \
@@ -75,6 +76,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) NSMutableArray *windowClass;
 @property (strong, nonatomic) NSString *windowType;
 @property (strong, nonatomic) XCBWindow *leaderWindow;
+@property (strong, nonatomic) XCBShape* shape;
 
 /*** _NET_WM_STATE ***/
 

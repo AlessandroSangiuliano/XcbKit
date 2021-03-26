@@ -1302,10 +1302,10 @@ ICCCMService *icccmService;
 
 - (void)handleVisibilityEvent:(xcb_visibility_notify_event_t *)anEvent
 {
-    XCBWindow *window = [self windowForXCBId:anEvent->window];
+    /*XCBWindow *window = [self windowForXCBId:anEvent->window];
     XCBFrame *frame;
     XCBWindow *clientWindow;
-    XCBTitleBar* titleBar;
+    XCBTitleBar* titleBar;*/
 
     /*if ([window isKindOfClass:[XCBFrame class]])
     {
@@ -1321,9 +1321,9 @@ ICCCMService *icccmService;
             [clientWindow createPixmap];
     }*/
 
-    window = nil;
+    /*window = nil;
     clientWindow = nil;
-    titleBar = nil;
+    titleBar = nil;*/
 }
 
 - (void)handleExpose:(xcb_expose_event_t *)anEvent
