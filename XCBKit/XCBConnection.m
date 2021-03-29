@@ -868,6 +868,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
+    XCBTitleBar *titleBar;
 
     if ([window isCloseButton])
     {
@@ -897,7 +898,7 @@ ICCCMService *icccmService;
     if ([window isMaximizeButton])
     {
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
-        XCBTitleBar *titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
         if ([frame isMaximized])
@@ -938,6 +939,7 @@ ICCCMService *icccmService;
         frame = nil;
         clientWindow = nil;
         settingsService = nil;
+        titleBar = nil;
         return;
     }
 
@@ -952,25 +954,36 @@ ICCCMService *icccmService;
     {
         frame = (XCBFrame *) window;
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
+        /*[frame stackAbove];
+        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [self drawAllTitleBarsExcept:titleBar];*/
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
         frame = (XCBFrame *) [window parentWindow];
+        //[frame stackAbove];
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
+        /*titleBar = (XCBTitleBar*)window;
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [self drawAllTitleBarsExcept:titleBar];*/
     }
 
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
-        [[window parentWindow] stackAbove]; //FIXME: not necessary
         frame = (XCBFrame *) [window parentWindow];
+        /*[frame stackAbove];
+        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [self drawAllTitleBarsExcept:titleBar];*/
     }
 
     [frame stackAbove];
 
-    XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
+    titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
     [self drawAllTitleBarsExcept:titleBar];
 
@@ -1338,8 +1351,8 @@ ICCCMService *icccmService;
     if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
     {
         titleBar = (XCBTitleBar*) [window parentWindow];
-        /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                     : TitleBarDownColor];*/
+        [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
@@ -1563,7 +1576,6 @@ ICCCMService *icccmService;
 
                 [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
                 [frame setIsAbove:NO];
-                //[[frame childWindowForKey:ClientWindow] createPixmap];
                 frame = nil;
             }
 
