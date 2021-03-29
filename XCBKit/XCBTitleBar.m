@@ -152,9 +152,9 @@
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
 
     [rootVisual setVisualTypeForScreen:screen];
-    uint32_t mask = XCB_CW_BACK_PIXMAP | XCB_CW_EVENT_MASK;
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     uint32_t values[2];
-    values[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
+    values[0] = [screen screen]->white_pixel;
     values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
 
     BOOL shapeExtensionSupported;
