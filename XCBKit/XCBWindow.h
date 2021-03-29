@@ -129,6 +129,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) createPixmapDelayed;
 - (void) destroyPixmap;
 - (void) updatePixmap;
+- (void) clearArea:(XCBRect)aRect generatesExposure:(BOOL)aValue;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;

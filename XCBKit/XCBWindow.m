@@ -335,6 +335,17 @@
     visual = nil;
 }
 
+- (void) clearArea:(XCBRect)aRect generatesExposure:(BOOL)aValue
+{
+    xcb_clear_area([connection connection],
+                   aValue,
+                   window,
+                   aRect.position.x,
+                   aRect.position.y,
+                   aRect.size.width,
+                   aRect.size.height);
+}
+
 - (void)createPixmapDelayed
 {
     [NSThread sleepForTimeInterval:1];

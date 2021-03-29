@@ -49,6 +49,7 @@
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
     NSBundle *thisBundle = [NSBundle bundleForClass:[self class]];
     [visual setVisualTypeForScreen:scr];
+    XCBRect area;
 
     CairoDrawer *drawer = nil;
     
@@ -56,8 +57,15 @@
     {
         NSString* path = [thisBundle pathForResource:@"close" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
-        
+
+        area = [hideWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+
+        [hideWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
         [drawer putImage:path];
         
         drawer = nil;
@@ -68,8 +76,14 @@
     {
         NSString* path = [thisBundle pathForResource:@"min" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
-        
+
+        area = [minimizeWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+        [minimizeWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
         [drawer putImage:path];
         
         drawer = nil;
@@ -80,8 +94,14 @@
     {
         NSString* path = [thisBundle pathForResource:@"max" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
-        
+
+        area = [maximizeWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+        [maximizeWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
         [drawer putImage:path];
 
         path = nil;
@@ -262,6 +282,15 @@
     [[super connection] mapWindow:hideWindowButton];
     [[super connection] mapWindow:minimizeWindowButton];
     [[super connection] mapWindow:maximizeWindowButton];
+    [hideWindowButton onScreen];
+    [minimizeWindowButton onScreen];
+    [maximizeWindowButton onScreen];
+    [hideWindowButton updateAttributes];
+    [minimizeWindowButton updateAttributes];
+    [maximizeWindowButton updateAttributes];
+    [hideWindowButton createPixmap];
+    [minimizeWindowButton createPixmap];
+    [maximizeWindowButton createPixmap];
 
     screen = nil;
     rootVisual = nil;
@@ -272,7 +301,7 @@
 - (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
 {
     [self drawTitleBarForColor:aColor];
-    //[self drawArcsForColor:aColor];
+    [self drawArcsForColor:aColor];
     [self setWindowTitle:windowTitle];
 }
 

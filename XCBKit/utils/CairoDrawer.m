@@ -96,7 +96,7 @@ static inline void free_callback(void *data)
 {
     //height = height - 2;
     //width = width - 2;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
@@ -117,9 +117,9 @@ static inline void free_callback(void *data)
     
     cairo_set_source(cr, pat);
     
-    CGFloat xPosition = width / 2;
-    CGFloat yPosition = height / 2;
-    CGFloat radius = (CGFloat) height / 2.0;
+    CGFloat xPosition = (CGFloat) width / 2;
+    CGFloat yPosition = (CGFloat) height / 2;
+    CGFloat radius = (CGFloat) height / 2.0 + 0.3; /* 0.3 solves a bad looking problem about circular window */
     
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     cairo_fill(cr);
@@ -130,7 +130,6 @@ static inline void free_callback(void *data)
 
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
-    XCBColor black = XCBMakeColor(0,0,0,1);
     cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
     cairo_stroke(cr);
     cairo_surface_flush(cairoSurface);
