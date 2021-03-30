@@ -537,9 +537,8 @@ ICCCMService *icccmService;
                 return;
             }
 
-            if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDialog]])
+            /*if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDialog]])
             {
-                /*** FIXME: fix the position and the stack order of the dialog window ***/
                 NSLog(@"Dialog window %u to be registered", [window window]);
                 [self registerWindow:window];
                 [self mapWindow:window];
@@ -555,7 +554,7 @@ ICCCMService *icccmService;
                 parentWindow = nil;
                 free(windowTypeReply);
                 return;
-            }
+            }*/
 
             atom = NULL; //FIXME:is this malloc'd?
         }
@@ -975,11 +974,17 @@ ICCCMService *icccmService;
     {
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         frame = (XCBFrame *) [window parentWindow];
+        EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
+        [ewmhService updateNetActiveWindow:window];
+        ewmhService = nil;
         /*[frame stackAbove];
         titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
         [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
         [self drawAllTitleBarsExcept:titleBar];*/
+
     }
+
+
 
     [frame stackAbove];
 
