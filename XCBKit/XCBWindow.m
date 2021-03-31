@@ -56,6 +56,7 @@
 @synthesize leaderWindow;
 @synthesize maximizedHorizontally;
 @synthesize maximizedVertically;
+@synthesize shape;
 
 /*** _NET_WM_STATE ***/
 
@@ -129,6 +130,8 @@
 
     cachedWMHints = [[NSMutableDictionary alloc] init];
     windowClass = [[NSMutableArray alloc] initWithCapacity:2];
+
+    shape = [[XCBShape alloc] initWithConnection:connection withWinId:window];
 
     return self;
 }
@@ -330,6 +333,17 @@
      * [drawer drawContent];*/
 
     visual = nil;
+}
+
+- (void) clearArea:(XCBRect)aRect generatesExposure:(BOOL)aValue
+{
+    xcb_clear_area([connection connection],
+                   aValue,
+                   window,
+                   aRect.position.x,
+                   aRect.position.y,
+                   aRect.size.width,
+                   aRect.size.height);
 }
 
 - (void)createPixmapDelayed
@@ -1143,6 +1157,7 @@
     windowClass = nil;
     windowType = nil;
     leaderWindow = nil;
+    shape = nil;
 
     if (pixmap != 0)
         xcb_free_pixmap([connection connection], pixmap);

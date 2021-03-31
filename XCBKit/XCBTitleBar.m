@@ -49,6 +49,7 @@
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[scr screen]->root_visual];
     NSBundle *thisBundle = [NSBundle bundleForClass:[self class]];
     [visual setVisualTypeForScreen:scr];
+    XCBRect area;
 
     CairoDrawer *drawer = nil;
     
@@ -56,8 +57,15 @@
     {
         NSString* path = [thisBundle pathForResource:@"close" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:hideWindowButton visual:visual];
-        
+
+        area = [hideWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+
+        [hideWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
         [drawer putImage:path];
         
         drawer = nil;
@@ -68,8 +76,14 @@
     {
         NSString* path = [thisBundle pathForResource:@"min" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:minimizeWindowButton visual:visual];
-        
+
+        area = [minimizeWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+        [minimizeWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
         [drawer putImage:path];
         
         drawer = nil;
@@ -80,8 +94,14 @@
     {
         NSString* path = [thisBundle pathForResource:@"max" ofType:@"png"];
         drawer = [[CairoDrawer alloc] initWithConnection:[super connection] window:maximizeWindowButton visual:visual];
-        
+
+        area = [maximizeWindowButton windowRect];
+        area.position.x = 0;
+        area.position.y = 0;
+        [maximizeWindowButton clearArea:area generatesExposure:NO];
+
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
         [drawer putImage:path];
 
         path = nil;
@@ -152,10 +172,12 @@
     XCBVisual *rootVisual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
 
     [rootVisual setVisualTypeForScreen:screen];
-    uint32_t mask = XCB_CW_BACK_PIXMAP | XCB_CW_EVENT_MASK;
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     uint32_t values[2];
-    values[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
+    values[0] = [screen screen]->white_pixel;
     values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
+
+    BOOL shapeExtensionSupported;
 
     XCBFrame* frame = (XCBFrame*)parentWindow;
 
@@ -178,6 +200,18 @@
         [hideWindowButton setIsCloseButton:YES];
 
         hideButtonColor = XCBMakeColor(0.411, 0.176, 0.673, 1); //original: 0.7 0.427 1 1
+
+        shapeExtensionSupported = [[hideWindowButton shape] checkSupported];
+        [[hideWindowButton shape] calculateDimensionsFromGeometries:[hideWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[hideWindowButton shape] createPixmapsAndGCs];
+            [[hideWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [hideWindowButton window]);
+
     }
 
     if ([[frame childWindowForKey:ClientWindow] canMinimize])
@@ -199,6 +233,18 @@
         [minimizeWindowButton setIsMinimizeButton:YES];
 
         minimizeButtonColor = XCBMakeColor(0.9,0.7,0.3,1);
+
+        shapeExtensionSupported = [[minimizeWindowButton shape] checkSupported];
+        [[minimizeWindowButton shape] calculateDimensionsFromGeometries:[minimizeWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[minimizeWindowButton shape] createPixmapsAndGCs];
+            [[minimizeWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [minimizeWindowButton window]);
+
     }
 
     if ([[frame childWindowForKey:ClientWindow] canFullscreen])
@@ -220,11 +266,31 @@
         [maximizeWindowButton setIsMaximizeButton:YES];
 
         maximizeButtonColor = XCBMakeColor(0,0.74,1,1);
+
+        shapeExtensionSupported = [[maximizeWindowButton shape] checkSupported];
+        [[maximizeWindowButton shape] calculateDimensionsFromGeometries:[maximizeWindowButton geometries]];
+
+        if (shapeExtensionSupported)
+        {
+            [[maximizeWindowButton shape] createPixmapsAndGCs];
+            [[maximizeWindowButton shape] createArcsWithRadius:7];
+        }
+        else
+            NSLog(@"Shape extension not supported for window: %u", [maximizeWindowButton window]);
     }
 
     [[super connection] mapWindow:hideWindowButton];
     [[super connection] mapWindow:minimizeWindowButton];
     [[super connection] mapWindow:maximizeWindowButton];
+    [hideWindowButton onScreen];
+    [minimizeWindowButton onScreen];
+    [maximizeWindowButton onScreen];
+    [hideWindowButton updateAttributes];
+    [minimizeWindowButton updateAttributes];
+    [maximizeWindowButton updateAttributes];
+    [hideWindowButton createPixmap];
+    [minimizeWindowButton createPixmap];
+    [maximizeWindowButton createPixmap];
 
     screen = nil;
     rootVisual = nil;
