@@ -346,6 +346,21 @@
                    aRect.size.height);
 }
 
+- (void) drawArea:(XCBRect)aRect
+{
+    [self clearArea:aRect generatesExposure:NO];
+    xcb_copy_area([connection connection],
+                  pixmap,
+                  window,
+                  graphicContextId,
+                  aRect.position.x,
+                  aRect.position.y,
+                  aRect.position.x,
+                  aRect.position.y,
+                  aRect.size.width,
+                  aRect.size.height);
+}
+
 - (void)createPixmapDelayed
 {
     [NSThread sleepForTimeInterval:1];

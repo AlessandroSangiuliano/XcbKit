@@ -65,8 +65,8 @@
         [hideWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
-        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
         [drawer putImage:path];
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
         
         drawer = nil;
         path= nil;
@@ -83,8 +83,8 @@
         [minimizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
         [drawer putImage:path];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
         
         drawer = nil;
         path = nil;
@@ -101,8 +101,8 @@
         [maximizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
         [drawer putImage:path];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
 
         path = nil;
         drawer = nil;

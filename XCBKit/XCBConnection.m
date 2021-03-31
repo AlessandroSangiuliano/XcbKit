@@ -1349,26 +1349,51 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
     [window onScreen];
     XCBTitleBar *titleBar;
-    XCBFrame *frame;
+    XCBFrame *frame; //??
+    XCBRect area;
+    XCBPoint position;
+    XCBSize size;
 
     //NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
+
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        //TODO: frame needs a pixmap too.
+        NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
+        frame = (XCBFrame*)window;
+        position = XCBMakePoint(anEvent->x, anEvent->y);
+        size = XCBMakeSize(anEvent->width, anEvent->height);
+        area = XCBMakeRect(position, size);
+        [frame drawArea:area];
+    }
 
     if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
     {
         titleBar = (XCBTitleBar*) [window parentWindow];
-        [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                     : TitleBarDownColor];
+        /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];*/
+        position = XCBMakePoint(anEvent->x, anEvent->y);
+        size = XCBMakeSize(anEvent->width, anEvent->height);
+        area = XCBMakeRect(position, size);
+        [[titleBar hideWindowButton] drawArea:area];
+        [[titleBar minimizeWindowButton] drawArea:area];
+        [[titleBar maximizeWindowButton] drawArea:area];
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
+        NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
         titleBar = (XCBTitleBar *) window;
         frame = (XCBFrame*)[titleBar parentWindow];
 
         if (!resizeState)
         {
-            [titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                                       : TitleBarDownColor];
+            /*[titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                                       : TitleBarDownColor];*/
+            position = XCBMakePoint(anEvent->x, anEvent->y);
+            size = XCBMakeSize(anEvent->width, anEvent->height);
+            area = XCBMakeRect(position, size);
+            [titleBar drawArea:area];
         }
         else if (resizeState && anEvent->count == 0)
         {
@@ -1384,8 +1409,12 @@ ICCCMService *icccmService;
                           anEvent->height);*/
             //[titleBar setTitleIsSet:NO];
             //[titleBar setWindowTitle:[titleBar windowTitle]];
-            [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                        : TitleBarDownColor];
+           /* [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                        : TitleBarDownColor];*/
+            position = XCBMakePoint(anEvent->x, anEvent->y);
+            size = XCBMakeSize(anEvent->width, anEvent->height);
+            area = XCBMakeRect(position, size);
+            [titleBar drawArea:area];
         }
 
     }

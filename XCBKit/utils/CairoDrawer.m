@@ -119,7 +119,7 @@ static inline void free_callback(void *data)
     
     CGFloat xPosition = (CGFloat) width / 2;
     CGFloat yPosition = (CGFloat) height / 2;
-    CGFloat radius = (CGFloat) height / 2.0 + 0.3; /* 0.3 solves a bad looking problem about circular window */
+    CGFloat radius = (CGFloat) height / 2.0 + 1; /* 1 solves a bad looking problem about circular window */
     
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     cairo_fill(cr);
@@ -298,7 +298,7 @@ static inline void free_callback(void *data)
     TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
     XCBSize size = [window windowRect].size;
     XCBPoint position;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
     cr = cairo_create(cairoSurface);
 
     cairo_surface_t* imageSurface = cairo_image_surface_create_from_png([aPath cString]);
