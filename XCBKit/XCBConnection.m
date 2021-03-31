@@ -614,7 +614,7 @@ ICCCMService *icccmService;
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-    uint32_t values[] = {[screen screen]->white_pixel, XCB_BACKING_STORE_WHEN_MAPPED, FRAMEMASK};
+    uint32_t values[] = {[screen screen]->white_pixel, /*XCB_BACKING_STORE_WHEN_MAPPED,*/ FRAMEMASK};
     TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
     uint16_t titleHeight = [settings heightDefined] ? [settings height] : [settings defaultHeight];
 
@@ -628,7 +628,7 @@ ICCCMService *icccmService;
     [request setBorderWidth:3];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
     [request setVisual:visual];
-    [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_BACKING_STORE | XCB_CW_EVENT_MASK];
+    [request setValueMask:XCB_CW_BACK_PIXEL /*| XCB_CW_BACKING_STORE*/ | XCB_CW_EVENT_MASK];
     [request setValueList:values];
     [request setClientWindow:window];
 
