@@ -193,6 +193,7 @@
     [titleBar createPixmap];
     [titleBar generateButtons];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar drawTitleBarForColor:TitleBarDownColor];
     [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];

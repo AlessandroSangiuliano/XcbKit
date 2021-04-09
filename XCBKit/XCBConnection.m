@@ -992,7 +992,8 @@ ICCCMService *icccmService;
     [frame stackAbove];
 
     titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar setIsAbove:YES];
+    [titleBar drawArea:[titleBar windowRect]];
     [self drawAllTitleBarsExcept:titleBar];
 
     [frame setOffset:XCBMakePoint(anEvent->event_x, anEvent->event_y)];
@@ -1588,7 +1589,6 @@ ICCCMService *icccmService;
 
 - (void)drawAllTitleBarsExcept:(XCBTitleBar *)aTitileBar
 {
-
     NSArray *windows = [windowsMap allValues];
     NSUInteger size = [windows count];
 
@@ -1616,8 +1616,8 @@ ICCCMService *icccmService;
                 }
 
                 NSLog(@"Client window under investigation: %@ and comparison: %@", [titleBar windowTitle], [aTitileBar windowTitle]);
-
-                [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
+                [titleBar setIsAbove:NO];
+                [titleBar drawArea:[titleBar windowRect]];
                 [frame setIsAbove:NO];
                 frame = nil;
             }

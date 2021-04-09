@@ -29,15 +29,15 @@ XCB_EVENT_MASK_KEY_PRESS
     NSString *windowTitle;
 }
 
-@property (nonatomic) XCBColor hideButtonColor;
-@property (nonatomic) XCBColor minimizeButtonColor;
-@property (nonatomic) XCBColor maximizeButtonColor;
+@property (nonatomic, assign) XCBColor hideButtonColor;
+@property (nonatomic, assign) XCBColor minimizeButtonColor;
+@property (nonatomic, assign) XCBColor maximizeButtonColor;
 @property (strong, nonatomic) XCBWindow *hideWindowButton;
 @property (strong, nonatomic) XCBWindow *minimizeWindowButton;
 @property (strong, nonatomic) XCBWindow *maximizeWindowButton;
-@property (nonatomic) xcb_arc_t arc;
-@property (nonatomic) XCBColor titleBarUpColor;
-@property (nonatomic) XCBColor titleBarDownColor;
+@property (nonatomic, assign) xcb_arc_t arc;
+@property (nonatomic, assign) XCBColor titleBarUpColor;
+@property (nonatomic, assign) XCBColor titleBarDownColor;
 @property (strong, nonatomic) EWMHService *ewmhService;
 @property (nonatomic, assign) BOOL titleIsSet;
 

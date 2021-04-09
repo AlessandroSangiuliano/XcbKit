@@ -146,7 +146,6 @@
         [drawer setWindow:hideWindowButton];
         [drawer setHeight:[hideWindowButton windowRect].size.height];
         [drawer setWidth:[hideWindowButton windowRect].size.width];
-        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     if (minimizeWindowButton != nil)
@@ -154,7 +153,6 @@
         [drawer setWindow:minimizeWindowButton];
         [drawer setHeight:[minimizeWindowButton windowRect].size.height];
         [drawer setWidth:[minimizeWindowButton windowRect].size.width];
-        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     if (maximizeWindowButton != nil)
@@ -162,7 +160,6 @@
         [drawer setWindow:maximizeWindowButton];
         [drawer setHeight:[maximizeWindowButton windowRect].size.height];
         [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-        //[drawer drawWindowWithColor:aux andStopColor:stopColor];
     }
     
     drawer = nil;

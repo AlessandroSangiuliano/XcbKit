@@ -35,7 +35,8 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
-			functions/Transformers.m
+			functions/Transformers.m \
+			functions/Comparators.m
 
 $(FRAMEWORK_NAME)_HEADER_FILES = \
 			XCBKit.h \
@@ -63,6 +64,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/XCBWindowTypeResponse.h \
 			utils/XCBShape.h \
 			functions/Transformers.h \
+			functions/Comparators.h \
 			enums/ETitleBarColor.h \
 			enums/EXErrorMessages.h \
 			enums/EIcccm.h \

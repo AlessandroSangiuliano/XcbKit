@@ -16,6 +16,7 @@
 @synthesize depth;
 @synthesize rootWindow;
 @synthesize geometryReply;
+@synthesize pixmapRect;
 
 - (id) initWithGeometryReply:(xcb_get_geometry_reply_t *)aReplay
 {

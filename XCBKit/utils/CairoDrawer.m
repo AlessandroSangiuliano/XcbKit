@@ -7,8 +7,10 @@
 //
 
 #import "CairoDrawer.h"
+#import "../XCBTitleBar.h"
 #import "../services/TitleBarSettingsService.h"
 #import <xcb/xcb_aux.h>
+#import "../functions/Comparators.h"
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -143,7 +145,14 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
 {
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
+    XCBTitleBar *titleBar = (XCBTitleBar*)window;
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarUpColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height-1);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
@@ -174,6 +183,8 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+
+    titleBar = nil;
     
 }
 

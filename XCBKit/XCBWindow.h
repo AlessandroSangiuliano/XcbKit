@@ -62,6 +62,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic, assign) BOOL needDestroy;
 @property (nonatomic, assign) xcb_pixmap_t pixmap;
+@property (nonatomic, assign) xcb_pixmap_t dPixmap;
 @property (nonatomic, assign) BOOL firstRun; //find a better solution
 @property (nonatomic, assign) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
