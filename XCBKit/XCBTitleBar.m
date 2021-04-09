@@ -123,6 +123,11 @@
     
     if (aColor == TitleBarDownColor)
         aux = titleBarDownColor;
+
+    XCBRect area = XCBMakeRect(XCBMakePoint([super windowRect].position.x, [super windowRect].position.y),
+                               XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
+
+    [super clearArea:area generatesExposure:NO];
     
     XCBScreen *screen = [self onScreen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
@@ -132,7 +137,7 @@
     
     XCBColor stopColor = XCBMakeColor(0.850, 0.850, 0.850, 1);
     [drawer drawTitleBarWithColor:aux andStopColor: stopColor];
-    
+
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
      * a better solution to avoid all the sets methods/messages ***/
     

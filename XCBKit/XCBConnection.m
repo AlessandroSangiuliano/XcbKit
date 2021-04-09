@@ -868,13 +868,14 @@ ICCCMService *icccmService;
     XCBWindow *window = [self windowForXCBId:anEvent->event];
     XCBFrame *frame;
     XCBTitleBar *titleBar;
+    XCBWindow *clientWindow;
 
     if ([window isCloseButton])
     {
         XCBFrame *frame = (XCBFrame *) [[window parentWindow] parentWindow];
         currentTime = anEvent->time;
 
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+        clientWindow = [frame childWindowForKey:ClientWindow];
 
         [clientWindow close];
         [frame setNeedDestroy:YES];
@@ -898,7 +899,7 @@ ICCCMService *icccmService;
     {
         frame = (XCBFrame*)[[window parentWindow] parentWindow];
         titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-        XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
+        clientWindow = [frame childWindowForKey:ClientWindow];
 
         if ([frame isMaximized])
         {
@@ -951,8 +952,9 @@ ICCCMService *icccmService;
 
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        frame = (XCBFrame *) window;
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
+        frame = (XCBFrame *) window;
+        clientWindow = [frame childWindowForKey:ClientWindow];
         /*[frame stackAbove];
         titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
         [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
@@ -961,9 +963,10 @@ ICCCMService *icccmService;
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        frame = (XCBFrame *) [window parentWindow];
         //[frame stackAbove];
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
+        frame = (XCBFrame *) [window parentWindow];
+        clientWindow = [frame childWindowForKey:ClientWindow];
         /*titleBar = (XCBTitleBar*)window;
         [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
         [self drawAllTitleBarsExcept:titleBar];*/
@@ -974,6 +977,7 @@ ICCCMService *icccmService;
     {
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         frame = (XCBFrame *) [window parentWindow];
+        clientWindow = [frame childWindowForKey:ClientWindow];
         EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
         [ewmhService updateNetActiveWindow:window];
         ewmhService = nil;
@@ -984,8 +988,7 @@ ICCCMService *icccmService;
 
     }
 
-
-
+    [clientWindow focus];
     [frame stackAbove];
 
     titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
@@ -1008,6 +1011,7 @@ ICCCMService *icccmService;
     frame = nil;
     window = nil;
     titleBar = nil;
+    clientWindow = nil;
 }
 
 - (void)handleButtonRelease:(xcb_button_release_event_t *)anEvent
@@ -1064,8 +1068,6 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-    NSLog(@"Focus In event for window: %u", anEvent->event);
-
     if (anEvent->mode == XCB_NOTIFY_MODE_GRAB || anEvent->mode == XCB_NOTIFY_MODE_UNGRAB)
         return;
 
@@ -1091,8 +1093,13 @@ ICCCMService *icccmService;
 
     NSString *name = [atomService atomNameFromAtom:anEvent->atom];
     NSLog(@"Property changed for window: %u, with name: %@", anEvent->window, name);
+
     if ([name isEqualToString:testStr])
         NSLog(@"We got it!");
+
+    atomService = nil;
+    testStr = nil;
+    name = nil;
 
     return;
 }
@@ -1236,7 +1243,6 @@ ICCCMService *icccmService;
     NSLog(@"Enter notify for window: %u", anEvent->event);
     XCBWindow *window = [self windowForXCBId:anEvent->event];
 
-
     if ([window isKindOfClass:[XCBWindow class]] &&
         [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
@@ -1249,7 +1255,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
-        [clientWindow focus]; // giving the focus here will remove prev focus
+        //[clientWindow focus]; // giving the focus here will remove prev focus
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1261,7 +1267,7 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
-        [clientWindow focus]; // giving the focus here will remove prev focus. example: writing a text in a window and tring to scrolldown another will not work.
+        //[clientWindow focus]; //giving the focus here will remove prev focus. example: writing a text in a window and tring to scrolldown another will not work.
 
         titleBar = nil;
         frameWindow = nil;
@@ -1356,7 +1362,7 @@ ICCCMService *icccmService;
 
     //NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
 
-    if ([window isKindOfClass:[XCBFrame class]])
+    /*if ([window isKindOfClass:[XCBWindow class]] && [[window parentWindow] isKindOfClass:[XCBFrame class]])
     {
         //TODO: frame needs a pixmap too.
         NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
@@ -1364,8 +1370,8 @@ ICCCMService *icccmService;
         position = XCBMakePoint(anEvent->x, anEvent->y);
         size = XCBMakeSize(anEvent->width, anEvent->height);
         area = XCBMakeRect(position, size);
-        [frame drawArea:area];
-    }
+        [window drawArea:area];
+    }*/
 
     if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
     {
@@ -1382,7 +1388,7 @@ ICCCMService *icccmService;
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
+        //NSLog(@"EXPOSE EVENT FOR WINDOW: %u of kind: %@", [window window], NSStringFromClass([window class]));
         titleBar = (XCBTitleBar *) window;
         frame = (XCBFrame*)[titleBar parentWindow];
 
@@ -1601,12 +1607,15 @@ ICCCMService *icccmService;
 
                 if ([clientWindow alwaysOnTop])
                 {
+                    NSLog(@"Always on top");
                     windows = nil;
                     tmp = nil;
                     frame = nil;
                     clientWindow = nil;
                     return;
                 }
+
+                NSLog(@"Client window under investigation: %@ and comparison: %@", [titleBar windowTitle], [aTitileBar windowTitle]);
 
                 [titleBar drawTitleBarComponentsForColor:TitleBarDownColor];
                 [frame setIsAbove:NO];

@@ -191,9 +191,9 @@
     [titleBar updateAttributes];
     [titleBar setIsMapped:YES];
     [titleBar createPixmap];
-    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [titleBar generateButtons];
     [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
     [connection mapWindow:titleBar];
