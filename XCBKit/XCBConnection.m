@@ -655,6 +655,8 @@ ICCCMService *icccmService;
     [frame setScreen:[window screen]];
     [window setNormalState];
     [frame setNormalState];
+    [frame stackAbove];
+    [[frame childWindowForKey:TitleBar] setIsAbove:YES];
     [icccmService wmClassForWindow:window];
 
     [self setNeedFlush:YES];
@@ -925,7 +927,7 @@ ICCCMService *icccmService;
         size = XCBMakeSize([frame windowRect].size.width, titleHgt);
         position = XCBMakePoint(0.0,0.0);
         [titleBar maximizeToSize:size andPosition:position];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [titleBar drawTitleBarComponents];
         [titleBar setFullScreen:YES];
 
         /***client window **/
@@ -993,7 +995,8 @@ ICCCMService *icccmService;
 
     titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar setIsAbove:YES];
-    [titleBar drawArea:[titleBar windowRect]];
+    [titleBar setButtonsAbove:YES];
+    [titleBar drawTitleBarComponents];
     [self drawAllTitleBarsExcept:titleBar];
 
     [frame setOffset:XCBMakePoint(anEvent->event_x, anEvent->event_y)];
@@ -1146,12 +1149,12 @@ ICCCMService *icccmService;
         {
             [ewmhService handleClientMessage:atomMessageName forWindow:window data:anEvent->data];
 
-            if ([[window parentWindow] isKindOfClass:[XCBFrame class]])
+            if ([[window parentWindow] isKindOfClass:[XCBFrame class]]) //TODO: debUg to see if this is still necessary!!
             {
                 frame = (XCBFrame *) [window parentWindow];
                 [frame stackAbove];
                 titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar]; //TODO: Can i put all this in a single method?
-                [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+                [titleBar drawTitleBarComponents];
                 [self drawAllTitleBarsExcept:titleBar];
             }
         }
@@ -1374,7 +1377,19 @@ ICCCMService *icccmService;
         [window drawArea:area];
     }*/
 
-    if ([window isMaximizeButton] || [window isCloseButton] || [window isMinimizeButton])
+    if ([window isMaximizeButton])
+    {
+        titleBar = (XCBTitleBar*) [window parentWindow];
+        /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];*/
+        position = XCBMakePoint(anEvent->x, anEvent->y);
+        size = XCBMakeSize(anEvent->width, anEvent->height);
+        area = XCBMakeRect(position, size);
+        NSLog(@"Area of the maximize button: %@", FnFromXCBRectToString(area));
+        [[titleBar maximizeWindowButton] drawArea:area];
+    }
+
+    if ([window isCloseButton])
     {
         titleBar = (XCBTitleBar*) [window parentWindow];
         /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
@@ -1383,8 +1398,17 @@ ICCCMService *icccmService;
         size = XCBMakeSize(anEvent->width, anEvent->height);
         area = XCBMakeRect(position, size);
         [[titleBar hideWindowButton] drawArea:area];
+    }
+
+    if ([window isMinimizeButton])
+    {
+        titleBar = (XCBTitleBar*) [window parentWindow];
+        /*[titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                     : TitleBarDownColor];*/
+        position = XCBMakePoint(anEvent->x, anEvent->y);
+        size = XCBMakeSize(anEvent->width, anEvent->height);
+        area = XCBMakeRect(position, size);
         [[titleBar minimizeWindowButton] drawArea:area];
-        [[titleBar maximizeWindowButton] drawArea:area];
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
@@ -1395,7 +1419,7 @@ ICCCMService *icccmService;
 
         if (!resizeState)
         {
-            /*[titleBar drawTitleBarComponentsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+            /*[titleBar drawTitleBarComponents[[titleBar parentWindow] isAbove] ? TitleBarUpColor
                                                                                        : TitleBarDownColor];*/
             position = XCBMakePoint(anEvent->x, anEvent->y);
             size = XCBMakeSize(anEvent->width, anEvent->height);
@@ -1617,7 +1641,9 @@ ICCCMService *icccmService;
 
                 NSLog(@"Client window under investigation: %@ and comparison: %@", [titleBar windowTitle], [aTitileBar windowTitle]);
                 [titleBar setIsAbove:NO];
-                [titleBar drawArea:[titleBar windowRect]];
+                [titleBar setButtonsAbove:NO];
+                //[titleBar drawArea:[titleBar windowRect]];
+                [titleBar drawTitleBarComponents];
                 [frame setIsAbove:NO];
                 frame = nil;
             }

@@ -96,9 +96,14 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarButtonWithColor:(XCBColor)buttonColor withStopColor:(XCBColor)stopColor
 {
-    //height = height - 2;
-    //width = width - 2;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+    XCBTitleBar *titleBar = (XCBTitleBar*)[window parentWindow];
+
+    if (CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+
+    if (!CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
@@ -140,7 +145,8 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-    
+
+    titleBar = nil;
 }
 
 - (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
@@ -304,12 +310,17 @@ static inline void free_callback(void *data)
     cairo_destroy(cr);
 }
 
-- (void) putImage:(NSString*)aPath
+- (void) putImage:(NSString*)aPath forDPixmap:(BOOL)aValue
 {
     TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
     XCBSize size = [window windowRect].size;
     XCBPoint position;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+
+    if (!aValue)
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    else
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], size.width, size.height);
+
     cr = cairo_create(cairoSurface);
 
     cairo_surface_t* imageSurface = cairo_image_surface_create_from_png([aPath cString]);

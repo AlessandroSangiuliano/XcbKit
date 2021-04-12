@@ -764,7 +764,7 @@
         [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
 
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [titleBar drawTitleBarComponents];
 
         [connection mapWindow:clientWindow];
 
@@ -1085,7 +1085,7 @@
     xcb_configure_window([connection connection], [titleBar window], config_title_mask, config_title_vals);
 
     [titleBar updateRectsFromGeometries];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar drawTitleBarComponents];
     [frame setWindowRect:frameRect];
 
     /*** required by ICCCM compliance ***/

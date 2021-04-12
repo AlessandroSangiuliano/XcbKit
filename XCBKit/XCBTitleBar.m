@@ -65,8 +65,8 @@
         [hideWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
-        [drawer putImage:path];
-        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
+        //[hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
         
         drawer = nil;
         path= nil;
@@ -83,8 +83,8 @@
         [minimizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [drawer putImage:path];
-        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
+        //[minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
         
         drawer = nil;
         path = nil;
@@ -101,8 +101,8 @@
         [maximizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [drawer putImage:path];
-        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
+        //[maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
 
         path = nil;
         drawer = nil;
@@ -140,8 +140,9 @@
 
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
      * a better solution to avoid all the sets methods/messages ***/
-    
-    if (hideWindowButton != nil)
+
+    //FIXME: now probably useless code.
+    /*if (hideWindowButton != nil)
     {
         [drawer setWindow:hideWindowButton];
         [drawer setHeight:[hideWindowButton windowRect].size.height];
@@ -160,7 +161,7 @@
         [drawer setWindow:maximizeWindowButton];
         [drawer setHeight:[maximizeWindowButton windowRect].size.height];
         [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-    }
+    }*/
     
     drawer = nil;
     screen = nil;
@@ -300,11 +301,36 @@
     frame = nil;
 }
 
-- (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
+- (void)drawTitleBarComponents
 {
-    [self drawTitleBarForColor:aColor];
-    [self drawArcsForColor:aColor];
+    [super drawArea:[super windowRect]];
+    [hideWindowButton drawArea:[hideWindowButton windowRect]];
+    [maximizeWindowButton drawArea:[maximizeWindowButton windowRect]];
+    [minimizeWindowButton drawArea:[minimizeWindowButton windowRect]];
+    //TODO: window title??
+}
+
+- (void) drawTitleBarComponentsPixmaps
+{
+    [self drawTitleBarForColor:TitleBarUpColor];
+    [self drawTitleBarForColor:TitleBarDownColor];
+    [self drawArcsForColor:TitleBarUpColor];
+    [self drawArcsForColor:TitleBarDownColor];
     [self setWindowTitle:windowTitle];
+}
+
+- (void) setButtonsAbove:(BOOL)aValue
+{
+    [hideWindowButton setIsAbove:aValue];
+    [minimizeWindowButton setIsAbove:aValue];
+    [maximizeWindowButton setIsAbove:aValue];
+}
+
+- (void)putButtonsBackgroundPixmaps
+{
+    [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
+    [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
+    [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
 }
 
 - (void) setWindowTitle:(NSString *) title

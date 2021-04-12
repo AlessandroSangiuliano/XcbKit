@@ -50,8 +50,11 @@ XCB_EVENT_MASK_KEY_PRESS
 ***/
 
 - (void) drawTitleBarForColor:(TitleBarColor)aColor; //maybe is better to set the color all the time if the default one is not desidered.
-- (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor;
+- (void) drawTitleBarComponents;
+- (void) drawTitleBarComponentsPixmaps;
 - (void) generateButtons;
+- (void) setButtonsAbove:(BOOL)aValue;
+- (void)putButtonsBackgroundPixmaps;
 
 /****************
  *    ACCESORS  *
