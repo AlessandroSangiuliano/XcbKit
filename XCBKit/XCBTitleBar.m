@@ -66,8 +66,7 @@
 
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
         [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
-        //[hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
-        
+
         drawer = nil;
         path= nil;
     }
@@ -84,8 +83,7 @@
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
         [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
-        //[minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
-        
+
         drawer = nil;
         path = nil;
     }
@@ -102,7 +100,6 @@
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
         [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
-        //[maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
 
         path = nil;
         drawer = nil;

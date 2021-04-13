@@ -202,8 +202,6 @@
     [connection mapWindow:titleBar];
     [titleBar setWindowTitle:windowTitle];
 
-
-
     XCBPoint position = XCBMakePoint(0, height - 1);
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];

@@ -240,6 +240,15 @@ static inline void free_callback(void *data)
     cairo_surface_flush(cairoSurface);
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+
+    cairo_surface_write_to_png(cairoSurface, "/tmp/dPixmap.png");
+
+    cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
+    cairo_destroy(cr);
 }
 
 - (void) drawIconFromSurface:(cairo_surface_t*)aSurface
