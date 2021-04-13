@@ -1085,7 +1085,7 @@
     xcb_configure_window([connection connection], [titleBar window], config_title_mask, config_title_vals);
 
     [titleBar updateRectsFromGeometries];
-    [titleBar drawTitleBarComponents];
+    //[titleBar drawTitleBarComponents]; FIXME: why this draw here?
     [frame setWindowRect:frameRect];
 
     /*** required by ICCCM compliance ***/

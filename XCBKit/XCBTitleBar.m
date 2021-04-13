@@ -304,9 +304,12 @@
 - (void)drawTitleBarComponents
 {
     [super drawArea:[super windowRect]];
-    [hideWindowButton drawArea:[hideWindowButton windowRect]];
-    [maximizeWindowButton drawArea:[maximizeWindowButton windowRect]];
-    [minimizeWindowButton drawArea:[minimizeWindowButton windowRect]];
+    XCBRect area = [hideWindowButton windowRect];
+    area.position.x = 0;
+    area.position.y = 0;
+    [hideWindowButton drawArea:area];
+    [maximizeWindowButton drawArea:area];
+    [minimizeWindowButton drawArea:area];
     //TODO: window title??
 }
 
@@ -326,11 +329,24 @@
     [maximizeWindowButton setIsAbove:aValue];
 }
 
-- (void)putButtonsBackgroundPixmaps
+- (void)putButtonsBackgroundPixmaps:(BOOL)aValue
 {
-    [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
-    [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
-    [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
+    [hideWindowButton clearArea:[hideWindowButton windowRect] generatesExposure:NO];
+    [minimizeWindowButton clearArea:[minimizeWindowButton windowRect] generatesExposure:NO];
+    [hideWindowButton clearArea:[maximizeWindowButton windowRect] generatesExposure:NO];
+
+    if (aValue)
+    {
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
+    }
+    else
+    {
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton dPixmap]];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton dPixmap]];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton dPixmap]];
+    }
 }
 
 - (void) setWindowTitle:(NSString *) title

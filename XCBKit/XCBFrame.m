@@ -194,9 +194,9 @@
     [titleBar generateButtons];
     [titleBar setIsAbove:YES];
     [titleBar setButtonsAbove:YES];
-    [titleBar putButtonsBackgroundPixmaps];
     [titleBar drawTitleBarComponentsPixmaps];
     [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
+    [titleBar putButtonsBackgroundPixmaps:YES];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
     [connection mapWindow:titleBar];

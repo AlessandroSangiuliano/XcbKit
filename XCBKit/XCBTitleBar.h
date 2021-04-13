@@ -54,7 +54,7 @@ XCB_EVENT_MASK_KEY_PRESS
 - (void) drawTitleBarComponentsPixmaps;
 - (void) generateButtons;
 - (void) setButtonsAbove:(BOOL)aValue;
-- (void)putButtonsBackgroundPixmaps;
+- (void) putButtonsBackgroundPixmaps:(BOOL)aValue;
 
 /****************
  *    ACCESORS  *
