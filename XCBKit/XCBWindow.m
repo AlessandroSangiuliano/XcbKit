@@ -57,6 +57,7 @@
 @synthesize maximizedHorizontally;
 @synthesize maximizedVertically;
 @synthesize shape;
+@synthesize dPixmap;
 
 /*** _NET_WM_STATE ***/
 
@@ -291,6 +292,7 @@
 - (void)createPixmap
 {
     pixmap = xcb_generate_id([connection connection]);
+    dPixmap = xcb_generate_id([connection connection]);
     //sleep(1);
 
     xcb_visualid_t visualId = [[self attributes] visualId];
@@ -306,6 +308,13 @@
     xcb_create_pixmap([connection connection],
                       xcb_aux_get_depth_of_visual([screen screen], [visual visualId]),
                       pixmap,
+                      window,
+                      windowRect.size.width,
+                      windowRect.size.height);
+
+    xcb_create_pixmap([connection connection],
+                      xcb_aux_get_depth_of_visual([screen screen], [visual visualId]),
+                      dPixmap,
                       window,
                       windowRect.size.width,
                       windowRect.size.height);
@@ -344,6 +353,21 @@
                    aRect.position.y,
                    aRect.size.width,
                    aRect.size.height);
+}
+
+- (void) drawArea:(XCBRect)aRect
+{
+    [self clearArea:aRect generatesExposure:NO];
+    xcb_copy_area([connection connection],
+                  isAbove ? pixmap : dPixmap,
+                  window,
+                  graphicContextId,
+                  aRect.position.x,
+                  aRect.position.y,
+                  aRect.position.x,
+                  aRect.position.y,
+                  aRect.size.width,
+                  aRect.size.height);
 }
 
 - (void)createPixmapDelayed
@@ -740,7 +764,7 @@
         [clientWindow setWindowRect:[clientWindow oldRect]];
         [connection mapWindow:titleBar];
 
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        [titleBar drawTitleBarComponents];
 
         [connection mapWindow:clientWindow];
 
@@ -919,6 +943,7 @@
 {
     xcb_get_geometry_cookie_t cookie = xcb_get_geometry([connection connection], window);
     xcb_generic_error_t *error;
+    xcb_get_geometry_reply_t *pixmapReply;
     xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply([connection connection], cookie, &error);
     XCBGeometryReply *geometry;
 
@@ -937,6 +962,28 @@
     }
 
     geometry = [[XCBGeometryReply alloc] initWithGeometryReply:reply];
+
+    if (pixmap)
+    {
+        cookie = xcb_get_geometry([connection connection], pixmap);
+        pixmapReply = xcb_get_geometry_reply([connection connection], cookie, &error);
+
+        if (error)
+        {
+            NSLog(@"Failed to retrieve the pixmap geometries");
+            [geometry setPixmapRect:XCBInvalidRect];
+        }
+        else
+        {
+            XCBPoint position = XCBMakePoint(pixmapReply->x, pixmapReply->y);
+            XCBSize size = XCBMakeSize(pixmapReply->width, pixmapReply->height);
+            XCBRect rect = XCBMakeRect(position, size);
+            [geometry setPixmapRect:rect];
+            free(pixmapReply);
+
+            /** bPixmap is the same of the pixmap. For now don't get it **/
+        }
+    }
 
     return geometry;
 }
@@ -1038,7 +1085,7 @@
     xcb_configure_window([connection connection], [titleBar window], config_title_mask, config_title_vals);
 
     [titleBar updateRectsFromGeometries];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponents]; FIXME: why this draw here?
     [frame setWindowRect:frameRect];
 
     /*** required by ICCCM compliance ***/
@@ -1160,7 +1207,10 @@
     shape = nil;
 
     if (pixmap != 0)
+    {
         xcb_free_pixmap([connection connection], pixmap);
+        xcb_free_pixmap([connection connection], dPixmap);
+    }
 
     if (graphicContextId != 0)
         xcb_free_gc([connection connection], graphicContextId);

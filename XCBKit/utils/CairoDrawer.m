@@ -7,8 +7,10 @@
 //
 
 #import "CairoDrawer.h"
+#import "../XCBTitleBar.h"
 #import "../services/TitleBarSettingsService.h"
 #import <xcb/xcb_aux.h>
+#import "../functions/Comparators.h"
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -94,9 +96,14 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarButtonWithColor:(XCBColor)buttonColor withStopColor:(XCBColor)stopColor
 {
-    //height = height - 2;
-    //width = width - 2;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+    XCBTitleBar *titleBar = (XCBTitleBar*)[window parentWindow];
+
+    if (CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+
+    if (!CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
@@ -119,7 +126,7 @@ static inline void free_callback(void *data)
     
     CGFloat xPosition = (CGFloat) width / 2;
     CGFloat yPosition = (CGFloat) height / 2;
-    CGFloat radius = (CGFloat) height / 2.0 + 0.3; /* 0.3 solves a bad looking problem about circular window */
+    CGFloat radius = (CGFloat) height / 2.0 + 1; /* 1 solves a bad looking problem about circular window */
     
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     cairo_fill(cr);
@@ -138,12 +145,20 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-    
+
+    titleBar = nil;
 }
 
 - (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
 {
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
+    XCBTitleBar *titleBar = (XCBTitleBar*)window;
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarUpColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height-1);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
@@ -174,6 +189,8 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+
+    titleBar = nil;
     
 }
 
@@ -220,6 +237,15 @@ static inline void free_callback(void *data)
 
     cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
+    cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
+    cairo_destroy(cr);
+
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+
+    cairo_surface_write_to_png(cairoSurface, "/tmp/dPixmap.png");
+
     cairo_surface_flush(cairoSurface);
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
@@ -293,12 +319,17 @@ static inline void free_callback(void *data)
     cairo_destroy(cr);
 }
 
-- (void) putImage:(NSString*)aPath
+- (void) putImage:(NSString*)aPath forDPixmap:(BOOL)aValue
 {
     TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
     XCBSize size = [window windowRect].size;
     XCBPoint position;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], size.width, size.height);
+
+    if (!aValue)
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    else
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], size.width, size.height);
+
     cr = cairo_create(cairoSurface);
 
     cairo_surface_t* imageSurface = cairo_image_surface_create_from_png([aPath cString]);

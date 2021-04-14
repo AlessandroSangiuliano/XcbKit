@@ -629,8 +629,8 @@
         {
             XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
             XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-            [frame stackAbove];
-            [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+            [frame stackAbove]; //FIXME: just use focus?
+            [titleBar drawTitleBarComponents];
             [connection drawAllTitleBarsExcept:titleBar];
             frame = nil;
             titleBar = nil;
@@ -714,7 +714,7 @@
                     size = XCBMakeSize([frame windowRect].size.width, titleHgt);
                     position = XCBMakePoint(0.0,0.0);
                     [titleBar maximizeToSize:size andPosition:position];
-                    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+                    [titleBar drawTitleBarComponents];
 
                     /*** client window size and position ***/
                     size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2);
@@ -769,7 +769,7 @@
                     size = XCBMakeSize(size.width, titleHgt);
                     position = XCBMakePoint(0.0, 0.0);
                     [titleBar maximizeToSize:size andPosition:position];
-                    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+                    [titleBar drawTitleBarComponents];
 
                     /*** client window size and position ***/
                     size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2); //TODO:why - 2?
@@ -825,7 +825,7 @@
                     /*** titlebar size and position ***/
                     size = XCBMakeSize([frame windowRect].size.width, titleHgt);
                     [titleBar maximizeToSize:size andPosition:position];
-                    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+                    [titleBar drawTitleBarComponents];
 
                     /*** client window size and position ***/
                     size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - 2);

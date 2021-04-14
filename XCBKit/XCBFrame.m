@@ -191,15 +191,16 @@
     [titleBar updateAttributes];
     [titleBar setIsMapped:YES];
     [titleBar createPixmap];
-    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
     [titleBar generateButtons];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar setIsAbove:YES];
+    [titleBar setButtonsAbove:YES];
+    [titleBar drawTitleBarComponentsPixmaps];
+    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
+    [titleBar putButtonsBackgroundPixmaps:YES];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
     [connection mapWindow:titleBar];
     [titleBar setWindowTitle:windowTitle];
-
-
 
     XCBPoint position = XCBMakePoint(0, height - 1);
     [connection reparentWindow:clientWindow toWindow:self position:position];
@@ -214,7 +215,7 @@
     scr = nil;
     rootVisual = nil;
     settings = nil;
-    
+
     free(reply);
 }
 
@@ -714,7 +715,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
     [super restoreDimensionAndPosition];
     [clientWindow restoreDimensionAndPosition];
     [titleBar restoreDimensionAndPosition];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    [titleBar drawTitleBarComponents];
 
     clientWindow = nil;
     titleBar = nil;
