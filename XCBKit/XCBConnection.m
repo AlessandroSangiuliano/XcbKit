@@ -1375,12 +1375,11 @@ ICCCMService *icccmService;
 
     if ([window isMaximizeButton])
     {
+        titleBar = (XCBTitleBar*) [window parentWindow];
         position = XCBMakePoint(anEvent->x, anEvent->y);
         size = XCBMakeSize(anEvent->width, anEvent->height);
         area = XCBMakeRect(position, size);
-        NSLog(@"Area of the maximize button: %@", FnFromXCBRectToString(area));
         [[titleBar maximizeWindowButton] drawArea:area];
-        NSLog(@"Maximize Pixmaps %d %d", [[titleBar maximizeWindowButton] pixmap], [[titleBar maximizeWindowButton] dPixmap]);
     }
 
     if ([window isCloseButton])
@@ -1390,16 +1389,15 @@ ICCCMService *icccmService;
         size = XCBMakeSize(anEvent->width, anEvent->height);
         area = XCBMakeRect(position, size);
         [[titleBar hideWindowButton] drawArea:area];
-        NSLog(@"Close Pixmaps %d %d", [[titleBar hideWindowButton] pixmap], [[titleBar hideWindowButton] dPixmap]);
     }
 
     if ([window isMinimizeButton])
     {
+        titleBar = (XCBTitleBar*) [window parentWindow];
         position = XCBMakePoint(anEvent->x, anEvent->y);
         size = XCBMakeSize(anEvent->width, anEvent->height);
         area = XCBMakeRect(position, size);
         [[titleBar minimizeWindowButton] drawArea:area];
-        NSLog(@"Minimize Pixmaps %d %d", [[titleBar minimizeWindowButton] pixmap], [[titleBar minimizeWindowButton] dPixmap]);
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
