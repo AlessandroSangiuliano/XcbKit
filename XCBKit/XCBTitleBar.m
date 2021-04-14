@@ -65,9 +65,8 @@
         [hideWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor:aColor == TitleBarUpColor ? hideButtonColor : titleBarDownColor withStopColor:stopColor];
-        [drawer putImage:path];
-        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
-        
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
+
         drawer = nil;
         path= nil;
     }
@@ -83,9 +82,8 @@
         [minimizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? minimizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [drawer putImage:path];
-        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
-        
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
+
         drawer = nil;
         path = nil;
     }
@@ -101,8 +99,7 @@
         [maximizeWindowButton clearArea:area generatesExposure:NO];
 
         [drawer drawTitleBarButtonWithColor: aColor == TitleBarUpColor ? maximizeButtonColor : titleBarDownColor  withStopColor:stopColor];
-        [drawer putImage:path];
-        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
+        [drawer putImage:path forDPixmap:aColor == TitleBarUpColor ? NO : YES];
 
         path = nil;
         drawer = nil;
@@ -140,8 +137,9 @@
 
     /*** This is better than allocating/deallocating the drawer object for each window to draw, however find
      * a better solution to avoid all the sets methods/messages ***/
-    
-    if (hideWindowButton != nil)
+
+    //FIXME: now probably useless code.
+    /*if (hideWindowButton != nil)
     {
         [drawer setWindow:hideWindowButton];
         [drawer setHeight:[hideWindowButton windowRect].size.height];
@@ -160,7 +158,7 @@
         [drawer setWindow:maximizeWindowButton];
         [drawer setHeight:[maximizeWindowButton windowRect].size.height];
         [drawer setWidth:[maximizeWindowButton windowRect].size.width];
-    }
+    }*/
     
     drawer = nil;
     screen = nil;
@@ -300,11 +298,52 @@
     frame = nil;
 }
 
-- (void) drawTitleBarComponentsForColor:(TitleBarColor)aColor
+- (void)drawTitleBarComponents
 {
-    [self drawTitleBarForColor:aColor];
-    [self drawArcsForColor:aColor];
+    [super drawArea:[super windowRect]];
+    XCBRect area = [hideWindowButton windowRect];
+    area.position.x = 0;
+    area.position.y = 0;
+    [hideWindowButton drawArea:area];
+    [maximizeWindowButton drawArea:area];
+    [minimizeWindowButton drawArea:area];
+    //TODO: window title??
+}
+
+- (void) drawTitleBarComponentsPixmaps
+{
+    [self drawTitleBarForColor:TitleBarUpColor];
+    [self drawTitleBarForColor:TitleBarDownColor];
+    [self drawArcsForColor:TitleBarUpColor];
+    [self drawArcsForColor:TitleBarDownColor];
     [self setWindowTitle:windowTitle];
+}
+
+- (void) setButtonsAbove:(BOOL)aValue
+{
+    [hideWindowButton setIsAbove:aValue];
+    [minimizeWindowButton setIsAbove:aValue];
+    [maximizeWindowButton setIsAbove:aValue];
+}
+
+- (void)putButtonsBackgroundPixmaps:(BOOL)aValue
+{
+    [hideWindowButton clearArea:[hideWindowButton windowRect] generatesExposure:NO];
+    [minimizeWindowButton clearArea:[minimizeWindowButton windowRect] generatesExposure:NO];
+    [hideWindowButton clearArea:[maximizeWindowButton windowRect] generatesExposure:NO];
+
+    if (aValue)
+    {
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton pixmap]];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton pixmap]];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton pixmap]];
+    }
+    else
+    {
+        [hideWindowButton putWindowBackgroundWithPixmap:[hideWindowButton dPixmap]];
+        [minimizeWindowButton putWindowBackgroundWithPixmap:[minimizeWindowButton dPixmap]];
+        [maximizeWindowButton putWindowBackgroundWithPixmap:[maximizeWindowButton dPixmap]];
+    }
 }
 
 - (void) setWindowTitle:(NSString *) title
