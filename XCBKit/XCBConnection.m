@@ -1280,45 +1280,10 @@ ICCCMService *icccmService;
 - (void)handleLeaveNotify:(xcb_leave_notify_event_t *)anEvent
 {
     NSLog(@"Leave notify for window: %u", anEvent->event);
-    XCBWindow *window = [self windowForXCBId:anEvent->event];
+    /*XCBWindow *window = [self windowForXCBId:anEvent->event];
     [window description];
 
-    if ([window isKindOfClass:[XCBWindow class]] &&
-        [[window parentWindow] isKindOfClass:[XCBFrame class]])
-    {
-        [window ungrabButton];
-    }
-
-    if ([window isKindOfClass:[XCBFrame class]])
-    {
-        XCBFrame *frameWindow = (XCBFrame *) window;
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
-
-        if (![[frameWindow cursor] leftPointerSelected])
-        {
-            [frameWindow showLeftPointerCursor];
-        }
-
-        [clientWindow ungrabButton];
-
-        frameWindow = nil;
-        clientWindow = nil;
-    }
-
-    if ([window isKindOfClass:[XCBTitleBar class]])
-    {
-        XCBTitleBar *titleBar = (XCBTitleBar *) window;
-        XCBFrame *frameWindow = (XCBFrame *) [titleBar parentWindow];
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
-
-        [clientWindow ungrabButton];
-
-        titleBar = nil;
-        frameWindow = nil;
-        clientWindow = nil;
-    }
-
-    window = nil;
+    window = nil;*/
 
 }
 
