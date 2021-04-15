@@ -44,7 +44,6 @@
 @property (nonatomic, assign) BOOL xfixesInitialized;
 @property (nonatomic, assign) BOOL resizeState;
 @property (nonatomic, assign) NSInteger clientListIndex;
-@property (nonatomic, strong) XCBWindow *grabbedWindow;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;

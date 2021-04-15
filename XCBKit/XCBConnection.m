@@ -27,7 +27,6 @@
 @synthesize xfixesInitialized;
 @synthesize resizeState;
 @synthesize clientListIndex;
-@synthesize grabbedWindow;
 
 ICCCMService *icccmService;
 
@@ -1266,7 +1265,6 @@ ICCCMService *icccmService;
         XCBFrame *frameWindow = (XCBFrame *) [titleBar parentWindow];
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
-        [grabbedWindow ungrabButton];
         [clientWindow grabButton];
 
         titleBar = nil;
