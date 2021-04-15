@@ -854,6 +854,7 @@
                     XCB_NONE,
                     XCB_BUTTON_INDEX_1, //for now just grab the left button
                     XCB_MOD_MASK_ANY); // for now any mask.
+    [connection setGrabbedWindow:self];
 }
 
 - (void)ungrabButton

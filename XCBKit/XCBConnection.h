@@ -43,7 +43,8 @@
 @property (strong, nonatomic) XCBRegion* damagedRegions;
 @property (nonatomic, assign) BOOL xfixesInitialized;
 @property (nonatomic, assign) BOOL resizeState;
-@property (nonatomic) NSInteger clientListIndex;
+@property (nonatomic, assign) NSInteger clientListIndex;
+@property (nonatomic, strong) XCBWindow *grabbedWindow;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;

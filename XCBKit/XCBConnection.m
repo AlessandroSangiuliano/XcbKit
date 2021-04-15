@@ -27,6 +27,7 @@
 @synthesize xfixesInitialized;
 @synthesize resizeState;
 @synthesize clientListIndex;
+@synthesize grabbedWindow;
 
 ICCCMService *icccmService;
 
@@ -1255,7 +1256,6 @@ ICCCMService *icccmService;
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
         [clientWindow grabButton];
-        //[clientWindow focus]; // giving the focus here will remove prev focus
         clientWindow = nil;
         frameWindow = nil;
     }
@@ -1266,8 +1266,8 @@ ICCCMService *icccmService;
         XCBFrame *frameWindow = (XCBFrame *) [titleBar parentWindow];
         XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
 
+        [grabbedWindow ungrabButton];
         [clientWindow grabButton];
-        //[clientWindow focus]; //giving the focus here will remove prev focus. example: writing a text in a window and tring to scrolldown another will not work.
 
         titleBar = nil;
         frameWindow = nil;
@@ -1280,47 +1280,10 @@ ICCCMService *icccmService;
 - (void)handleLeaveNotify:(xcb_leave_notify_event_t *)anEvent
 {
     NSLog(@"Leave notify for window: %u", anEvent->event);
-    XCBWindow *window = [self windowForXCBId:anEvent->event];
+    /*XCBWindow *window = [self windowForXCBId:anEvent->event];
+    [window description];
 
-    /*if ([window window] != anEvent->root) //FIXME: WHAT IS THIS???
-        return;*/
-
-    if ([window isKindOfClass:[XCBWindow class]] &&
-        [[window parentWindow] isKindOfClass:[XCBFrame class]])
-    {
-        [window ungrabButton];
-    }
-
-    if ([window isKindOfClass:[XCBFrame class]])
-    {
-        XCBFrame *frameWindow = (XCBFrame *) window;
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
-
-        if (![[frameWindow cursor] leftPointerSelected])
-        {
-            [frameWindow showLeftPointerCursor];
-        }
-
-        [clientWindow ungrabButton];
-
-        frameWindow = nil;
-        clientWindow = nil;
-    }
-
-    if ([window isKindOfClass:[XCBTitleBar class]])
-    {
-        XCBTitleBar *titleBar = (XCBTitleBar *) window;
-        XCBFrame *frameWindow = (XCBFrame *) [titleBar parentWindow];
-        XCBWindow *clientWindow = [frameWindow childWindowForKey:ClientWindow];
-
-        [clientWindow ungrabButton];
-
-        titleBar = nil;
-        frameWindow = nil;
-        clientWindow = nil;
-    }
-
-    window = nil;
+    window = nil;*/
 
 }
 
@@ -1628,7 +1591,6 @@ ICCCMService *icccmService;
                     return;
                 }
 
-                NSLog(@"Client window under investigation: %@ and comparison: %@", [titleBar windowTitle], [aTitileBar windowTitle]);
                 [titleBar setIsAbove:NO];
                 [titleBar setButtonsAbove:NO];
                 [titleBar drawTitleBarComponents];
@@ -1777,6 +1739,7 @@ ICCCMService *icccmService;
     windowsMap = nil;
     displayName = nil;
     damagedRegions = nil;
+
     xcb_disconnect(connection);
     icccmService = nil;
 }
