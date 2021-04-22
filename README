@@ -1,4 +1,4 @@
-XcbKit is a Kit (SDK) for window managers developed in Objective-C on the X11 protocol.
+XcbKit is a Kit (SDK) for window managers developed in Objective-C on the X11 protocol, mainly focusing GNU/Linux and FreeBSD.
 
 Version: 0.0.17
 
