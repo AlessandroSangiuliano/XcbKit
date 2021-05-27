@@ -17,7 +17,7 @@
 #import "XCBRegion.h"
 #import "utils/CairoSurfacesSet.h"
 #import <xcb/xcb_aux.h>
-#import <enums/EIcccm.h>
+#import "enums/EIcccm.h"
 #import "services/TitleBarSettingsService.h"
 
 @implementation XCBConnection
