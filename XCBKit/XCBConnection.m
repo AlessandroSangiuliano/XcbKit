@@ -35,7 +35,12 @@ ICCCMService *icccmService;
     return [self initWithDisplay:NULL];
 }
 
-- (id)initWithDisplay:(NSString *)aDisplay
+- (id)initWithDisplay:(NSString*)aDisplay;
+{
+    return [self initWithXcbConnection:NULL andDisplay:aDisplay];
+}
+
+- (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay
 {
     self = [super init];
     const char *localDisplayName = NULL;
@@ -55,7 +60,10 @@ ICCCMService *icccmService;
 
     screens = [NSMutableArray new];
 
-    connection = xcb_connect(localDisplayName, NULL);
+    if (aConnection)
+        connection = aConnection;
+    else
+        connection = xcb_connect(localDisplayName, NULL);
 
     if (connection == NULL)
     {

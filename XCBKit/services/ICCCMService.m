@@ -86,6 +86,12 @@
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
 
+    if (!reply)
+    {
+        NSLog(@"Reply is NULL");
+        return hasProtocol;
+    }
+
     for(int i = 0; i < reply->length; i++)
     {
         if (windowProtocols[i] == atom)

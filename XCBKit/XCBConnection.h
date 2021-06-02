@@ -51,6 +51,7 @@
  * init with DISPLAY and screeen to NULL
  */
 - (id) init;
+- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay;
 - (id) initWithDisplay:(NSString *) aDisplay;
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
