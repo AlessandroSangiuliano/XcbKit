@@ -47,6 +47,7 @@ ICCCMService *icccmService;
     const char *localDisplayName = NULL;
     needFlush = NO;
     dragState = NO;
+    isAWindowManager = isWindowManager;
 
     if (aDisplay == NULL)
     {
@@ -86,12 +87,11 @@ ICCCMService *icccmService;
 
     /** save all screens **/
 
-    [self checkScreensAsWindowManager:isWindowManager];
+    [self checkScreens];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
     icccmService = [ICCCMService sharedInstanceWithConnection:self];
-    isAWindowManager = NO;
 
     clientListIndex = 0;
 
@@ -127,6 +127,9 @@ ICCCMService *icccmService;
 
 - (void)registerWindow:(XCBWindow *)aWindow
 {
+    if (!isAWindowManager)
+        return;
+
     xcb_window_t win = [aWindow window];
     NSLog(@"[XCBConnection] Adding the window %u in the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
@@ -205,7 +208,7 @@ ICCCMService *icccmService;
     needFlush = aNeedFlushChoice;
 }
 
-- (void)checkScreensAsWindowManager:(BOOL)isWindowManager
+- (void)checkScreens
 {
     xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
     NSUInteger number = 0;
@@ -225,8 +228,7 @@ ICCCMService *icccmService;
               scr->width_in_pixels,
               scr->height_in_pixels);
 
-        if (isWindowManager)
-            [self registerWindow:rootWindow];
+        [self registerWindow:rootWindow];
 
         [rootWindow setScreen:screen];
         [rootWindow initCursor];
@@ -271,7 +273,7 @@ ICCCMService *icccmService;
     {
         response = [[XCBWindowTypeResponse alloc] initWithXCBWindow:window];
 
-        if (reg && isAWindowManager)
+        if (reg)
             [self registerWindow:window];
     }
 
@@ -280,7 +282,7 @@ ICCCMService *icccmService;
         frame = FnFromXCBWindowToXCBFrame(window, self, [aRequest clientWindow]);
         response = [[XCBWindowTypeResponse alloc] initWithXCBFrame:frame];
 
-        if (reg && isAWindowManager)
+        if (reg)
             [self registerWindow:frame];
     }
 
@@ -289,7 +291,7 @@ ICCCMService *icccmService;
         titleBar = FnFromXCBWindowToXCBTitleBar(window, self);
         response = [[XCBWindowTypeResponse alloc] initWithXCBTitleBar:titleBar];
 
-        if (reg && isAWindowManager)
+        if (reg)
             [self registerWindow:titleBar];
     }
 
@@ -340,7 +342,7 @@ ICCCMService *icccmService;
 
     needFlush = YES;
 
-    if (reg && isAWindowManager)
+    if (reg)
         [self registerWindow:winToCreate];
 
     return winToCreate;
@@ -1672,7 +1674,6 @@ ICCCMService *icccmService;
         rootWindow = nil;
         screen = nil;
         ewmhService = nil;
-        isAWindowManager = YES;
         return YES;
     }
 
@@ -1706,8 +1707,6 @@ ICCCMService *icccmService;
     }
 
     NSLog(@"Registered as window manager");
-
-    isAWindowManager = YES;
 
     screen = nil;
     rootWindow = nil;
