@@ -154,6 +154,9 @@ ICCCMService *icccmService;
 
 - (void)unregisterWindow:(XCBWindow *)aWindow
 {
+    if (!isAWindowManager)
+        return;
+
     xcb_window_t win = [aWindow window];
     NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];

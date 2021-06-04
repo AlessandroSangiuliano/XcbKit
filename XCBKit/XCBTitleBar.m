@@ -183,7 +183,6 @@
 
     if ([[frame childWindowForKey:ClientWindow] canClose])
     {
-        NSLog(@"Pene: %d", [[super connection] isAWindowManager]);
         hideWindowButton = [[super connection] createWindowWithDepth:XCB_COPY_FROM_PARENT
                                                     withParentWindow:self
                                                        withXPosition:5
