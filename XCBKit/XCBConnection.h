@@ -51,9 +51,9 @@
 /**
  * init with DISPLAY and screeen to NULL
  */
-- (id) init;
-- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay;
-- (id) initWithDisplay:(NSString *) aDisplay;
+- (id) initAsWindowManager:(BOOL)isWindowManager;
+- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay asWindowManager:(BOOL)isWindowManager;
+- (id) initWithDisplay:(NSString *) aDisplay asWindowManager:(BOOL)isWindowManager;
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
 - (NSMutableDictionary *) windowsMap;
@@ -75,7 +75,7 @@
                 registerWindow:(BOOL)reg;
 
 - (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
-- (void) checkScreens;
+- (void) checkScreensAsWindowManager:(BOOL)isWindowManager;
 - (NSMutableArray*) screens;
 - (void) grabServer;
 - (void) ungrabServer;

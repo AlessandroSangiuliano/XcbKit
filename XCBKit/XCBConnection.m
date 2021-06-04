@@ -31,17 +31,17 @@
 
 ICCCMService *icccmService;
 
-- (id)init
+- (id)initAsWindowManager:(BOOL)isWindowManager
 {
-    return [self initWithDisplay:NULL];
+    return [self initWithDisplay:NULL asWindowManager:isWindowManager];
 }
 
-- (id)initWithDisplay:(NSString*)aDisplay;
+- (id)initWithDisplay:(NSString*)aDisplay asWindowManager:(BOOL)isWindowManager
 {
-    return [self initWithXcbConnection:NULL andDisplay:aDisplay];
+    return [self initWithXcbConnection:NULL andDisplay:aDisplay asWindowManager:isWindowManager];
 }
 
-- (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay
+- (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay asWindowManager:(BOOL)isWindowManager
 {
     self = [super init];
     const char *localDisplayName = NULL;
@@ -86,7 +86,7 @@ ICCCMService *icccmService;
 
     /** save all screens **/
 
-    [self checkScreens];
+    [self checkScreensAsWindowManager:isWindowManager];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     currentTime = XCB_CURRENT_TIME;
@@ -205,7 +205,7 @@ ICCCMService *icccmService;
     needFlush = aNeedFlushChoice;
 }
 
-- (void) checkScreens
+- (void)checkScreensAsWindowManager:(BOOL)isWindowManager
 {
     xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
     NSUInteger number = 0;
@@ -225,7 +225,9 @@ ICCCMService *icccmService;
               scr->width_in_pixels,
               scr->height_in_pixels);
 
-        [self registerWindow:rootWindow];
+        if (isWindowManager)
+            [self registerWindow:rootWindow];
+
         [rootWindow setScreen:screen];
         [rootWindow initCursor];
         [rootWindow showLeftPointerCursor];
