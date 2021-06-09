@@ -125,5 +125,5 @@
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
-- (void) setClientList:(xcb_window_t*)aClientList;
+- (xcb_window_t*) clientList;
 @end
