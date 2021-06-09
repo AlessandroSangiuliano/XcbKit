@@ -27,25 +27,27 @@
 @synthesize xfixesInitialized;
 @synthesize resizeState;
 @synthesize clientListIndex;
+@synthesize isAWindowManager;
 
 ICCCMService *icccmService;
 
-- (id)init
+- (id)initAsWindowManager:(BOOL)isWindowManager
 {
-    return [self initWithDisplay:NULL];
+    return [self initWithDisplay:NULL asWindowManager:isWindowManager];
 }
 
-- (id)initWithDisplay:(NSString*)aDisplay;
+- (id)initWithDisplay:(NSString*)aDisplay asWindowManager:(BOOL)isWindowManager
 {
-    return [self initWithXcbConnection:NULL andDisplay:aDisplay];
+    return [self initWithXcbConnection:NULL andDisplay:aDisplay asWindowManager:isWindowManager];
 }
 
-- (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay
+- (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay asWindowManager:(BOOL)isWindowManager
 {
     self = [super init];
     const char *localDisplayName = NULL;
     needFlush = NO;
     dragState = NO;
+    isAWindowManager = isWindowManager;
 
     if (aDisplay == NULL)
     {
@@ -125,6 +127,9 @@ ICCCMService *icccmService;
 
 - (void)registerWindow:(XCBWindow *)aWindow
 {
+    if (!isAWindowManager)
+        return;
+
     xcb_window_t win = [aWindow window];
     NSLog(@"[XCBConnection] Adding the window %u in the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
@@ -152,6 +157,9 @@ ICCCMService *icccmService;
 
 - (void)unregisterWindow:(XCBWindow *)aWindow
 {
+    if (!isAWindowManager)
+        return;
+
     xcb_window_t win = [aWindow window];
     NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
@@ -200,7 +208,7 @@ ICCCMService *icccmService;
     needFlush = aNeedFlushChoice;
 }
 
-- (void) checkScreens
+- (void)checkScreens
 {
     xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
     NSUInteger number = 0;
@@ -221,6 +229,7 @@ ICCCMService *icccmService;
               scr->height_in_pixels);
 
         [self registerWindow:rootWindow];
+
         [rootWindow setScreen:screen];
         [rootWindow initCursor];
         [rootWindow showLeftPointerCursor];
@@ -257,25 +266,24 @@ ICCCMService *icccmService;
                             withXCBClass:[aRequest xcbClass]
                             withVisualId:[aRequest visual]
                            withValueMask:[aRequest valueMask]
-                           withValueList:[aRequest valueList]];
+                           withValueList:[aRequest valueList]
+                          registerWindow:NO];
 
     if ([aRequest windowType] == XCBWindowRequest)
     {
         response = [[XCBWindowTypeResponse alloc] initWithXCBWindow:window];
+
+        if (reg)
+            [self registerWindow:window];
     }
 
     if ([aRequest windowType] == XCBFrameRequest)
     {
         frame = FnFromXCBWindowToXCBFrame(window, self, [aRequest clientWindow]);
+        response = [[XCBWindowTypeResponse alloc] initWithXCBFrame:frame];
 
         if (reg)
-        {
-            [self unregisterWindow:window];
             [self registerWindow:frame];
-        } else
-            [self unregisterWindow:window];
-
-        response = [[XCBWindowTypeResponse alloc] initWithXCBFrame:frame];
     }
 
     if ([aRequest windowType] == XCBTitleBarRequest)
@@ -284,12 +292,7 @@ ICCCMService *icccmService;
         response = [[XCBWindowTypeResponse alloc] initWithXCBTitleBar:titleBar];
 
         if (reg)
-        {
-            [self unregisterWindow:window];
             [self registerWindow:titleBar];
-        } else
-            [self unregisterWindow:window];
-
     }
 
     frame = nil;
@@ -300,16 +303,17 @@ ICCCMService *icccmService;
 }
 
 - (XCBWindow *)createWindowWithDepth:(uint8_t)depth
-                    withParentWindow:(XCBWindow *)aParentWindow
-                       withXPosition:(int16_t)xPosition
-                       withYPosition:(int16_t)yPosition
-                           withWidth:(int16_t)width
-                          withHeight:(int16_t)height
-                    withBorrderWidth:(uint16_t)borderWidth
-                        withXCBClass:(uint16_t)xcbClass
-                        withVisualId:(XCBVisual *)aVisual
-                       withValueMask:(uint32_t)valueMask
-                       withValueList:(const uint32_t *)valueList
+               withParentWindow:(XCBWindow *)aParentWindow
+               withXPosition:(int16_t)xPosition
+               withYPosition:(int16_t)yPosition
+               withWidth:(int16_t)width
+               withHeight:(int16_t)height
+               withBorrderWidth:(uint16_t)borderWidth
+               withXCBClass:(uint16_t)xcbClass
+               withVisualId:(XCBVisual *)aVisual
+               withValueMask:(uint32_t)valueMask
+               withValueList:(const uint32_t *)valueList
+               registerWindow:(BOOL)reg
 {
     xcb_window_t winId = xcb_generate_id(connection);
     XCBWindow *winToCreate = [[XCBWindow alloc] initWithXCBWindow:winId withParentWindow:aParentWindow andConnection:self];
@@ -337,7 +341,10 @@ ICCCMService *icccmService;
 
 
     needFlush = YES;
-    [self registerWindow:winToCreate];
+
+    if (reg)
+        [self registerWindow:winToCreate];
+
     return winToCreate;
 
 }
@@ -1630,7 +1637,7 @@ ICCCMService *icccmService;
     currentTime = time;
 }
 
-- (void)registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
+- (BOOL) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow *)selectionWindow
 {
     [selectionWindow onScreen];
     XCBScreen *screen = [selectionWindow screen];
@@ -1659,7 +1666,7 @@ ICCCMService *icccmService;
             rootWindow = nil;
             screen = nil;
             ewmhService = nil;
-            return;
+            return NO;
         }
 
         NSLog(@"Subtructure redirect was set to the root window");
@@ -1667,7 +1674,7 @@ ICCCMService *icccmService;
         rootWindow = nil;
         screen = nil;
         ewmhService = nil;
-        return;
+        return YES;
     }
 
     NSLog(@"Replacing window manager");
@@ -1695,7 +1702,7 @@ ICCCMService *icccmService;
             selector = nil;
             atomName = nil;
             ewmhService = nil;
-            return;
+            return NO;
         }
     }
 
@@ -1706,6 +1713,8 @@ ICCCMService *icccmService;
     selector = nil;
     atomName = nil;
     ewmhService = nil;
+
+    return YES;
 }
 
 - (XCBWindow *)rootWindowForScreenNumber:(int)number

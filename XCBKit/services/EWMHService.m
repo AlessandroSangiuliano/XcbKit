@@ -1013,7 +1013,6 @@
 
 - (void) updateNetClientList
 {
-
     uint32_t size = [connection clientListIndex] + 1;
 
     //TODO: with more screens this need to be looped ?

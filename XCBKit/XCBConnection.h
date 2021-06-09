@@ -44,15 +44,16 @@
 @property (nonatomic, assign) BOOL xfixesInitialized;
 @property (nonatomic, assign) BOOL resizeState;
 @property (nonatomic, assign) NSInteger clientListIndex;
+@property (nonatomic, assign, readonly) BOOL isAWindowManager;
 
 + (XCBConnection *) sharedConnection;
 - (xcb_connection_t *) connection;
 /**
  * init with DISPLAY and screeen to NULL
  */
-- (id) init;
-- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay;
-- (id) initWithDisplay:(NSString *) aDisplay;
+- (id) initAsWindowManager:(BOOL)isWindowManager;
+- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay asWindowManager:(BOOL)isWindowManager;
+- (id) initWithDisplay:(NSString *) aDisplay asWindowManager:(BOOL)isWindowManager;
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
 - (NSMutableDictionary *) windowsMap;
@@ -70,7 +71,8 @@
 				  withXCBClass: (uint16_t) xcbClass
 				  withVisualId: (XCBVisual*) aVisual
 				 withValueMask: (uint32_t) valueMask
-				 withValueList: (const uint32_t *) valueList;
+				 withValueList: (const uint32_t *) valueList
+                registerWindow:(BOOL)reg;
 
 - (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
 - (void) checkScreens;
@@ -120,7 +122,7 @@
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
-- (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
+- (BOOL) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
 - (xcb_window_t*) clientList;
 

@@ -193,7 +193,8 @@
                                                         withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
                                                         withVisualId:rootVisual
                                                        withValueMask:mask
-                                                       withValueList:values];
+                                                       withValueList:values
+                                                      registerWindow:YES];
 
         [hideWindowButton setWindowMask:mask];
         [hideWindowButton setCanMove:NO];
@@ -226,7 +227,8 @@
                                                             withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
                                                             withVisualId:rootVisual
                                                            withValueMask:mask
-                                                           withValueList:values];
+                                                           withValueList:values
+                                                          registerWindow:YES];
 
         [minimizeWindowButton setWindowMask:mask];
         [minimizeWindowButton setCanMove:NO];
@@ -259,7 +261,8 @@
                                                             withXCBClass:XCB_WINDOW_CLASS_INPUT_OUTPUT
                                                             withVisualId:rootVisual
                                                            withValueMask:mask
-                                                           withValueList:values];
+                                                           withValueList:values
+                                                          registerWindow:YES];
 
         [maximizeWindowButton setWindowMask:mask];
         [maximizeWindowButton setCanMove:NO];
