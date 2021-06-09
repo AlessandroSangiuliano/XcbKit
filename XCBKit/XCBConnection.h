@@ -118,12 +118,12 @@
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 - (void)drawAllTitleBarsExcept:(XCBTitleBar *)aTitileBar;
+- (BOOL) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 
+/*** ACCESSORS ***/
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
-- (BOOL) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
-- (xcb_window_t*) clientList;
-
+- (void) setClientList:(xcb_window_t*)aClientList;
 @end
