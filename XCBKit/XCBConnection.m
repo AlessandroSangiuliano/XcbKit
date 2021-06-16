@@ -131,6 +131,7 @@ ICCCMService *icccmService;
         return;
 
     xcb_window_t win = [aWindow window];
+
     NSLog(@"[XCBConnection] Adding the window %u in the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
     XCBWindow *window = [windowsMap objectForKey:key];
@@ -143,6 +144,11 @@ ICCCMService *icccmService;
         key = nil;
         return;
     }
+    
+    if ([aWindow isKindOfClass:[XCBFrame class]] ||
+        [aWindow isKindOfClass:[XCBTitleBar class]] ||
+        [aWindow isCloseButton] || [aWindow isMaximizeButton] || [aWindow isMinimizeButton])
+        win = 0;
 
     if (win != 0)
         clientList[clientListIndex++] = win;
@@ -782,7 +788,7 @@ ICCCMService *icccmService;
 {
     XCBWindow *window = [self windowForXCBId:anEvent->window];
 
-   // NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
+    // NSLog(@"In configure notify for window %u: %d, %d", anEvent->window, anEvent->x, anEvent->y);
 
     window = nil;
 
@@ -1226,7 +1232,7 @@ ICCCMService *icccmService;
             [frame setScreen:screen];
             xcb_visualid_t visualid = [[frame attributes] visualId];
             visual = [[XCBVisual alloc] initWithVisualId:visualid
-                                        withVisualType:xcb_aux_find_visual_by_id([screen screen], visualid)];
+                                          withVisualType:xcb_aux_find_visual_by_id([screen screen], visualid)];
             [drawer setVisual:visual];
             [drawer setWindow:frame];
             [drawer setPreviewImage];
@@ -1405,8 +1411,8 @@ ICCCMService *icccmService;
                           anEvent->height);*/
             //[titleBar setTitleIsSet:NO];
             //[titleBar setWindowTitle:[titleBar windowTitle]];
-           /* [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
-                                                                        : TitleBarDownColor];*/
+            /* [titleBar drawArcsForColor:[[titleBar parentWindow] isAbove] ? TitleBarUpColor
+                                                                         : TitleBarDownColor];*/
             position = XCBMakePoint(anEvent->x, anEvent->y);
             size = XCBMakeSize(anEvent->width, anEvent->height);
             area = XCBMakeRect(position, size);
@@ -1422,7 +1428,18 @@ ICCCMService *icccmService;
 
 - (void)handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
 {
-    NSLog(@"Yet Not Implemented");
+    NSLog(@"Reparent Notify for window: %u", anEvent->window);
+
+    XCBWindow *window = [self windowForXCBId:anEvent->window];
+    XCBWindow *parent = [self windowForXCBId:anEvent->parent];
+
+    if (parent == nil)
+        parent = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+
+    [window setParentWindow:parent];
+
+    window = nil;
+    parent = nil;
 }
 
 - (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent
