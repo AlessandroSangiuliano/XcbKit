@@ -1428,7 +1428,18 @@ ICCCMService *icccmService;
 
 - (void)handleReparentNotify:(xcb_reparent_notify_event_t *)anEvent
 {
-    NSLog(@"Yet Not Implemented");
+    NSLog(@"Reparent Notify for window: %u", anEvent->window);
+
+    XCBWindow *window = [self windowForXCBId:anEvent->window];
+    XCBWindow *parent = [self windowForXCBId:anEvent->parent];
+
+    if (parent == nil)
+        parent = [[XCBWindow alloc] initWithXCBWindow:anEvent->parent andConnection:self];
+
+    [window setParentWindow:parent];
+
+    window = nil;
+    parent = nil;
 }
 
 - (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent

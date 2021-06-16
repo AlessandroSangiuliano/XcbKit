@@ -741,8 +741,16 @@
 
 - (void)restoreFromIconified
 {
-    windowRect = oldRect;
+    XCBWindow *rootWindow = [[self onScreen] rootWindow];
     XCBFrame *frame;
+
+    if ([[frame parentWindow] window] != [rootWindow window])
+    {
+        frame = (XCBFrame*)self;
+        [connection reparentWindow:frame toWindow:rootWindow position:oldRect.position];
+    }
+
+    windowRect = oldRect;
 
     XCBPoint position = windowRect.position;
     XCBSize size = windowRect.size;
@@ -757,6 +765,7 @@
     if ([self isKindOfClass:[XCBFrame class]]) //FIXME: ??
     {
         frame = (XCBFrame *) self;
+
         XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
         XCBWindow *clientWindow = [frame childWindowForKey:ClientWindow];
 
@@ -778,6 +787,7 @@
     }
 
     frame = nil;
+    rootWindow = nil;
 }
 
 - (void)destroy
