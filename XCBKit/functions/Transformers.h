@@ -40,4 +40,8 @@ XCBWindow* FnFromExposeEventToXCBWindow(xcb_expose_event_t *anEvent, XCBConnecti
 
 NSString *FnFromNSIntegerToNSString(NSInteger value);
 
+/*** Delete a window from an array of xcb_window_t ***/
+
+BOOL FnRemoveWindowFromWindowsArray(xcb_window_t windows[], int arraySize, xcb_window_t windowToRemove);
+
 @end

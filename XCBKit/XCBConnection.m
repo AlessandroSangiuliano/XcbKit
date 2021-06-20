@@ -172,16 +172,11 @@ ICCCMService *icccmService;
     [windowsMap removeObjectForKey:key];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
-
-    for (int i = 0; i < CLIENTLISTSIZE; ++i)
-    {
-        if (clientList[i] == win && win != 0)
-        {
-            clientList[i] = XCB_NONE;
-            clientListIndex--;
-            NSLog(@"Window %u removed form client list", win);
-        }
-    }
+    
+    BOOL removed = FnRemoveWindowFromWindowsArray(clientList, clientListIndex, win);
+    
+    if (removed)
+        clientListIndex--;
 
     [ewmhService updateNetClientList];
 
@@ -978,21 +973,13 @@ ICCCMService *icccmService;
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         frame = (XCBFrame *) window;
         clientWindow = [frame childWindowForKey:ClientWindow];
-        /*[frame stackAbove];
-        titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-        [self drawAllTitleBarsExcept:titleBar];*/
     }
 
     if ([window isKindOfClass:[XCBTitleBar class]])
     {
-        //[frame stackAbove];
         xcb_allow_events(connection, XCB_ALLOW_REPLAY_POINTER, anEvent->time);
         frame = (XCBFrame *) [window parentWindow];
         clientWindow = [frame childWindowForKey:ClientWindow];
-        /*titleBar = (XCBTitleBar*)window;
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-        [self drawAllTitleBarsExcept:titleBar];*/
     }
 
     if ([window isKindOfClass:[XCBWindow class]] &&
@@ -1008,7 +995,7 @@ ICCCMService *icccmService;
     }
 
     [clientWindow focus];
-    [frame stackAbove];
+    //[frame stackAbove];
 
     titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
     [titleBar setIsAbove:YES];
@@ -1618,13 +1605,15 @@ ICCCMService *icccmService;
                     tmp = nil;
                     frame = nil;
                     clientWindow = nil;
-                    return;
+                    titleBar = nil;
+                    continue;
                 }
 
                 [titleBar setIsAbove:NO];
                 [titleBar setButtonsAbove:NO];
                 [titleBar drawTitleBarComponents];
                 [frame setIsAbove:NO];
+                [frame stackBelow];
                 frame = nil;
             }
 
