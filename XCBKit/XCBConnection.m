@@ -172,16 +172,11 @@ ICCCMService *icccmService;
     [windowsMap removeObjectForKey:key];
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
-
-    for (int i = 0; i < CLIENTLISTSIZE; ++i)
-    {
-        if (clientList[i] == win && win != 0)
-        {
-            clientList[i] = XCB_NONE;
-            clientListIndex--;
-            NSLog(@"Window %u removed form client list", win);
-        }
-    }
+    
+    BOOL removed = FnRemoveWindowFromWindowsArray(clientList, clientListIndex, win);
+    
+    if (removed)
+        clientListIndex--;
 
     [ewmhService updateNetClientList];
 
