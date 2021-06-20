@@ -671,8 +671,9 @@ ICCCMService *icccmService;
     [frame setScreen:[window screen]];
     [window setNormalState];
     [frame setNormalState];
-    [frame stackAbove];
+    //[frame stackAbove];
     [[frame childWindowForKey:TitleBar] setIsAbove:YES];
+    [self drawAllTitleBarsExcept:(XCBTitleBar*)[frame childWindowForKey:TitleBar]];
     [icccmService wmClassForWindow:window];
 
     [self setNeedFlush:YES];
@@ -1156,7 +1157,7 @@ ICCCMService *icccmService;
             if ([[window parentWindow] isKindOfClass:[XCBFrame class]]) //TODO: debUg to see if this is still necessary!!
             {
                 frame = (XCBFrame *) [window parentWindow];
-                [frame stackAbove];
+                //[frame stackAbove];
                 titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar]; //TODO: Can i put all this in a single method?
                 [titleBar drawTitleBarComponents];
                 [self drawAllTitleBarsExcept:titleBar];

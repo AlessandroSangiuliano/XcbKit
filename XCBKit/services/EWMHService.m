@@ -629,7 +629,7 @@
         {
             XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
             XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-            [frame stackAbove]; //FIXME: just use focus?
+            //[frame stackAbove]; //FIXME: just use focus?
             [titleBar drawTitleBarComponents];
             [connection drawAllTitleBarsExcept:titleBar];
             frame = nil;
