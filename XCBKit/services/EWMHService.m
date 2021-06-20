@@ -1013,7 +1013,7 @@
 
 - (void) updateNetClientList
 {
-    uint32_t size = [connection clientListIndex] + 1;
+    uint32_t size = [connection clientListIndex];
 
     //TODO: with more screens this need to be looped ?
     XCBWindow *rootWindow = [connection rootWindowForScreenNumber:0];
