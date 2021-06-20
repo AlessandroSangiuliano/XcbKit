@@ -86,6 +86,12 @@
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
 
+    if (!reply)
+    {
+        NSLog(@"Reply is NULL");
+        return hasProtocol;
+    }
+
     for(int i = 0; i < reply->length; i++)
     {
         if (windowProtocols[i] == atom)
@@ -159,6 +165,33 @@
                           withFormat:32
                       withDataLength:2
                             withData:data];
+}
+
+- (WindowState)wmStateFromWindow:(XCBWindow*)aWindow
+{
+    WindowState state;
+
+            xcb_get_property_reply_t *reply = [super
+            getProperty:WMState
+           propertyType:[[super atomService] atomFromCachedAtomsWithKey:WMState]
+              forWindow:aWindow
+                 delete:NO
+                 length:2];
+
+    int *value = xcb_get_property_value(reply);
+
+    if (*value == 0)
+        state = ICCCM_WM_STATE_WITHDRAWN;
+    else if (*value == 1)
+        state = ICCCM_WM_STATE_NORMAL;
+    else if (*value == 3)
+        state = ICCCM_WM_STATE_ICONIC;
+    else
+        state = -1;
+
+    free(reply);
+
+    return state;
 }
 
 - (void) wmClassForWindow:(XCBWindow*)aWindow
