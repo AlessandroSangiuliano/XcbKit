@@ -671,7 +671,7 @@ ICCCMService *icccmService;
     [frame setScreen:[window screen]];
     [window setNormalState];
     [frame setNormalState];
-    //[frame stackAbove];
+    [frame stackBelow];
     [[frame childWindowForKey:TitleBar] setIsAbove:YES];
     [self drawAllTitleBarsExcept:(XCBTitleBar*)[frame childWindowForKey:TitleBar]];
     [icccmService wmClassForWindow:window];
