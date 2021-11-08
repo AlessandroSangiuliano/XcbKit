@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <cairo/cairo-xcb.h>
 #import <cairo/cairo.h>
-#import <XCBConnection.h>
+
+@class XCBConnection;
 
 @interface CairoSurfacesSet : NSObject
 
