@@ -21,6 +21,7 @@
 @property (strong, nonatomic) NSString* WMState;
 @property (strong, nonatomic) NSString* WMHints;
 @property (strong, nonatomic) NSString* WMChangeState;
+@property (strong, nonatomic) NSString* WMClass;
 
 + (id) sharedInstanceWithConnection:(XCBConnection*)aConnection;
 
@@ -33,5 +34,6 @@
 - (void) setWMStateForWindow:(XCBWindow*)aWindow state:(WindowState)state;
 - (WindowState) wmStateFromWindow:(XCBWindow*)aWindow;
 - (void) wmClassForWindow:(XCBWindow*)aWindow;
+
 
 @end
