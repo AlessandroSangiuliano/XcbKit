@@ -583,10 +583,12 @@ ICCCMService *icccmService;
                                              delete:NO
                                              length:5 * sizeof(uint64_t)];
 
+        /*** this is much more for the GNUstep icon window ***/
+
         if (motifHints)
         {
             xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(motifHints);
-
+            
             if (atom[0] == 3 && atom[1] == 0 && atom[2] == 0 && atom[3] == 0 && atom[4] == 0)
             {
                 NSLog(@"Motif Icon: %d", [window window]);
@@ -615,6 +617,19 @@ ICCCMService *icccmService;
                 return;
             }
 
+        }
+        else
+        {
+            /*** while here we are for the other apps class ***/
+            
+            xcb_get_property_reply_t  *reply = [ewmhService netWmIconFromWindow:window];
+            CairoSurfacesSet *cairoSet = [[CairoSurfacesSet alloc] initWithConnection:self];
+            [cairoSet buildSetFromReply:reply];
+            [window setIcons:[cairoSet cairoSurfaces]];
+            [window onScreen];
+            [window updateAttributes];
+            cairoSet = nil;
+            free(reply);
         }
 
         [window updateRectsFromGeometries];
