@@ -20,6 +20,7 @@
 @synthesize WMState;
 @synthesize WMHints;
 @synthesize WMChangeState;
+@synthesize WMClass;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -40,6 +41,7 @@
     WMState = @"WM_STATE";
     WMHints = @"WM_HINTS";
     WMChangeState = @"WM_CHANGE_STATE";
+    WMClass = @"WM_CLASS";
     
     NSString* icccmAtoms[] =
     {
@@ -51,7 +53,8 @@
         WMTakeFocus,
         WMState,
         WMHints,
-        WMChangeState
+        WMChangeState,
+        WMClass
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -224,6 +227,7 @@
     WMHints = nil;
     WMState = nil;
     WMNormalHints = nil;
+    WMClass = nil;
 }
 
 
