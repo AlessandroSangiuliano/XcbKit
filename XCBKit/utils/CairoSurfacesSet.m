@@ -69,7 +69,7 @@
 
     if (!data)
         return;
-
+    
     while ((surface = [self nextSurface:&data end:data_end]) != NULL)
         [self pushSurface:surface];
 

@@ -9,6 +9,7 @@
 #import "XCBWindow.h"
 #import "XCBConnection.h"
 #import "XCBTitleBar.h"
+#import "utils/CairoSurfacesSet.h"
 #import "utils/CairoDrawer.h"
 #import <xcb/xcb_aux.h>
 #import "services/ICCCMService.h"
@@ -519,7 +520,7 @@
 
     BOOL attributesChanged = NO;
 
-    NSLog(@"Changing attributes for window: %u", window);
+    //NSLog(@"Changing attributes for window: %u", window);
 
     if (check)
     {
@@ -1199,6 +1200,24 @@
     uint32_t values[] = {aPixmap};
 
     [self changeAttributes:values withMask:mask checked:NO];
+}
+
+- (void)generateWindowIcons
+{
+    CairoSurfacesSet *cairoSet;
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    xcb_get_property_reply_t *reply = [ewmhService netWmIconFromWindow:self];
+    cairoSet = [[CairoSurfacesSet alloc] initWithConnection:connection];
+    [cairoSet buildSetFromReply:reply];
+    icons = [cairoSet cairoSurfaces];
+    [self onScreen];
+    [self updateAttributes];
+    
+    cairoSet = nil;
+    ewmhService = nil;
+    free(reply);
+    
 }
 
 - (void)dealloc

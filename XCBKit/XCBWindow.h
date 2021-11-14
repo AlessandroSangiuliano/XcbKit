@@ -181,5 +181,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) shade;
 - (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap;
 - (void) refreshBorder;
+- (void) generateWindowIcons;
 
 @end
