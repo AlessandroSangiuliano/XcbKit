@@ -209,7 +209,7 @@
         NSLog(@"Error while checking WM_CLASS");
         return;
     }
-
+    
     [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.class_name]];
     [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.instance_name]];
 

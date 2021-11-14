@@ -592,12 +592,8 @@ ICCCMService *icccmService;
             if (atom[0] == 3 && atom[1] == 0 && atom[2] == 0 && atom[3] == 0 && atom[4] == 0)
             {
                 NSLog(@"Motif Icon: %d", [window window]);
-                [window description];
                 free(motifHints);
-                xcb_get_property_reply_t  *reply = [ewmhService netWmIconFromWindow:window];
-                CairoSurfacesSet *cairoSet = [[CairoSurfacesSet alloc] initWithConnection:self];
-                [cairoSet buildSetFromReply:reply];
-                [window setIcons:[cairoSet cairoSurfaces]];
+                [window generateWindowIcons];
                 XCBGeometryReply *geometry = [window geometries];
                 [window setWindowRect:[geometry rect]];
                 [window setDecorated:NO];
@@ -609,11 +605,9 @@ ICCCMService *icccmService;
                 [icccmService wmClassForWindow:window];
 
                 window = nil;
-                cairoSet = nil;
                 ewmhService = nil;
                 geometry = nil;
                 name = nil;
-                free(reply);
                 return;
             }
 
@@ -622,14 +616,10 @@ ICCCMService *icccmService;
         {
             /*** while here we are for the other apps class ***/
             
-            xcb_get_property_reply_t  *reply = [ewmhService netWmIconFromWindow:window];
-            CairoSurfacesSet *cairoSet = [[CairoSurfacesSet alloc] initWithConnection:self];
-            [cairoSet buildSetFromReply:reply];
-            [window setIcons:[cairoSet cairoSurfaces]];
+            [window generateWindowIcons];
             [window onScreen];
             [window updateAttributes];
-            cairoSet = nil;
-            free(reply);
+            //[window drawIcons];
         }
 
         [window updateRectsFromGeometries];
