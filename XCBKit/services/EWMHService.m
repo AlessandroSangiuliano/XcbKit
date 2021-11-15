@@ -548,6 +548,7 @@
 
     if (reply->length == 0 && reply->format == 0 && reply->type == 0)
     {
+        NSLog(@"Property not present");
         free(error);
         return NULL;
     }
@@ -996,6 +997,28 @@
                      withDataLength:i
                            withData:props];
 }
+
+- (uint32_t)netWMPidForWindow:(XCBWindow *)aWindow
+{
+    void *reply = [self getProperty:EWMHWMPid propertyType:XCB_ATOM_CARDINAL
+                          forWindow:aWindow
+                             delete:NO
+                             length:1];
+    
+    if (!reply)
+        return -1;
+    
+    uint32_t *net = xcb_get_property_value(reply);
+    
+    uint32_t pid = *net;
+    
+    free(reply);
+    net = NULL;
+    
+    return pid;
+    
+}
+
 
 - (xcb_get_property_reply_t*) netWmIconFromWindow:(XCBWindow*)aWindow
 {

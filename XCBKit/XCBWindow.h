@@ -107,6 +107,10 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (nonatomic, assign) BOOL canStick;
 @property (nonatomic, assign) BOOL alwaysOnTop;
 
+/*** _NET_WM_PID ***/
+
+@property (nonatomic, assign) u_int32_t pid;
+
 
 - (xcb_window_t) window;
 - (void) setWindow:(xcb_window_t) aWindow;
@@ -182,5 +186,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap;
 - (void) refreshBorder;
 - (void) generateWindowIcons;
+- (BOOL) updatePid;
 
 @end

@@ -194,6 +194,7 @@
 - (void) updateNetActiveWindow:(XCBWindow*)aWindow;
 - (void) updateNetSupported:(NSArray*)atomsArray forRootWindow:(XCBWindow*)aRootWindow;
 - (void) updateNetWmState:(XCBWindow*) aWindow;
+- (uint32_t) netWMPidForWindow:(XCBWindow *)aWindow;
 
 - (void) dealloc;
 
