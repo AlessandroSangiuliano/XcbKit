@@ -72,6 +72,7 @@
 @synthesize fullScreen;
 @synthesize gotAttention;
 @synthesize alwaysOnTop;
+@synthesize pid;
 
 
 - (id)initWithXCBWindow:(xcb_window_t)aWindow
@@ -1218,6 +1219,20 @@
     ewmhService = nil;
     free(reply);
     
+}
+
+- (BOOL)updatePid
+{
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    
+    uint32_t lpid = [ewmhService netWMPidForWindow:self];
+    
+    if (lpid == -1)
+        return NO;
+    
+    pid = lpid;
+    
+    return YES;
 }
 
 - (void)dealloc
