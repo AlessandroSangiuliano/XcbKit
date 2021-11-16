@@ -46,7 +46,7 @@
 @property (nonatomic, assign) NSInteger clientListIndex;
 @property (nonatomic, assign, readonly) BOOL isAWindowManager;
 
-+ (XCBConnection *) sharedConnection;
++ (XCBConnection *) sharedConnectionAsWindowManager:(BOOL)asWindowManager;
 - (xcb_connection_t *) connection;
 /**
  * init with DISPLAY and screeen to NULL

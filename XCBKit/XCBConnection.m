@@ -102,14 +102,22 @@ ICCCMService *icccmService;
     return self;
 }
 
-+ (XCBConnection *)sharedConnection
++ (XCBConnection *)sharedConnectionAsWindowManager:(BOOL)asWindowManager
 {
     static XCBConnection *sharedInstance = nil;
 
     if (sharedInstance == nil)
     {
-        NSLog(@"[XCBConnection]: Creating shared connection...");
-        sharedInstance = [[self alloc] init];
+        if (asWindowManager)
+        {
+            NSLog(@"[XCBConnection]: Creating shared connection as window manager...");
+            sharedInstance = [[self alloc] initAsWindowManager:asWindowManager];
+        }
+        else
+        {
+            NSLog(@"[XCBConnection]: Creating shared connection...");
+            sharedInstance = [[self alloc] initAsWindowManager:asWindowManager];
+        }
     }
 
     return sharedInstance;
