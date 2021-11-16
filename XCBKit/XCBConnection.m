@@ -468,7 +468,6 @@ ICCCMService *icccmService;
 
         xcb_window_t leader = [[[window cachedWMHints] valueForKey:FnFromNSIntegerToNSString(ICCCMWindowGroupHint)] unsignedIntValue];
         XCBWindow *leaderWindow = [[XCBWindow alloc] initWithXCBWindow:leader andConnection:self];
-        NSLog(@"Leader from XCBKit %u", [leaderWindow window]);
         [window setLeaderWindow:leaderWindow];
         leaderWindow = nil;
 

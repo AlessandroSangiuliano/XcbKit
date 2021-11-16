@@ -187,5 +187,6 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) refreshBorder;
 - (void) generateWindowIcons;
 - (BOOL) updatePid;
+- (BOOL) updateLeaderWindow;
 
 @end
