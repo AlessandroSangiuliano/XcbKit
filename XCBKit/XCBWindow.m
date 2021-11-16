@@ -1235,6 +1235,22 @@
     return YES;
 }
 
+- (BOOL)updateLeaderWindow
+{
+    xcb_window_t leader = 0;
+    [self refreshCachedWMHints];
+    
+    leader = [[cachedWMHints valueForKey:FnFromNSIntegerToNSString(ICCCMWindowGroupHint)] unsignedIntValue];
+    
+    if (leader == 0)
+        return NO;
+    
+    leaderWindow = [[XCBWindow alloc] initWithXCBWindow:leader andConnection:connection];
+    
+    return YES;
+}
+
+
 - (void)dealloc
 {
     parentWindow = nil;
