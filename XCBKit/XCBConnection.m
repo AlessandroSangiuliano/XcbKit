@@ -30,6 +30,8 @@
 @synthesize isAWindowManager;
 
 ICCCMService *icccmService;
+static XCBConnection *sharedInstance;
+
 
 - (id)initAsWindowManager:(BOOL)isWindowManager
 {
@@ -44,6 +46,13 @@ ICCCMService *icccmService;
 - (id)initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString *)aDisplay asWindowManager:(BOOL)isWindowManager
 {
     self = [super init];
+    
+    if (self == nil)
+    {
+        NSLog(@"Unable to init!");
+        return nil;
+    }
+    
     const char *localDisplayName = NULL;
     needFlush = NO;
     dragState = NO;
@@ -104,8 +113,6 @@ ICCCMService *icccmService;
 
 + (XCBConnection *)sharedConnectionAsWindowManager:(BOOL)asWindowManager
 {
-    static XCBConnection *sharedInstance = nil;
-
     if (sharedInstance == nil)
     {
         if (asWindowManager)
