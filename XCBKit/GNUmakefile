@@ -69,7 +69,8 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			enums/EXErrorMessages.h \
 			enums/EIcccm.h \
 			enums/EMousePosition.h \
-			enums/EEwmh.h
+			enums/EEwmh.h \
+			protocols/server/Server.h
 
 $(FRAMEWORK_NAME)_RESOURCE_FILES = \
 			Resources/max.png \
