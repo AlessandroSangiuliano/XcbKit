@@ -9,6 +9,7 @@
 
 @protocol Server <NSObject>
 
+@optional
 - (void) requestWindowsMap;
 
 @end
