@@ -10,6 +10,6 @@
 @protocol Server <NSObject>
 
 @optional
-- (void) requestWindowsMap;
+- (NSMutableDictionary *) requestWindowsMap;
 
 @end
