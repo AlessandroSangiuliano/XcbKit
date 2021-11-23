@@ -10,6 +10,8 @@
 @protocol Server <NSObject>
 
 @optional
+
 - (NSMutableDictionary *) requestWindowsMap;
+- (void) handleNotification:(NSNotification *)aNotification;
 
 @end
