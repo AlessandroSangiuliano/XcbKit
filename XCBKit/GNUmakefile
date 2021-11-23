@@ -70,7 +70,8 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			enums/EIcccm.h \
 			enums/EMousePosition.h \
 			enums/EEwmh.h \
-			protocols/server/Server.h
+			protocols/server/Server.h \
+			protocols/client/Client.h
 
 $(FRAMEWORK_NAME)_RESOURCE_FILES = \
 			Resources/max.png \
