@@ -12,6 +12,6 @@
 @optional
 
 - (NSMutableDictionary *) requestWindowsMap;
-- (void) handleNotification:(NSNotification *)aNotification;
+- (void) sendNotification:(NSNotification *)aNotification;
 
 @end
