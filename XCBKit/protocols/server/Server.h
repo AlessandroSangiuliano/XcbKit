@@ -6,12 +6,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+#import "enums/ERequests.h"
 
 @protocol Server <NSObject>
 
 @optional
 
-- (NSMutableDictionary *) requestWindowsMap;
-- (void) sendNotification:(NSNotification *)aNotification;
+- (id) handleRequestFor:(Request)aRequest;
+- (void) handleNotification:(NSNotification *)aNotification;
 
 @end
