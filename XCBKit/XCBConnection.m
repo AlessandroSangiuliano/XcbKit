@@ -28,6 +28,7 @@
 @synthesize resizeState;
 @synthesize clientListIndex;
 @synthesize isAWindowManager;
+@synthesize isWindowsMapUpdated;
 
 ICCCMService *icccmService;
 static XCBConnection *sharedInstance;
@@ -68,6 +69,7 @@ static XCBConnection *sharedInstance;
     }
 
     windowsMap = [[NSMutableDictionary alloc] initWithCapacity:1000];
+    isWindowsMapUpdated = NO;
 
     screens = [NSMutableArray new];
 
@@ -170,6 +172,7 @@ static XCBConnection *sharedInstance;
 
     [ewmhService updateNetClientList];
     [windowsMap setObject:aWindow forKey:key];
+    isWindowsMapUpdated = YES;
 
     window = nil;
     key = nil;
@@ -228,9 +231,11 @@ static XCBConnection *sharedInstance;
 {
     xcb_screen_iterator_t iterator = xcb_setup_roots_iterator(xcb_get_setup(connection));
     NSUInteger number = 0;
+    
 
     while (iterator.rem)
     {
+        isWindowsMapUpdated = NO;
         xcb_screen_t *scr = iterator.data;
         XCBWindow *rootWindow = [[XCBWindow alloc] initWithXCBWindow:scr->root withParentWindow:XCB_NONE andConnection:self];
         XCBScreen *screen = [XCBScreen screenWithXCBScreen:scr andRootWindow:rootWindow];
@@ -288,6 +293,7 @@ static XCBConnection *sharedInstance;
     if ([aRequest windowType] == XCBWindowRequest)
     {
         response = [[XCBWindowTypeResponse alloc] initWithXCBWindow:window];
+        isWindowsMapUpdated = NO;
 
         if (reg)
             [self registerWindow:window];
@@ -297,6 +303,7 @@ static XCBConnection *sharedInstance;
     {
         frame = FnFromXCBWindowToXCBFrame(window, self, [aRequest clientWindow]);
         response = [[XCBWindowTypeResponse alloc] initWithXCBFrame:frame];
+        isWindowsMapUpdated = NO;
 
         if (reg)
             [self registerWindow:frame];
@@ -306,6 +313,7 @@ static XCBConnection *sharedInstance;
     {
         titleBar = FnFromXCBWindowToXCBTitleBar(window, self);
         response = [[XCBWindowTypeResponse alloc] initWithXCBTitleBar:titleBar];
+        isWindowsMapUpdated = NO;
 
         if (reg)
             [self registerWindow:titleBar];
@@ -340,6 +348,9 @@ static XCBConnection *sharedInstance;
 
     [winToCreate setWindowRect:windowRect];
     [winToCreate setOriginalRect:windowRect];
+    
+    isWindowsMapUpdated = NO;
+    
 
     xcb_create_window(connection,
                       depth,
@@ -447,6 +458,8 @@ static XCBConnection *sharedInstance;
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     BOOL isManaged = NO;
     XCBWindow *window = [self windowForXCBId:anEvent->window];
+    
+    isWindowsMapUpdated = NO;
 
     NSLog(@"[%@] Map request for window %u", NSStringFromClass([self class]), anEvent->window);
 

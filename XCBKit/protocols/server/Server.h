@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
-#import "enums/ERequests.h"
+#import "../../enums/ERequests.h"
 
 @protocol Server <NSObject>
 

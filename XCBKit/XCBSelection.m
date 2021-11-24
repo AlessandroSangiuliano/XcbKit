@@ -37,6 +37,8 @@
                                                                            request,
                                                                            NULL);
     
+    [connection setIsWindowsMapUpdated:NO];
+    
     if (NULL == reply)
 	{
         NSLog(@"Unable to get the owner");
