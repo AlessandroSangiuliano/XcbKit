@@ -11,6 +11,6 @@
 
 @optional
 
-- (void) handleNotification:(NSNotification *) aNotification;
+- (void) sendNotification:(NSNotification *) aNotification;
 
 @end
