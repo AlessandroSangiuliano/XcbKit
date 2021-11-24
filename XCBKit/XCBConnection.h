@@ -22,7 +22,7 @@
                     XCB_CW_CURSOR
 
 #define CLIENTLISTSIZE 1000
-#define WINDOWSMAPUPDATED @"windowsMapUpdated";
+#define WINDOWSMAPUPDATED @"windowsMapUpdated"
 
 @class XCBWindow;
 @class EWMHService;
