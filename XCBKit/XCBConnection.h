@@ -45,6 +45,7 @@
 @property (nonatomic, assign) BOOL resizeState;
 @property (nonatomic, assign) NSInteger clientListIndex;
 @property (nonatomic, assign, readonly) BOOL isAWindowManager;
+@property (nonatomic, assign) BOOL isWindowsMapUpdated;
 
 + (XCBConnection *) sharedConnectionAsWindowManager:(BOOL)asWindowManager;
 - (xcb_connection_t *) connection;

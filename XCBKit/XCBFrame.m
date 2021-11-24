@@ -42,6 +42,7 @@
     [self setWindowRect:aRect];
     [self setOriginalRect:aRect];
     /*** checks normal hints for client window **/
+    [connection setIsWindowsMapUpdated:NO];
     
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
