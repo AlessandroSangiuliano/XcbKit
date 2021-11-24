@@ -11,6 +11,8 @@
 
 @protocol Server <NSObject>
 
+@property (nonatomic, strong) NSString *serverName;
+
 @optional
 
 - (id) handleRequestFor:(Request)aRequest;
