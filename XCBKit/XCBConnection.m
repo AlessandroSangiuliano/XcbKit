@@ -142,6 +142,11 @@ static XCBConnection *sharedInstance;
     return windowsMap;
 }
 
+- (void) setWindowsMap:(NSMutableDictionary *)aWindowsMap
+{
+    windowsMap = aWindowsMap;
+}
+
 - (void)registerWindow:(XCBWindow *)aWindow
 {
     if (!isAWindowManager)

@@ -59,6 +59,7 @@
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
 - (NSMutableDictionary *) windowsMap;
+- (void) setWindowsMap:(NSMutableDictionary *)aWindowsMap;
 - (void) closeConnection;
 - (XCBWindow*) windowForXCBId:(xcb_window_t)anId;
 - (int) flush;
