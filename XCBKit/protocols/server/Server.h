@@ -13,6 +13,8 @@
 
 @property (nonatomic, strong) NSString *serverName;
 
+- (void) becomeServer;
+
 @optional
 
 - (id) handleRequestFor:(Request)aRequest;
