@@ -193,7 +193,7 @@ static XCBConnection *sharedInstance;
     NSLog(@"[XCBConnection] Removing the window %u from the windowsMap", win);
     NSNumber *key = [[NSNumber alloc] initWithInt:win];
     [windowsMap removeObjectForKey:key];
-
+    
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:self];
     
     BOOL removed = FnRemoveWindowFromWindowsArray(clientList, clientListIndex, win);
