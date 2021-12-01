@@ -713,6 +713,7 @@ static XCBConnection *sharedInstance;
     [[frame childWindowForKey:TitleBar] setIsAbove:YES];
     [self drawAllTitleBarsExcept:(XCBTitleBar*)[frame childWindowForKey:TitleBar]];
     [icccmService wmClassForWindow:window];
+    [frame configureClient];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -896,6 +897,7 @@ static XCBConnection *sharedInstance;
                 }
                 break;
         }
+
     }
     else
     {
