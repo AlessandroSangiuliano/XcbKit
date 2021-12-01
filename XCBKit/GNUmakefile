@@ -35,6 +35,7 @@ $(FRAMEWORK_NAME)_OBJC_FILES = \
 			utils/CairoSurfacesSet.m \
 			utils/XCBCreateWindowTypeRequest.m \
 			utils/XCBWindowTypeResponse.m \
+			utils/XCBEvent.m \
 			functions/Transformers.m \
 			functions/Comparators.m
 
@@ -62,6 +63,7 @@ $(FRAMEWORK_NAME)_HEADER_FILES = \
 			utils/CairoSurfacesSet.h \
 			utils/XCBCreateWindowTypeRequest.h \
 			utils/XCBWindowTypeResponse.h \
+			utils/XCBEvent.h \
 			utils/XCBShape.h \
 			functions/Transformers.h \
 			functions/Comparators.h \

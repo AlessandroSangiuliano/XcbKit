@@ -1102,7 +1102,7 @@
 
     /*** required by ICCCM compliance ***/
 
-    //[frame configureClient];
+    [frame configureClient];
 
     frame = nil;
     titleBar = nil;
@@ -1120,9 +1120,9 @@
 {
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
 
-    if (icons == nil)
+    if (icons == nil || [icons count] == 0)
     {
-        NSLog(@"No icons. Array nil");
+        NSLog(@"No icons. Array nil or empty");
         drawer = nil;
         return;
     }

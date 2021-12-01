@@ -842,7 +842,7 @@ static XCBConnection *sharedInstance;
 
         XCBPoint destPoint = XCBMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
-        //[frame configureClient];
+        [frame configureClient];
 
         window = nil;
         frame = nil;
