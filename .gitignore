@@ -146,3 +146,7 @@ XCBKit/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdCXX/
 XCBKit/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdOBJC/
 
 XCBKit/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdOBJCXX/
+
+*.make
+
+*.ts

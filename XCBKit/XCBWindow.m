@@ -390,6 +390,10 @@
 {
     NSUInteger size = [[connection screens] count];
     XCBQueryTreeReply *queryTreeReply = [self queryTree];
+    
+    if ([queryTreeReply message] == BadWindow)
+        return nil;
+    
     XCBWindow *rootWindow = [queryTreeReply rootWindow];
 
     for (int i = 0; i < size; i++)
