@@ -390,6 +390,10 @@
 {
     NSUInteger size = [[connection screens] count];
     XCBQueryTreeReply *queryTreeReply = [self queryTree];
+    
+    if ([queryTreeReply message] == BadWindow)
+        return nil;
+    
     XCBWindow *rootWindow = [queryTreeReply rootWindow];
 
     for (int i = 0; i < size; i++)
@@ -1102,7 +1106,7 @@
 
     /*** required by ICCCM compliance ***/
 
-    //[frame configureClient];
+    [frame configureClient];
 
     frame = nil;
     titleBar = nil;
@@ -1120,9 +1124,9 @@
 {
     CairoDrawer *drawer = [[CairoDrawer alloc] initWithConnection:connection window:self];
 
-    if (icons == nil)
+    if (icons == nil || [icons count] == 0)
     {
-        NSLog(@"No icons. Array nil");
+        NSLog(@"No icons. Array nil or empty");
         drawer = nil;
         return;
     }

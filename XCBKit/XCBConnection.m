@@ -713,6 +713,7 @@ static XCBConnection *sharedInstance;
     [[frame childWindowForKey:TitleBar] setIsAbove:YES];
     [self drawAllTitleBarsExcept:(XCBTitleBar*)[frame childWindowForKey:TitleBar]];
     [icccmService wmClassForWindow:window];
+    [frame configureClient];
 
     [self setNeedFlush:YES];
     window = nil;
@@ -842,7 +843,7 @@ static XCBConnection *sharedInstance;
 
         XCBPoint destPoint = XCBMakePoint(anEvent->event_x, anEvent->event_y);
         [frame moveTo:destPoint];
-        //[frame configureClient];
+        [frame configureClient];
 
         window = nil;
         frame = nil;
@@ -896,6 +897,7 @@ static XCBConnection *sharedInstance;
                 }
                 break;
         }
+
     }
     else
     {
