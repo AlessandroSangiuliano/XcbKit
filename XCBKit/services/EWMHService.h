@@ -186,7 +186,7 @@
 
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow;
 - (void) updateNetFrameExtentsForWindow:(XCBWindow*)aWindow andExtents:(uint32_t[])extents;
-
+- (void) updateNetWmWindowTypeDockForWindow:(XCBWindow*)aWindow;
 - (BOOL) ewmhClientMessage:(NSString*)anAtomMessageName;
 - (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow data:(xcb_client_message_data_t)someData;
 - (xcb_get_property_reply_t *) netWmIconFromWindow:(XCBWindow*)aWindow;
