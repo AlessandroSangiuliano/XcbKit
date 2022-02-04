@@ -592,6 +592,19 @@
                            withData:extents];
 }
 
+- (void)updateNetWmWindowTypeDockForWindow:(XCBWindow *)aWindow
+{
+    xcb_atom_t atom = [atomService atomFromCachedAtomsWithKey:EWMHWMWindowTypeDock];
+    
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMWindowType
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32
+                     withDataLength:1
+                           withData:&atom];
+}
+
 - (BOOL) ewmhClientMessage:(NSString *)anAtomMessageName
 {
     NSString *net = @"NET";
