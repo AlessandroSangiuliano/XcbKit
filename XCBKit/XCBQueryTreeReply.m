@@ -28,23 +28,12 @@
     return self;
 }
 
-- (NSMutableArray*) queryTreeAsArray
+- (xcb_window_t *) queryTreeAsArray
 {
     int len = xcb_query_tree_children_length(queryReply);
     xcb_window_t *chldrn = xcb_query_tree_children(queryReply);
-    XCBConnection *connection = [rootWindow connection];
 
-    NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:len];
-
-    for (int i = 0; i < len; ++i)
-    {
-        XCBWindow *window = [connection windowForXCBId:chldrn[i]];
-        [children addObject:window];
-        window = nil;
-    }
-
-    connection = nil;
-    return children;
+    return chldrn;
 }
 
 - (void) dealloc
