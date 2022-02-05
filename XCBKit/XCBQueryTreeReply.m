@@ -13,7 +13,7 @@
 @synthesize rootWindow;
 @synthesize parentWindow;
 @synthesize queryReply;
-@synthesize len;
+@synthesize childrenLen;
 
 - (id) initWithReply:(xcb_query_tree_reply_t *)aReply andConnection:(XCBConnection*)aConnection
 {
@@ -31,7 +31,7 @@
 
 - (xcb_window_t *) queryTreeAsArray
 {
-    len = xcb_query_tree_children_length(queryReply);
+    childrenLen = xcb_query_tree_children_length(queryReply);
     xcb_window_t *chldrn = xcb_query_tree_children(queryReply);
 
     return chldrn;
