@@ -656,7 +656,7 @@ static XCBConnection *sharedInstance;
         }
 
         [window updateRectsFromGeometries];
-        //[self registerWindow:window]; //TODO: PROABLY BETTER TO REGISTER AFTR THE MAPPIng
+        [self registerWindow:window]; //TODO: PROABLY BETTER TO REGISTER AFTR THE MAPPIng
         [window setFirstRun:YES];
         [window setWindowType:name];
         free(windowTypeReply);
@@ -701,7 +701,7 @@ static XCBConnection *sharedInstance;
 
     [ewmhService updateNetFrameExtentsForWindow:frame];
     [self mapWindow:frame];
-    [self registerWindow:window];
+    //[self registerWindow:window];
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
