@@ -656,14 +656,13 @@ static XCBConnection *sharedInstance;
         }
 
         [window updateRectsFromGeometries];
-        [self registerWindow:window]; //TODO: PROABLY BETTER TO REGISTER AFTR THE MAPPIng
         [window setFirstRun:YES];
         [window setWindowType:name];
         free(windowTypeReply);
         name = nil;
     }
 
-    [window onScreen];
+    [window onScreen]; // TODO: Just called in the else before this? really necessary?
     XCBScreen *screen =  [window screen];
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
@@ -700,11 +699,14 @@ static XCBConnection *sharedInstance;
                                    withData:atomProtocols];
 
     [ewmhService updateNetFrameExtentsForWindow:frame];
-    [self mapWindow:frame];
-    //[self registerWindow:window];
+    /*[self mapWindow:frame];
+    [self registerWindow:window];*/
 
     NSLog(@"Client window decorated with id %u", [window window]);
     [frame decorateClientWindow];
+    [self mapWindow:frame];
+    [self registerWindow:window];
+    
     [frame initCursor];
     [window updateAttributes];
     [frame setScreen:[window screen]];
