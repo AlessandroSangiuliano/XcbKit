@@ -39,7 +39,7 @@
 
 - (void) dealloc
 {
-   /* if (queryReply)
+    /*if (queryReply) this is not needed actually. also thee is a void* reply in the superclass that could be reused instead of this.
         free(queryReply);*/
 
     rootWindow = nil;
