@@ -14,11 +14,12 @@
 
 @interface XCBGeometryReply : XCBReply
 
-@property (nonatomic) uint16_t borderWidth;
-@property (nonatomic) uint8_t depth;
-@property (nonatomic) XCBRect rect;
+@property (nonatomic, assign) uint16_t borderWidth;
+@property (nonatomic, assign) uint8_t depth;
+@property (nonatomic, assign) XCBRect rect;
+@property (nonatomic, assign) XCBRect pixmapRect;
 @property (strong, nonatomic) XCBWindow *rootWindow;
-@property (nonatomic) xcb_get_geometry_reply_t *geometryReply;
+@property (nonatomic, assign) xcb_get_geometry_reply_t *geometryReply;
 
 - (id) initWithGeometryReply:(xcb_get_geometry_reply_t*)aReplay;
 - (void) description;

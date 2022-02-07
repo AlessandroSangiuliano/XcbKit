@@ -36,6 +36,7 @@
 - (void) saveContext;
 - (void) restoreContext;
 - (void) setPreviewImage;
+- (void) putImage:(NSString*)aPath forDPixmap:(BOOL)aValue;
 - (void) drawContent;
 - (cairo_surface_t*) drawContentFromData:(uint32_t *)data withWidht:(int)aWidth andHeight:(int)aHeight;
 - (void) drawIconFromSurface:(cairo_surface_t*)aSurface;

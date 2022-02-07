@@ -11,8 +11,8 @@
 
 typedef struct _XCBPoint
 {
-    int16_t x;
-    int16_t y;
+    double x;
+    double y;
     
 } XCBPoint;
 
@@ -47,7 +47,7 @@ static inline XCBColor XCBMakeColor(double redComponent, double greenComponent, 
     return color;
 }
 
-static inline XCBPoint XCBMakePoint(int16_t x, int16_t y)
+static inline XCBPoint XCBMakePoint(double x, double y)
 {
     XCBPoint point = {x, y};
     return point;
@@ -93,12 +93,7 @@ static inline BOOL FnCheckXCBRectIsValid(XCBRect rect)
 
 static inline NSString* FnFromXCBRectToString(XCBRect rect)
 {
-    return [NSString stringWithFormat:@"Position: (x: %hd, y: %hd), Size: (width: %hd, height: %hd)",
+    return [NSString stringWithFormat:@"Position: (x: %f, y: %f), Size: (width: %hd, height: %hd)",
             rect.position.x, rect.position.y, rect.size.width, rect.size.height];
 }
 
-@interface XCBShape : NSObject
-
-
-
-@end

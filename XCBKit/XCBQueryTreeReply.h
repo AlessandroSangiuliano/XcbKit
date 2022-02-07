@@ -18,8 +18,9 @@
 @property (strong, nonatomic) XCBWindow *rootWindow;
 @property (strong, nonatomic) XCBWindow *parentWindow;
 @property (nonatomic) xcb_query_tree_reply_t *queryReply;
+@property (nonatomic, assign) int childrenLen;
 
 - (id) initWithReply:(xcb_query_tree_reply_t *)aReply andConnection:(XCBConnection*)aConnection;
-- (NSMutableArray*)queryTreeAsArray;
+- (xcb_window_t *)queryTreeAsArray;
 
 @end

@@ -8,6 +8,8 @@
 
 #import "EWMHService.h"
 #import "../functions/Transformers.h"
+#import "../enums/EEwmh.h"
+#import "../services/TitleBarSettingsService.h"
 
 @implementation EWMHService
 
@@ -546,12 +548,11 @@
 
     if (reply->length == 0 && reply->format == 0 && reply->type == 0)
     {
+        NSLog(@"Property not present");
         free(error);
         return NULL;
     }
 
-
-    //void* value = xcb_get_property_value(reply);
     free(error);
     return reply;
 }
@@ -591,6 +592,19 @@
                            withData:extents];
 }
 
+- (void)updateNetWmWindowTypeDockForWindow:(XCBWindow *)aWindow
+{
+    xcb_atom_t atom = [atomService atomFromCachedAtomsWithKey:EWMHWMWindowTypeDock];
+    
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMWindowType
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32
+                     withDataLength:1
+                           withData:&atom];
+}
+
 - (BOOL) ewmhClientMessage:(NSString *)anAtomMessageName
 {
     NSString *net = @"NET";
@@ -609,7 +623,7 @@
     return ewmh;
 }
 
-- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow
+- (void) handleClientMessage:(NSString*)anAtomMessageName forWindow:(XCBWindow*)aWindow data:(xcb_client_message_data_t)someData
 {
     if ([anAtomMessageName isEqualToString:EWMHRequestFrameExtents])
     {
@@ -619,7 +633,7 @@
         return;
     }
 
-    /*** if it is _NET_ACTIVE_WINDOW, focus the window that update the property too. ***/
+    /*** if it is _NET_ACTIVE_WINDOW, focus the window that updates the property too. ***/
 
     if ([anAtomMessageName isEqualToString:EWMHActiveWindow])
     {
@@ -629,8 +643,8 @@
         {
             XCBFrame *frame = (XCBFrame *) [aWindow parentWindow];
             XCBTitleBar *titleBar = (XCBTitleBar *) [frame childWindowForKey:TitleBar];
-            [frame stackAbove];
-            [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+            //[frame stackAbove]; //FIXME: just use focus?
+            [titleBar drawTitleBarComponents];
             [connection drawAllTitleBarsExcept:titleBar];
             frame = nil;
             titleBar = nil;
@@ -638,7 +652,386 @@
 
         return;
     }
+
+    if ([anAtomMessageName isEqualToString:EWMHWMState])
+    {
+        Action action = someData.data32[0];
+        xcb_atom_t firstProp = someData.data32[1];
+        xcb_atom_t secondProp = someData.data32[2];
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar])
+        {
+            BOOL skipTaskBar = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow skipTaskBar]);
+            [aWindow setSkipTaskBar:skipTaskBar];
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager])
+        {
+            BOOL skipPager = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow skipTaskBar]);
+            [aWindow setSkipPager:skipPager];
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove])
+        {
+            BOOL above = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isAbove]);
+
+            if (above)
+                [aWindow stackAbove];
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow])
+        {
+            BOOL below = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isBelow]);
+
+            if (below)
+                [aWindow stackBelow];
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz])
+        {
+            BOOL maxHorz = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedHorizontally]);
+            XCBScreen *screen = [aWindow screen];
+            XCBSize size;
+            XCBPoint position;
+            XCBFrame *frame;
+            XCBTitleBar *titleBar;
+            TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+
+            uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+
+            if (maxHorz)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                if ([aWindow decorated])
+                {
+                    frame = (XCBFrame*)[aWindow parentWindow];
+                    titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+
+                    /*** frame size and position ***/
+                    size = XCBMakeSize([screen width], [frame windowRect].size.height);
+                    [frame maximizeToSize:size andPosition:[frame windowRect].position];
+
+                    /*** titlebar size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width, titleHgt);
+                    position = XCBMakePoint(0.0,0.0);
+                    [titleBar maximizeToSize:size andPosition:position];
+                    [titleBar drawTitleBarComponents];
+
+                    /*** client window size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2);
+                    position = XCBMakePoint(0.0, titleHgt - 1);
+
+                    frame = nil;
+                    titleBar = nil;
+                }
+                else
+                {
+                    size = XCBMakeSize([screen width], [aWindow windowRect].size.height);
+                    position = XCBMakePoint([aWindow windowRect].position.x, [aWindow windowRect].position.y);
+                }
+
+                [aWindow maximizeToSize:size andPosition:position];
+                [aWindow setMaximizedHorizontally:maxHorz];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+            settingsService = nil;
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert])
+        {
+            BOOL maxVert = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow maximizedVertically]);
+            XCBScreen *screen = [aWindow screen];
+            XCBSize size;
+            XCBPoint position;
+            XCBFrame *frame;
+            XCBTitleBar *titleBar;
+            TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+
+            uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+
+            if (maxVert)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                if ([aWindow decorated])
+                {
+                    frame = (XCBFrame*)[aWindow parentWindow];
+                    titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+
+                    /*** frame size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width, [screen height]);
+                    [frame maximizeToSize:size andPosition:[frame windowRect].position];
+
+                    /*** titlebar size and position ***/
+                    size = XCBMakeSize(size.width, titleHgt);
+                    position = XCBMakePoint(0.0, 0.0);
+                    [titleBar maximizeToSize:size andPosition:position];
+                    [titleBar drawTitleBarComponents];
+
+                    /*** client window size and position ***/
+                    size = XCBMakeSize([aWindow windowRect].size.width - 2, [frame windowRect].size.height - titleHgt - 2); //TODO:why - 2?
+                    position = XCBMakePoint(0.0, titleHgt - 1);
+                    frame = nil;
+                    titleBar = nil;
+                }
+                else
+                {
+                    size = XCBMakeSize([aWindow windowRect].size.width, [screen height]);
+                    position = XCBMakePoint([aWindow windowRect].position.x, [aWindow windowRect].position.y);
+                }
+
+                [aWindow maximizeToSize:size andPosition:position];
+                [aWindow setMaximizedVertically:maxVert];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+            settingsService = nil;
+        }
+
+        /***TODO: test it ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen])
+        {
+            BOOL fullscr = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMaximized]);
+            XCBScreen *screen = [aWindow screen];
+            TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+            XCBFrame *frame;
+            XCBTitleBar *titleBar;
+            XCBSize size;
+            XCBPoint position;
+
+            uint16_t titleHgt = [settingsService heightDefined] ? [settingsService height] : [settingsService defaultHeight];
+
+            if (fullscr)
+            {
+                if ([aWindow isMinimized])
+                    [aWindow restoreFromIconified];
+
+                if ([aWindow decorated])
+                {
+                    frame = (XCBFrame*)[aWindow parentWindow];
+                    titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+
+                    /*** frame size and position ***/
+                    size = XCBMakeSize([screen width], [screen height]);
+                    position = XCBMakePoint(0.0,0.0);
+                    [frame maximizeToSize:size andPosition:position];
+
+                    /*** titlebar size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width, titleHgt);
+                    [titleBar maximizeToSize:size andPosition:position];
+                    [titleBar drawTitleBarComponents];
+
+                    /*** client window size and position ***/
+                    size = XCBMakeSize([frame windowRect].size.width - 2, [frame windowRect].size.height - 2);
+                    position = XCBMakePoint(0, titleHgt - 1);
+
+                    frame = nil;
+                    titleBar = nil;
+                }
+                else
+                {
+                    size = XCBMakeSize([screen width], [screen height]);
+                    position = XCBMakePoint(0, 0);
+                }
+
+
+                [aWindow maximizeToSize:size andPosition:position];
+                [aWindow setFullScreen:fullscr];
+                screen = nil;
+            }
+
+            [self updateNetWmState:aWindow];
+            settingsService = nil;
+        }
+
+        /*** TODO: test and complete it, but shading support has really low priority ***/
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded])
+        {
+            BOOL shaded = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow shaded]);
+
+            if (shaded)
+            {
+                if ([aWindow isMinimized])
+                    return;
+
+                [aWindow shade];
+                [aWindow setShaded:shaded];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden])
+        {
+            BOOL minimize = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow isMinimized]);
+
+            if (minimize)
+            {
+                [aWindow minimize];
+                [aWindow setIsMinimized:minimize];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        /*** TODO: test it. for now just focus the window and set it active ***/
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention])
+        {
+            BOOL attention = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow gotAttention]);
+
+            if (attention)
+            {
+                [aWindow focus];
+                [aWindow setGotAttention:attention];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+        if (firstProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky] ||
+            secondProp == [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky])
+        {
+            BOOL always = (action == _NET_WM_STATE_ADD) || (action == _NET_WM_STATE_TOGGLE && ![aWindow alwaysOnTop]);
+
+            if (always)
+            {
+                [aWindow stackAbove];
+                [aWindow setAlwaysOnTop:always];
+            }
+
+            [self updateNetWmState:aWindow];
+        }
+
+    }
+
 }
+
+- (void) updateNetWmState:(XCBWindow*)aWindow
+{
+    int i = 0;
+    xcb_atom_t props[12];
+
+    if ([aWindow skipTaskBar])
+    {
+        NSLog(@"Skip taskbar for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipTaskbar];
+    }
+
+    if ([aWindow skipPager])
+    {
+        NSLog(@"Skip Pager for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSkipPager];
+    }
+
+    if ([aWindow isAbove])
+    {
+        NSLog(@"Above for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateAbove];
+    }
+
+    if ([aWindow isBelow])
+    {
+        NSLog(@"Below for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateBelow];
+    }
+
+    if ([aWindow maximizedHorizontally])
+    {
+        NSLog(@"Maximize horizotally for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedHorz];
+    }
+
+    if ([aWindow maximizedVertically])
+    {
+        NSLog(@"Maximize vertically for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateMaximizedVert];
+    }
+
+    if ([aWindow shaded])
+    {
+        NSLog(@"Shaded for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateShaded];
+    }
+
+    if ([aWindow isMinimized])
+    {
+        NSLog(@"Hidden for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateHidden];
+    }
+
+    if ([aWindow fullScreen])
+    {
+        NSLog(@"Full screen for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateFullscreen];
+    }
+
+    if ([aWindow gotAttention])
+    {
+        NSLog(@"Demands attention for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateDemandsAttention];
+    }
+
+    if ([aWindow alwaysOnTop])
+    {
+        NSLog(@"Sticky for window %u", [aWindow window]);
+        props[i++] = [atomService atomFromCachedAtomsWithKey:EWMHWMStateSticky];
+    }
+
+    [self changePropertiesForWindow:aWindow
+                           withMode:XCB_PROP_MODE_REPLACE
+                       withProperty:EWMHWMState
+                           withType:XCB_ATOM_ATOM
+                         withFormat:32
+                     withDataLength:i
+                           withData:props];
+}
+
+- (uint32_t)netWMPidForWindow:(XCBWindow *)aWindow
+{
+    void *reply = [self getProperty:EWMHWMPid propertyType:XCB_ATOM_CARDINAL
+                          forWindow:aWindow
+                             delete:NO
+                             length:1];
+    
+    if (!reply)
+        return -1;
+    
+    uint32_t *net = xcb_get_property_value(reply);
+    
+    uint32_t pid = *net;
+    
+    free(reply);
+    net = NULL;
+    
+    return pid;
+    
+}
+
 
 - (xcb_get_property_reply_t*) netWmIconFromWindow:(XCBWindow*)aWindow
 {
@@ -656,8 +1049,7 @@
 
 - (void) updateNetClientList
 {
-
-    uint32_t size = [connection clientListIndex] + 1;
+    uint32_t size = [connection clientListIndex];
 
     //TODO: with more screens this need to be looped ?
     XCBWindow *rootWindow = [connection rootWindowForScreenNumber:0];
@@ -713,6 +1105,7 @@
                          withFormat:32 withDataLength:size
                            withData:atomList];
 }
+
 
 -(void)dealloc
 {

@@ -22,6 +22,7 @@
                     XCB_CW_CURSOR
 
 #define CLIENTLISTSIZE 1000
+#define WINDOWSMAPUPDATED @"windowsMapUpdated"
 
 @class XCBWindow;
 @class EWMHService;
@@ -43,18 +44,22 @@
 @property (strong, nonatomic) XCBRegion* damagedRegions;
 @property (nonatomic, assign) BOOL xfixesInitialized;
 @property (nonatomic, assign) BOOL resizeState;
-@property (nonatomic) NSInteger clientListIndex;
+@property (nonatomic, assign) NSInteger clientListIndex;
+@property (nonatomic, assign, readonly) BOOL isAWindowManager;
+@property (nonatomic, assign) BOOL isWindowsMapUpdated;
 
-+ (XCBConnection *) sharedConnection;
++ (XCBConnection *) sharedConnectionAsWindowManager:(BOOL)asWindowManager;
 - (xcb_connection_t *) connection;
 /**
  * init with DISPLAY and screeen to NULL
  */
-- (id) init;
-- (id) initWithDisplay:(NSString *) aDisplay;
+- (id) initAsWindowManager:(BOOL)isWindowManager;
+- (id) initWithXcbConnection:(xcb_connection_t*)aConnection andDisplay:(NSString*)aDisplay asWindowManager:(BOOL)isWindowManager;
+- (id) initWithDisplay:(NSString *) aDisplay asWindowManager:(BOOL)isWindowManager;
 - (void) registerWindow:(XCBWindow*) aWindow;
 - (void) unregisterWindow:(XCBWindow *) aWindow;
 - (NSMutableDictionary *) windowsMap;
+- (void) setWindowsMap:(NSMutableDictionary *)aWindowsMap;
 - (void) closeConnection;
 - (XCBWindow*) windowForXCBId:(xcb_window_t)anId;
 - (int) flush;
@@ -69,11 +74,14 @@
 				  withXCBClass: (uint16_t) xcbClass
 				  withVisualId: (XCBVisual*) aVisual
 				 withValueMask: (uint32_t) valueMask
-				 withValueList: (const uint32_t *) valueList;
+				 withValueList: (const uint32_t *) valueList
+                registerWindow:(BOOL)reg;
 
 - (XCBWindowTypeResponse*) createWindowForRequest:(XCBCreateWindowTypeRequest*) aRequest registerWindow:(BOOL) reg;
 - (void) checkScreens;
 - (NSMutableArray*) screens;
+- (void) grabServer;
+- (void) ungrabServer;
 
 /*** HANDLE EVENTS ***/
 
@@ -113,12 +121,12 @@
 - (void) addDamagedRegion:(XCBRegion*) damagedRegion;
 - (void) borderClickedForFrameWindow:(XCBFrame*)aFrame withEvent:(xcb_button_press_event_t*)anEvent;
 - (void)drawAllTitleBarsExcept:(XCBTitleBar *)aTitileBar;
+- (BOOL) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 
+/*** ACCESSORS ***/
 
 - (xcb_timestamp_t) currentTime;
 - (void) setCurrentTime:(xcb_timestamp_t)time;
-- (void) registerAsWindowManager:(BOOL)replace screenId:(uint32_t)screenId selectionWindow:(XCBWindow*)selectionWindow;
 - (XCBWindow*) rootWindowForScreenNumber:(int)number;
 - (xcb_window_t*) clientList;
-
 @end

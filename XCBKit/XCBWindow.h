@@ -15,6 +15,7 @@
 #import "XCBAttributesReply.h"
 #import "XCBVisual.h"
 #import "XCBCursor.h"
+#import "XCBShape.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \
@@ -50,24 +51,22 @@ typedef NS_ENUM(NSInteger, WindowState)
     ICCCM_WM_STATE_ICONIC = 3
 };
 
-@property (nonatomic) xcb_gcontext_t graphicContextId;
-@property (nonatomic) XCBRect windowRect;
-@property (nonatomic) XCBRect oldRect;
-@property (nonatomic) XCBRect originalRect;
+@property (nonatomic, assign) xcb_gcontext_t graphicContextId;
+@property (nonatomic, assign) XCBRect windowRect;
+@property (nonatomic, assign) XCBRect oldRect;
+@property (nonatomic, assign) XCBRect originalRect;
 @property (nonatomic, assign) BOOL decorated;
 @property (nonatomic, assign) BOOL isCloseButton;
 @property (nonatomic, assign) BOOL isMinimizeButton;
 @property (nonatomic, assign) BOOL isMaximizeButton;
-@property (nonatomic, assign) BOOL isMaximized;
-@property (nonatomic, assign) BOOL isMinimized;
 @property (nonatomic) XCBConnection* connection;
 @property (nonatomic, assign) BOOL needDestroy;
-@property (nonatomic) xcb_pixmap_t pixmap;
+@property (nonatomic, assign) xcb_pixmap_t pixmap;
+@property (nonatomic, assign) xcb_pixmap_t dPixmap;
 @property (nonatomic, assign) BOOL firstRun; //find a better solution
 @property (nonatomic, assign) BOOL pointerGrabbed;
 @property (strong, nonatomic) NSMutableArray* allowedActions;
-@property (nonatomic, assign) BOOL isAbove;
-@property (nonatomic) XCBSize pixmapSize;
+@property (nonatomic, assign) XCBSize pixmapSize;
 @property (strong, nonatomic) NSMutableArray *icons;
 @property (strong, nonatomic) XCBScreen *screen;
 @property (strong, nonatomic) XCBAttributesReply *attributes;
@@ -78,20 +77,39 @@ typedef NS_ENUM(NSInteger, WindowState)
 @property (strong, nonatomic) NSMutableArray *windowClass;
 @property (strong, nonatomic) NSString *windowType;
 @property (strong, nonatomic) XCBWindow *leaderWindow;
+@property (strong, nonatomic) XCBShape* shape;
 
+/*** _NET_WM_STATE ***/
+
+@property (nonatomic, assign) BOOL skipTaskBar;
+@property (nonatomic, assign) BOOL skipPager;
+@property (nonatomic, assign) BOOL isAbove;
+@property (nonatomic, assign) BOOL isBelow;
+@property (nonatomic, assign) BOOL maximizedVertically;
+@property (nonatomic, assign) BOOL maximizedHorizontally;
+@property (nonatomic, assign) BOOL shaded;
+@property (nonatomic, assign) BOOL isMaximized;
+@property (nonatomic, assign) BOOL isMinimized;
+@property (nonatomic, assign) BOOL fullScreen;
+@property (nonatomic, assign) BOOL gotAttention;
 
 /*** ALLOWED ACTIONS ***/
 
-@property (nonatomic) BOOL canMove;
-@property (nonatomic) BOOL canResize;
-@property (nonatomic) BOOL canMinimize;
-@property (nonatomic) BOOL canMaximizeVert;
-@property (nonatomic) BOOL canMaximizeHorz;
-@property (nonatomic) BOOL canFullscreen;
-@property (nonatomic) BOOL canChangeDesktop;
-@property (nonatomic) BOOL canClose;
-@property (nonatomic) BOOL canShade;
-@property (nonatomic) BOOL canStick;
+@property (nonatomic, assign) BOOL canMove;
+@property (nonatomic, assign) BOOL canResize;
+@property (nonatomic, assign) BOOL canMinimize;
+@property (nonatomic, assign) BOOL canMaximizeVert;
+@property (nonatomic, assign) BOOL canMaximizeHorz;
+@property (nonatomic, assign) BOOL canFullscreen;
+@property (nonatomic, assign) BOOL canChangeDesktop;
+@property (nonatomic, assign) BOOL canClose;
+@property (nonatomic, assign) BOOL canShade;
+@property (nonatomic, assign) BOOL canStick;
+@property (nonatomic, assign) BOOL alwaysOnTop;
+
+/*** _NET_WM_PID ***/
+
+@property (nonatomic, assign) u_int32_t pid;
 
 
 - (xcb_window_t) window;
@@ -116,6 +134,8 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) createPixmapDelayed;
 - (void) destroyPixmap;
 - (void) updatePixmap;
+- (void) clearArea:(XCBRect)aRect generatesExposure:(BOOL)aValue;
+- (void) drawArea:(XCBRect)aRect;
 
 - (XCBWindow*) parentWindow;
 - (XCBWindow*) aboveWindow;
@@ -133,7 +153,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (XCBScreen*) onScreen;
 - (XCBVisual*) visual;
 
-- (void) maximizeToWidth:(uint16_t)width andHeight:(uint16_t)height;
+- (void) maximizeToSize:(XCBSize)aSize andPosition:(XCBPoint)aPosition;
 - (void) minimize;
 - (void) hide;
 - (void) close;
@@ -162,5 +182,11 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) initCursor;
 - (void) showLeftPointerCursor;
 - (void) showResizeCursorForPosition:(MousePosition)position;
+- (void) shade;
+- (void) putWindowBackgroundWithPixmap:(xcb_pixmap_t)aPixmap;
+- (void) refreshBorder;
+- (void) generateWindowIcons;
+- (BOOL) updatePid;
+- (BOOL) updateLeaderWindow;
 
 @end

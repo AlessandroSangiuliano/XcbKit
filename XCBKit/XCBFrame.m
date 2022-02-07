@@ -9,6 +9,8 @@
 #import "XCBFrame.h"
 #import "functions/Transformers.h"
 #import "services/ICCCMService.h"
+#import "services/TitleBarSettingsService.h"
+#import "utils/CairoDrawer.h"
 
 
 @implementation XCBFrame
@@ -21,6 +23,7 @@
 @synthesize offset;
 @synthesize leftBorderClicked;
 @synthesize topBorderClicked;
+@synthesize titleHeight;
 
 - (id) initWithClientWindow:(XCBWindow *)aClientWindow withConnection:(XCBConnection *)aConnection
 {
@@ -39,6 +42,7 @@
     [self setWindowRect:aRect];
     [self setOriginalRect:aRect];
     /*** checks normal hints for client window **/
+    [connection setIsWindowsMapUpdated:NO];
     
     ICCCMService* icccmService = [ICCCMService sharedInstanceWithConnection:connection];
     xcb_size_hints_t *sizeHints = [icccmService wmNormalHintsForWindow:aClientWindow];
@@ -81,10 +85,15 @@
     [children setObject:aClientWindow forKey: key];
     [connection registerWindow:self];
 
+    TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
+    titleHeight = [settings heightDefined] ? [settings height] : [settings defaultHeight];
+
     [super setIsAbove:YES];
     free(sizeHints);
     icccmService = nil;
     key= nil;
+    settings = nil;
+
     return self;
 }
 
@@ -126,13 +135,17 @@
     values[0] = [scr screen]->white_pixel;
     values[1] = TITLE_MASK_VALUES;
 
+    TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
+
+    uint16_t height = [settings heightDefined] ? [settings height] : [settings defaultHeight];
+
     XCBCreateWindowTypeRequest* request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBTitleBarRequest];
     [request setDepth:XCB_COPY_FROM_PARENT];
     [request setParentWindow:self];
     [request setXPosition:0];
     [request setYPosition:0];
     [request setWidth:[self windowRect].size.width];
-    [request setHeight:22];
+    [request setHeight:height];
     [request setBorderWidth:0];
     [request setXcbClass:XCB_WINDOW_CLASS_INPUT_OUTPUT];
     [request setVisual:rootVisual];
@@ -146,7 +159,7 @@
 
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
 
-    void* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
+    xcb_get_property_reply_t* reply = [ewmhService getProperty:[ewmhService EWMHWMName]
                               propertyType:XCB_GET_PROPERTY_TYPE_ANY
                                  forWindow:clientWindow
                                     delete:NO
@@ -156,8 +169,9 @@
     if (reply)
     {
         char *value = xcb_get_property_value(reply);
-        windowTitle = [NSString stringWithUTF8String:value];
-        value = NULL;
+        int len = xcb_get_property_value_length(reply);
+        NSLog(@"Window title: %s, len: %d", value, len);
+        windowTitle = [NSString stringWithCString:value length:len];
     }
 
     // for now if it is nil just set an empty string
@@ -174,16 +188,22 @@
         icccmService = nil;
     }
 
-    [titleBar generateButtons];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
-    [titleBar setWindowTitle:windowTitle];
-
-    [connection mapWindow:titleBar];
+    [titleBar onScreen];
+    [titleBar updateAttributes];
     [titleBar setIsMapped:YES];
+    [titleBar createPixmap];
+    [titleBar generateButtons];
+    [titleBar setIsAbove:YES];
+    [titleBar setButtonsAbove:YES];
+    [titleBar drawTitleBarComponentsPixmaps];
+    [titleBar putWindowBackgroundWithPixmap:[titleBar pixmap]];
+    [titleBar putButtonsBackgroundPixmaps:YES];
     [clientWindow setDecorated:YES];
     [clientWindow setWindowBorderWidth:0];
+    [connection mapWindow:titleBar];
+    [titleBar setWindowTitle:windowTitle];
 
-    XCBPoint position = XCBMakePoint(0, 21);
+    XCBPoint position = XCBMakePoint(0, height - 1);
     [connection reparentWindow:clientWindow toWindow:self position:position];
     [connection mapWindow:clientWindow];
     uint32_t border[] = {0};
@@ -195,71 +215,91 @@
     windowTitle = nil;
     scr = nil;
     rootVisual = nil;
-    
+    settings = nil;
+
     free(reply);
 }
 
-- (void) resize:(xcb_motion_notify_event_t *)anEvent
+/*** performance while resizing pixel by pixel is critical so we do everything we can to improve it also if the message signature looks bad ***/
+
+- (void) resize:(xcb_motion_notify_event_t *)anEvent xcbConnection:(xcb_connection_t*)aXcbConnection
 {
 
     /*** width ***/
 
     if (rightBorderClicked && !bottomBorderClicked && !leftBorderClicked && !topBorderClicked)
-        resizeFromRightForEvent(anEvent, self, minWidthHint);
+    {
+        resizeFromRightForEvent(anEvent, aXcbConnection, self, minWidthHint);
+        //[self configureClient];
+    }
 
     if (leftBorderClicked && !bottomBorderClicked && !rightBorderClicked && !topBorderClicked)
-        resizeFromLeftForEvent(anEvent, self, minWidthHint);
+    {
+        resizeFromLeftForEvent(anEvent, aXcbConnection, self, minWidthHint);
+        //[self configureClient];
+    }
 
 
     /** height **/
 
     if (bottomBorderClicked && !rightBorderClicked && !leftBorderClicked)
-        resizeFromBottomForEvent(anEvent, self, minHeightHint);
+    {
+        resizeFromBottomForEvent(anEvent, aXcbConnection, self, minHeightHint, titleHeight);
+        //[self configureClient];
+    }
+
 
     if (topBorderClicked && !rightBorderClicked && !leftBorderClicked && !bottomBorderClicked)
-        resizeFromTopForEvent(anEvent, self, minHeightHint);
+    {
+        resizeFromTopForEvent(anEvent, aXcbConnection, self, minHeightHint, titleHeight);
+        //[self configureClient];
+    }
 
 
     /** width and height **/
 
     if (rightBorderClicked && bottomBorderClicked && !leftBorderClicked)
     {
-        resizeFromAngleForEvent(anEvent, self, minWidthHint, minHeightHint);
+        resizeFromAngleForEvent(anEvent, aXcbConnection, self, minWidthHint, minHeightHint, titleHeight);
+        //[self configureClient];
     }
 
 }
 
-void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window, int minW)
+void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent,
+                             xcb_connection_t *connection,
+                             XCBFrame* frame,
+                             int minW)
 {
-    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
-    xcb_connection_t *connection = [[window connection] connection];
+    XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+    //xcb_connection_t *connection = [[frame connection] connection];
 
-    XCBRect rect = [window windowRect];
+    XCBRect frameRect = [frame windowRect];
     XCBRect titleBarRect = [titleBar windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
     uint32_t values[] = {anEvent->event_x};
 
-    if (rect.size.width <= minW && anEvent->event_x < minW)
+    if (frameRect.size.width <= minW && anEvent->event_x < minW)
     {
-        rect.size.width = minW;
+        frameRect.size.width = minW;
         titleBarRect.size.width = minW;
         clientRect.size.width = minW;
         values[0] = minW;
-        xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH, &values);
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_WIDTH, &values);
         xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
 
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        [frame setWindowRect:frameRect];
+        [frame setOriginalRect:frameRect];
 
         [titleBar setWindowRect:titleBarRect];
         [titleBar setOriginalRect:titleBarRect];
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -267,13 +307,13 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* windo
         return;
     }
 
-    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_WIDTH, &values);
     xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH, &values);
-    rect.size.width = anEvent->event_x;
+    frameRect.size.width = anEvent->event_x;
 
-    [window setWindowRect:rect];
-    [window setOriginalRect:rect];
+    [frame setWindowRect:frameRect];
+    [frame setOriginalRect:frameRect];
 
     titleBarRect.size.width = anEvent->event_x;
     [titleBar setWindowRect:titleBarRect];
@@ -282,20 +322,23 @@ void resizeFromRightForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* windo
     clientRect.size.width = anEvent->event_x;
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
     connection = NULL;
 }
 
-void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window, int minW)
+void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent,
+                            xcb_connection_t *connection,
+                            XCBFrame* frame,
+                            int minW)
 {
-    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
-    xcb_connection_t *connection = [[window connection] connection];
+    XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+    //xcb_connection_t *connection = [[frame connection] connection];
 
-    XCBRect rect = [window windowRect];
+    XCBRect rect = [frame windowRect];
     XCBRect titleBarRect = [titleBar windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
@@ -304,7 +347,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
 
     if (rect.size.width <= minW && anEvent->root_x > rect.position.x)
     {
-        /* FIXME: when the reducing in a fast way, the resize works but there also is a little window movement, more noticeable
+        /* FIXME: when the reducing in a fast way, the resize works but there also is a little frame movement, more noticeable
          * doing faster movements with the mouse while reducing */
 
         rect.size.width = minW;
@@ -312,13 +355,13 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
         clientRect.size.width = minW;
         values[0] = rect.position.x;
         values[1] = minW;
-        xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
         values[0] = 0;
         xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
 
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        [frame setWindowRect:rect];
+        [frame setOriginalRect:rect];
 
         titleBarRect.position.x = values[0];
         titleBarRect.size.width = values[1];
@@ -329,7 +372,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
         clientRect.size.width = values[1];
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         clientWindow = nil;
         titleBar = nil;
@@ -338,15 +381,15 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
     }
 
 
-    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
+    xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
     rect.position.x = values[0];
     rect.size.width = values[1];
     values[0] = 0;
     xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_WIDTH, &values);
 
-    [window setWindowRect:rect];
-    [window setOriginalRect:rect];
+    [frame setWindowRect:rect];
+    [frame setOriginalRect:rect];
 
     titleBarRect.position.x = values[0];
     titleBarRect.size.width = values[1];
@@ -357,7 +400,7 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
     clientRect.size.width = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     clientWindow = nil;
     titleBar = nil;
@@ -365,27 +408,31 @@ void resizeFromLeftForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window
 
 }
 
-void resizeFromBottomForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window, int minH)
+void resizeFromBottomForEvent(xcb_motion_notify_event_t *anEvent,
+                              xcb_connection_t *connection,
+                              XCBFrame* frame,
+                              int minH,
+                              uint16_t titleBarHeight)
 {
-    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
-    xcb_connection_t *connection = [[window connection] connection];
+    XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+    //xcb_connection_t *connection = [[frame connection] connection];
 
-    XCBRect rect = [window windowRect];
+    XCBRect rect = [frame windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
     uint32_t values[] = {anEvent->event_y};
 
-    if (rect.size.height <= minH + 22 && anEvent->event_y < minH)
+    if (rect.size.height <= minH + titleBarHeight && anEvent->event_y < minH)
     {
-        rect.size.height = minH + 22;
+        rect.size.height = minH + titleBarHeight;
         clientRect.size.height = minH;
         values[0] = clientRect.size.height;
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
         values[0] = rect.size.height;
-        xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_HEIGHT, &values);
 
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        [frame setWindowRect:rect];
+        [frame setOriginalRect:rect];
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
@@ -395,54 +442,59 @@ void resizeFromBottomForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* wind
         return;
     }
 
-    values[0] = anEvent->event_y - 22;
+    values[0] = anEvent->event_y - titleBarHeight;
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     clientRect.size.height = values[0];
     values[0] = anEvent->event_y;
-    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_HEIGHT, &values);
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
 
 
     rect.size.height = values[0];
-    [window setWindowRect:rect];
-    [window setOriginalRect:rect];
+    [frame setWindowRect:rect];
+    [frame setOriginalRect:rect];
 
     clientWindow = nil;
     connection = NULL;
 }
 
-void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window, int minH)
+void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent,
+                           xcb_connection_t *connection,
+                           XCBFrame* frame,
+                           int minH,
+                           uint16_t titleBarHeight)
 {
-    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
-    xcb_connection_t *connection = [[window connection] connection];
+    XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+    //xcb_connection_t *connection = [[frame connection] connection];
 
-    XCBRect rect = [window windowRect];
+    XCBRect rect = [frame windowRect];
     XCBRect titleBarRect = [titleBar windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
     int yDelta = rect.position.y - anEvent->root_y;
+
     uint32_t values[] = {anEvent->root_y, yDelta + rect.size.height};
 
-    if (rect.size.height <= minH + 22 && anEvent->root_y > rect.position.y)
+    if (rect.size.height <= minH + titleBarHeight && anEvent->root_y > rect.position.y)
     {
-        /* FIXME: when the reducing in a fast way, the resize works but there also is a little window movement, more noticeable
+        /* FIXME: when the reducing in a fast way, the resize works but there also is a little frame movement, more noticeable
          * doing faster movements with the mouse while reducing */
 
-        rect.size.height = minH + 22;
+        rect.size.height = minH + titleBarHeight;
         clientRect.size.height = minH;
-        values[0] = clientRect.position.y;
+        values[0] = clientRect.position.y - 1;
         values[1] = clientRect.size.height;
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
 
         values[0] = rect.position.y;
         values[1] = rect.size.height;
-        xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
 
 
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        [frame setWindowRect:rect];
+        [frame setOriginalRect:rect];
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
@@ -454,7 +506,7 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window,
         return;
     }
 
-    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
 
     rect.position.y = values[0];
     rect.size.height = values[1];
@@ -464,14 +516,14 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window,
 
     titleBarRect.position.y = values[0];
 
-    values[0] = 22;
-    values[1] = rect.size.height - 22;
+    values[0] = titleBarHeight - 1;
+    values[1] = rect.size.height - titleBarHeight;
 
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_HEIGHT, &values);
     clientRect.size.height = values[1];
 
-    [window setWindowRect:rect];
-    [window setOriginalRect:rect];
+    [frame setWindowRect:rect];
+    [frame setOriginalRect:rect];
 
     [titleBar setWindowRect:titleBarRect];
     [titleBar setOriginalRect:titleBarRect];
@@ -485,47 +537,52 @@ void resizeFromTopForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame* window,
     connection = NULL;
 }
 
-void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *window, int minW, int minH)
+void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent,
+                             xcb_connection_t *connection,
+                             XCBFrame *frame,
+                             int minW,
+                             int minH,
+                             uint16_t titleBarHeight)
 {
-    XCBWindow* clientWindow = [window childWindowForKey:ClientWindow];
-    XCBTitleBar* titleBar = (XCBTitleBar*)[window childWindowForKey:TitleBar];
-    xcb_connection_t *connection = [[window connection] connection];
+    XCBWindow* clientWindow = [frame childWindowForKey:ClientWindow];
+    XCBTitleBar* titleBar = (XCBTitleBar*)[frame childWindowForKey:TitleBar];
+    //xcb_connection_t *connection = [[frame connection] connection];
 
-    XCBRect rect = [window windowRect];
+    XCBRect rect = [frame windowRect];
     XCBRect titleBarRect = [titleBar windowRect];
     XCBRect clientRect = [clientWindow windowRect];
 
     uint32_t values[] = {anEvent->event_x, anEvent->event_y};
 
     if (rect.size.width <= minW && anEvent->event_x < minW &&
-        rect.size.height <= minH + 22 && anEvent->event_y < minH)
+        rect.size.height <= minH + titleBarHeight && anEvent->event_y < minH)
     {
         rect.size.width = minW;
         titleBarRect.size.width = minW;
         clientRect.size.width = minW;
 
-        rect.size.height = minH + 22;
+        rect.size.height = minH + titleBarHeight;
         clientRect.size.height = minH;
 
         values[0] = rect.size.width;
         values[1] = rect.size.height;
 
-        xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+        xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
         values[0] = titleBarRect.size.width;
         xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
         values[0] = clientRect.size.width;
         values[1] = clientRect.size.height;
         xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
 
-        [window setWindowRect:rect];
-        [window setOriginalRect:rect];
+        [frame setWindowRect:rect];
+        [frame setOriginalRect:rect];
 
         [titleBar setWindowRect:titleBarRect];
         [titleBar setOriginalRect:titleBarRect];
 
         [clientWindow setWindowRect:clientRect];
         [clientWindow setOriginalRect:clientRect];
-        [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+        //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
         titleBar = nil;
         clientWindow = nil;
@@ -534,15 +591,15 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
         return;
     }
 
-    xcb_configure_window(connection, [window window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
+    xcb_configure_window(connection, [frame window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
     xcb_configure_window(connection, [titleBar window], XCB_CONFIG_WINDOW_WIDTH, &values);
-    values[1] = values[1] - 22;
+    values[1] = values[1] - titleBarHeight;
     xcb_configure_window(connection, [clientWindow window], XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, &values);
 
     rect.size.width = anEvent->event_x;
     rect.size.height = anEvent->event_y;
-    [window setWindowRect:rect];
-    [window setOriginalRect:rect];
+    [frame setWindowRect:rect];
+    [frame setOriginalRect:rect];
 
 
     titleBarRect.size.width = anEvent->event_x;
@@ -553,37 +610,30 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     clientRect.size.height = values[1];
     [clientWindow setWindowRect:clientRect];
     [clientWindow setOriginalRect:clientRect];
-    [titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
+    //[titleBar drawTitleBarComponentsForColor:TitleBarUpColor];
 
     titleBar = nil;
     clientWindow = nil;
     connection = NULL;
 }
 
-- (void) moveTo:(NSPoint)coordinates
+- (void) moveTo:(XCBPoint)coordinates
 {
     XCBPoint pos = [super windowRect].position;
 
-    int16_t x =  pos.x;
-    int16_t y =  pos.y;
-
-    x = x + coordinates.x - offset.x;
-    y = y + coordinates.y - offset.y;
-
-    pos.x = x;
-    pos.y = y;
-
-    /*** FIXME: performance of updating rects can be improved when the motion is ended at mouse button release ***/
-    XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
-    [super setWindowRect:newRect];
-
-    [super setOriginalRect:XCBMakeRect(XCBMakePoint(x, y),
-                                       XCBMakeSize([super originalRect].size.width,
-                                                   [super originalRect].size.height))];
+    pos.x = pos.x + coordinates.x - offset.x;
+    pos.y = pos.y + coordinates.y - offset.y;
 
     int32_t values[] = {pos.x, pos.y};
 
     xcb_configure_window([connection connection], window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+
+    XCBRect newRect = XCBMakeRect(pos, XCBMakeSize([super windowRect].size.width, [super windowRect].size.height));
+    [super setWindowRect:newRect];
+
+    [super setOriginalRect:XCBMakeRect(XCBMakePoint(pos.x, pos.y),
+                                       XCBMakeSize([super originalRect].size.width,
+                                                   [super originalRect].size.height))];
 }
 
 - (void) configureClient
@@ -591,16 +641,18 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     xcb_configure_notify_event_t event;
     XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
     XCBRect rect = [[self geometries] rect];
-    XCBRect  clientRect = [clientWindow rectFromGeometries];
+    XCBRect clientRect = [clientWindow rectFromGeometries];
+    TitleBarSettingsService *settings = [TitleBarSettingsService sharedInstance];
+    uint16_t height = [settings heightDefined] ? [settings height] : [settings defaultHeight];
 
-    NSLog(@"Frame rect: %d, %d", rect.position.x, rect.position.y);
+    NSLog(@"Configure client!");
 
     /*** synthetic event: coordinates must be in root space. ***/
 
     event.event = [clientWindow window];
     event.window = [clientWindow window];
     event.x = rect.position.x;
-    event.y = rect.position.y + 21;
+    event.y = rect.position.y + height;
     event.border_width = 0;
     event.width = clientRect.size.width;
     event.height = clientRect.size.height;
@@ -614,6 +666,7 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
     [clientWindow setWindowRect:clientRect];
 
     clientWindow = nil;
+    settings = nil;
 }
 
 - (MousePosition) mouseIsOnWindowBorderForEvent:(xcb_motion_notify_event_t *)anEvent
@@ -653,6 +706,20 @@ void resizeFromAngleForEvent(xcb_motion_notify_event_t *anEvent, XCBFrame *windo
 
     return position;
 
+}
+
+- (void) restoreDimensionAndPosition
+{
+    XCBWindow *clientWindow = [self childWindowForKey:ClientWindow];
+    XCBTitleBar *titleBar = (XCBTitleBar*)[self childWindowForKey:TitleBar];
+
+    [super restoreDimensionAndPosition];
+    [clientWindow restoreDimensionAndPosition];
+    [titleBar restoreDimensionAndPosition];
+    [titleBar drawTitleBarComponents];
+
+    clientWindow = nil;
+    titleBar = nil;
 }
 
 

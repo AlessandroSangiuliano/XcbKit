@@ -109,4 +109,24 @@ NSString *FnFromNSIntegerToNSString(NSInteger value)
     return [NSString stringWithFormat:@"%ld", value];
 }
 
+BOOL FnRemoveWindowFromWindowsArray(xcb_window_t windows[], int arraySize, xcb_window_t windowToRemove)
+{
+    BOOL removed = NO;
+    for (int i = 0; i < arraySize; i++)
+    {
+        if (windows[i] == windowToRemove)
+        {
+            for (int j = i; j < arraySize - 1; j++)
+                windows[j] = windows[j+1];
+            
+            removed = YES;
+            return removed;
+        }
+        
+    }
+    
+    return removed;
+    
+}
+
 @end

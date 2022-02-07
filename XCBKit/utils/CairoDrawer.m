@@ -7,6 +7,10 @@
 //
 
 #import "CairoDrawer.h"
+#import "../XCBTitleBar.h"
+#import "../services/TitleBarSettingsService.h"
+#import <xcb/xcb_aux.h>
+#import "../functions/Comparators.h"
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288
@@ -56,6 +60,11 @@ static inline void free_callback(void *data)
     
     if (visual != nil)
         [visual setVisualTypeForScreen:screen];
+    else if (window != nil)
+    {
+        xcb_visualid_t visualid = [[window attributes] visualId];
+        visual = [[XCBVisual alloc] initWithVisualId:visualid withVisualType:xcb_aux_find_visual_by_id([screen screen], visualid)];
+    }
     
     screen = nil;
     alreadyScaled = NO;
@@ -87,16 +96,21 @@ static inline void free_callback(void *data)
 
 - (void) drawTitleBarButtonWithColor:(XCBColor)buttonColor withStopColor:(XCBColor)stopColor
 {
-    height = height - 2;
-    width = width - 2;
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height);
+    XCBTitleBar *titleBar = (XCBTitleBar*)[window parentWindow];
+
+    if (CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+
+    if (!CmXCBColorAreEquals(buttonColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
     
     CGFloat startXPosition = 2;
     CGFloat endXPosition = 2;
-    CGFloat startYPosition = 1;
+    CGFloat startYPosition = 2; /// it was 1 previously, just try it for a bit!
     CGFloat endYPosition = height + 2;
     
     CGFloat stopGradientOffset = 0.9;
@@ -110,21 +124,20 @@ static inline void free_callback(void *data)
     
     cairo_set_source(cr, pat);
     
-    CGFloat xPosition = width / 2;
-    CGFloat yPosition = height / 2;
-    CGFloat radius = (CGFloat) height / 2.0;
+    CGFloat xPosition = (CGFloat) width / 2;
+    CGFloat yPosition = (CGFloat) height / 2;
+    CGFloat radius = (CGFloat) height / 2.0 + 1; /* 1 solves a bad looking problem about circular window */
     
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     cairo_fill(cr);
     
     cairo_surface_flush(cairoSurface);
-    
+
     cairo_set_line_width (cr, 0.2);
-    
+
     cairo_arc (cr, xPosition, yPosition, radius, 0  * (M_PI / 180.0), 360 * (M_PI / 180.0));
     
-    XCBColor black = XCBMakeColor(0,0,0,1);
-    cairo_set_source_rgb(cr, black.redComponent, black.greenComponent, black.blueComponent);
+    cairo_set_source_rgb(cr, buttonColor.redComponent, buttonColor.greenComponent, buttonColor.blueComponent);
     cairo_stroke(cr);
     cairo_surface_flush(cairoSurface);
     
@@ -132,12 +145,20 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
-    
+
+    titleBar = nil;
 }
 
 - (void) drawTitleBarWithColor:(XCBColor)titleColor andStopColor:(XCBColor)stopColor
 {
-    cairoSurface = cairo_xcb_surface_create([connection connection], [window window], [visual visualType], width, height-1);
+    XCBTitleBar *titleBar = (XCBTitleBar*)window;
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarUpColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], width, height-1);
+
+    if (CmXCBColorAreEquals(titleColor, [titleBar titleBarDownColor]))
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height-1);
+
     cr = cairo_create(cairoSurface);
     
     cairo_set_source_rgb(cr, titleColor.redComponent, titleColor.greenComponent, titleColor.blueComponent);
@@ -168,6 +189,8 @@ static inline void free_callback(void *data)
     
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+
+    titleBar = nil;
     
 }
 
@@ -214,6 +237,15 @@ static inline void free_callback(void *data)
 
     cairo_surface_write_to_png(cairoSurface, "/tmp/Pixmap.png");
     
+    cairo_surface_flush(cairoSurface);
+    cairo_surface_destroy(cairoSurface);
+    cairo_destroy(cr);
+
+    cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], width, height);
+    cr = cairo_create(cairoSurface);
+
+    cairo_surface_write_to_png(cairoSurface, "/tmp/dPixmap.png");
+
     cairo_surface_flush(cairoSurface);
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
@@ -285,6 +317,48 @@ static inline void free_callback(void *data)
 
     cairo_surface_destroy(cairoSurface);
     cairo_destroy(cr);
+}
+
+- (void) putImage:(NSString*)aPath forDPixmap:(BOOL)aValue
+{
+    TitleBarSettingsService *settingsService = [TitleBarSettingsService sharedInstance];
+    XCBSize size = [window windowRect].size;
+    XCBPoint position;
+
+    if (!aValue)
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window pixmap], [visual visualType], size.width, size.height);
+    else
+        cairoSurface = cairo_xcb_surface_create([connection connection], [window dPixmap], [visual visualType], size.width, size.height);
+
+    cr = cairo_create(cairoSurface);
+
+    cairo_surface_t* imageSurface = cairo_image_surface_create_from_png([aPath cString]);
+    cairo_surface_t* similar = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, size.width, size.height);
+    cairo_t* similarCtx = cairo_create(similar);
+
+    cairo_set_source_surface(similarCtx, imageSurface, 0, 0);
+    cairo_set_operator(similarCtx, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(similarCtx);
+
+    if ([window isCloseButton])
+        position = [settingsService closePosition];
+    else if ([window isMaximizeButton])
+        position = [settingsService maximizePosition];
+    else if ([window isMinimizeButton])
+        position = [settingsService minimizePosition];
+    /*** TODO: else the window is not one of the 3 title button... add a geneneric settings for windows? or something else ***/
+
+    cairo_set_source_surface(cr, similar, position.x, position.y);
+    cairo_paint(cr);
+
+    cairo_surface_destroy(cairoSurface);
+    cairo_surface_destroy(imageSurface);
+    cairo_surface_destroy(similar);
+    cairo_destroy(cr);
+    cairo_destroy(similarCtx);
+    settingsService = nil;
+
+    return;
 }
 
 - (void)setPreviewImage

@@ -20,6 +20,7 @@
 @synthesize WMState;
 @synthesize WMHints;
 @synthesize WMChangeState;
+@synthesize WMClass;
 
 - (id) initWithConnection:(XCBConnection*)aConnection
 {
@@ -40,6 +41,7 @@
     WMState = @"WM_STATE";
     WMHints = @"WM_HINTS";
     WMChangeState = @"WM_CHANGE_STATE";
+    WMClass = @"WM_CLASS";
     
     NSString* icccmAtoms[] =
     {
@@ -51,7 +53,8 @@
         WMTakeFocus,
         WMState,
         WMHints,
-        WMChangeState
+        WMChangeState,
+        WMClass
     };
     
     atomsArray = [NSArray arrayWithObjects:icccmAtoms count:sizeof(icccmAtoms)/sizeof(NSString*)];
@@ -85,6 +88,12 @@
                                                  length:UINT32_MAX];
 
     xcb_atom_t* windowProtocols = xcb_get_property_value(reply);
+
+    if (!reply)
+    {
+        NSLog(@"Reply is NULL");
+        return hasProtocol;
+    }
 
     for(int i = 0; i < reply->length; i++)
     {
@@ -161,6 +170,33 @@
                             withData:data];
 }
 
+- (WindowState)wmStateFromWindow:(XCBWindow*)aWindow
+{
+    WindowState state;
+
+            xcb_get_property_reply_t *reply = [super
+            getProperty:WMState
+           propertyType:[[super atomService] atomFromCachedAtomsWithKey:WMState]
+              forWindow:aWindow
+                 delete:NO
+                 length:2];
+
+    int *value = xcb_get_property_value(reply);
+
+    if (*value == 0)
+        state = ICCCM_WM_STATE_WITHDRAWN;
+    else if (*value == 1)
+        state = ICCCM_WM_STATE_NORMAL;
+    else if (*value == 3)
+        state = ICCCM_WM_STATE_ICONIC;
+    else
+        state = -1;
+
+    free(reply);
+
+    return state;
+}
+
 - (void) wmClassForWindow:(XCBWindow*)aWindow
 {
     xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_class_unchecked([[super connection] connection], [aWindow window]);
@@ -173,7 +209,7 @@
         NSLog(@"Error while checking WM_CLASS");
         return;
     }
-
+    
     [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.class_name]];
     [[aWindow windowClass] addObject:[[NSString alloc] initWithCString:reply.instance_name]];
 
@@ -191,6 +227,7 @@
     WMHints = nil;
     WMState = nil;
     WMNormalHints = nil;
+    WMClass = nil;
 }
 
 
