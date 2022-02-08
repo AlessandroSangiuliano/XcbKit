@@ -188,5 +188,7 @@ typedef NS_ENUM(NSInteger, WindowState)
 - (void) generateWindowIcons;
 - (BOOL) updatePid;
 - (BOOL) updateLeaderWindow;
+- (void) addToSaveSet;
+- (void) removeFromSaveSet;
 
 @end

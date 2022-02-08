@@ -1254,6 +1254,16 @@
     return YES;
 }
 
+- (void)addToSaveSet
+{
+    xcb_change_save_set_checked([connection connection], XCB_SET_MODE_INSERT, window);
+}
+
+- (void)removeFromSaveSet
+{
+    xcb_change_save_set_checked([connection connection], XCB_SET_MODE_DELETE, window);
+}
+
 
 - (void)dealloc
 {
