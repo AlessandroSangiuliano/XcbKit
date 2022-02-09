@@ -945,7 +945,7 @@
         event.data.data32[3] = 0;
         event.sequence = 0;
 
-        [connection sendEvent:(const char*) &event toClient:self propagate:NO];
+        [connection sendEvent:(const char*) &event toClient:self propagate:YES];
     }
 
     [ewmhService updateNetActiveWindow:self];
